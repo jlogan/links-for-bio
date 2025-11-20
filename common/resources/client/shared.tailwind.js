@@ -36,6 +36,7 @@ module.exports = {
       56: '3.5rem',
       60: '3.75rem',
       64: '4rem',
+      66: '4.125rem',
       68: '4.25rem',
       70: '4.375rem',
       76: '4.75rem',
@@ -53,6 +54,7 @@ module.exports = {
       124: '7.75rem',
       128: '8rem',
       132: '8.25rem',
+      136: '8.5rem',
       140: '8.75rem',
       144: '9rem',
       160: '10rem',
@@ -82,12 +84,14 @@ module.exports = {
       580: '36.25rem',
       620: '38.75rem',
       640: '40rem',
+      672: '42rem',
       680: '42.5rem',
       720: '45rem',
       780: '48.75rem',
       850: '53.125rem',
       950: '59.375rem',
       1280: '80rem',
+      1408: '88rem',
       '5vw': '5vw',
       '10vw': '10vw',
       'safe-area': 'env(safe-area-inset-bottom)',
@@ -105,6 +109,7 @@ module.exports = {
       hover: `rgb(var(--be-foreground-base) / ${theme('opacity.hover')})`,
       selected: `rgb(var(--be-foreground-base) / ${theme('opacity.selected')})`,
       focus: `rgb(var(--be-foreground-base) / ${theme('opacity.focus')})`,
+      link: 'rgb(var(--be-link-color, var(--be-primary)) / <alpha-value>)',
       divider: `rgb(var(--be-foreground-base) / var(--be-divider-opacity))`,
       'disabled-bg':
         'rgb(var(--be-foreground-base) / var(--be-disabled-bg-opacity))',
@@ -123,7 +128,7 @@ module.exports = {
       warning: '#f3a432',
       google: '#d34836',
       facebook: '#3b5998',
-      twitter: '#1da1f2',
+      twitter: '#000000',
       envato: '#6ca12b',
       tumblr: '#2b5a9f',
       background: 'rgb(var(--be-background) / <alpha-value>)',
@@ -142,6 +147,10 @@ module.exports = {
       'bg-alt': theme('backgroundColor.alt'),
       'text-muted': theme('textColor.muted'),
       DEFAULT: theme('colors.divider'),
+    }),
+    borderWidth: theme => ({
+      ...theme('spacing'),
+      DEFAULT: '1px',
     }),
     textColor: theme => ({
       ...theme('colors'),
@@ -170,6 +179,11 @@ module.exports = {
     }),
   },
   sharedExtend: {
+    borderRadius: {
+      button: 'var(--be-button-radius, 0.25rem)',
+      input: 'var(--be-input-radius, 0.25rem)',
+      panel: 'var(--be-panel-radius, 0.25rem)',
+    },
     flex: {
       2: '2 1 0%',
       3: '3 1 0%',
@@ -181,13 +195,16 @@ module.exports = {
       DEFAULT: 2,
     },
     height: {
+      screen: '100dvh',
       dialog: 'calc(var(--be-viewport-height, 100vh) * 0.9 - 2px)',
     },
     width: {
+      screen: '100vw',
       dialog: 'calc(var(--be-viewport-width, 100vw) * 0.9 - 2px)',
     },
     minHeight: theme => ({
       ...theme('spacing'),
+      screen: '100dvh',
       dialog: 'calc(var(--be-viewport-height, 100vh) * 0.9)',
     }),
     minWidth: theme => ({

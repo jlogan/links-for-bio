@@ -34,6 +34,16 @@ export const CommentsDatatableFilters: BackendFilter[] = [
     },
   },
   {
+    key: 'reports',
+    label: message('Reported'),
+    description: message('Show only reported comments'),
+    defaultOperator: FilterOperator.has,
+    control: {
+      type: FilterControlType.BooleanToggle,
+      defaultValue: '*',
+    },
+  },
+  {
     key: 'user_id',
     label: message('User'),
     description: message('User comment was created by'),

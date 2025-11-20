@@ -26,5 +26,6 @@ export interface TableContextValue<T extends TableDataItem = TableDataItem> {
   onAction: TableProps<T>['onAction'];
   selectRowOnContextMenu: TableProps<T>['selectRowOnContextMenu'];
   cellHeight: string | undefined;
+  headerCellHeight: string | undefined;
 }
 export const TableContext = createContext<TableContextValue>(null!);

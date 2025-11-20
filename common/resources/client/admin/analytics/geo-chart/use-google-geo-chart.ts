@@ -38,10 +38,10 @@ export function useGoogleGeoChart({
     ]);
 
     const backgroundColor = `${themeValueToHex(
-      selectedTheme.colors['--be-paper']
+      selectedTheme.values['--be-paper'],
     )}`;
     const chartColor = `${themeValueToHex(
-      selectedTheme.colors['--be-primary']
+      selectedTheme.values['--be-primary'],
     )}`;
 
     const options: google.visualization.GeoChartOptions = {
@@ -59,12 +59,12 @@ export function useGoogleGeoChart({
       google?.visualization?.GeoChart
     ) {
       geoChartRef.current = new google.visualization.GeoChart(
-        placeholderRef.current
+        placeholderRef.current,
       );
     }
     geoChartRef.current?.draw(
       google.visualization.arrayToDataTable(seedData),
-      options
+      options,
     );
   }, [
     selectedTheme,
@@ -75,28 +75,32 @@ export function useGoogleGeoChart({
     regionInteractivity,
   ]);
 
-  const initGoogleGeoChart = useCallback(() => {
-    if (lazyLoader.alreadyLoading(loaderUrl)) return;
-    lazyLoader.loadAsset(loaderUrl, {type: 'js'}).then(() => {
-      google.charts.load('current', {
-        packages: ['geochart'],
-        // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
-        mapsApiKey: apiKey,
-        callback: () => {
-          drawGoogleChart();
-          if (geoChartRef.current && onCountrySelected) {
-            google.visualization.events.addListener(
-              geoChartRef.current,
-              'regionClick',
-              (a: {region: string}) => {
-                onCountrySelected?.(a.region);
-              }
-            );
-          }
-        },
-      });
+  const initGoogleGeoChart = useCallback(async () => {
+    if (lazyLoader.isLoadingOrLoaded(loaderUrl)) return;
+    await lazyLoader.loadAsset(loaderUrl, {type: 'js', id: 'google-charts-js'});
+    await google.charts.load('current', {
+      packages: ['geochart'],
+      mapsApiKey: apiKey,
     });
-  }, [apiKey, drawGoogleChart, onCountrySelected]);
+    drawGoogleChart();
+  }, [apiKey, drawGoogleChart]);
+
+  useEffect(() => {
+    if (geoChartRef.current && onCountrySelected) {
+      google.visualization.events.addListener(
+        geoChartRef.current,
+        'regionClick',
+        (a: {region: string}) => onCountrySelected?.(a.region),
+      );
+    }
+
+    return () => {
+      if (geoChartRef.current) {
+        google.visualization.events.removeAllListeners(geoChartRef.current);
+      }
+    };
+    // this will correctly run when geochart instance is set on ref
+  }, [onCountrySelected, geoChartRef.current]);
 
   // on component load: load chart library then draw, otherwise just draw
   useEffect(() => {

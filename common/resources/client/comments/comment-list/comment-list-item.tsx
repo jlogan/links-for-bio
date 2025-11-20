@@ -56,21 +56,21 @@ export function CommentListItem({
         }
       }}
     >
-      <div className="flex items-start gap-24 py-18 min-h-70 group">
-        <UserAvatar user={comment.user} size="xl" circle />
-        <div className="text-sm flex-auto">
-          <div className="flex items-center gap-8 mb-4">
+      <div className="group flex min-h-70 items-start gap-24 py-18">
+        <UserAvatar user={comment.user} size={isMobile ? 'lg' : 'xl'} circle />
+        <div className="flex-auto text-sm">
+          <div className="mb-4 flex items-center gap-8">
             {comment.user && <UserDisplayName user={comment.user} />}
-            <time className="text-muted text-xs">
+            <time className="text-xs text-muted">
               <FormattedRelativeTime date={comment.created_at} />
             </time>
             {comment.position ? (
               <Position commentable={commentable} position={comment.position} />
             ) : null}
           </div>
-          <div>
+          <div className="whitespace-pre-line">
             {comment.deleted ? (
-              <span className="text-muted italic">
+              <span className="italic text-muted">
                 <Trans message="[COMMENT DELETED]" />
               </span>
             ) : (
@@ -78,7 +78,7 @@ export function CommentListItem({
             )}
           </div>
           {!comment.deleted && (
-            <div className="flex items-center gap-8 mt-10 -ml-8">
+            <div className="-ml-8 mt-10 flex items-center gap-8">
               {showReplyButton && (
                 <Button
                   sizeClassName="text-sm px-8 py-4"
@@ -121,7 +121,7 @@ const Position = memo(({commentable, position}: PositionProps) => {
   if (!commentable.duration) return null;
   const seconds = (position / 100) * (commentable.duration / 1000);
   return (
-    <span className="text-muted text-xs">
+    <span className="text-xs text-muted">
       <Trans
         message="at :position"
         values={{
@@ -160,9 +160,9 @@ export function CommentOptionsTrigger({
         {commentIds: [comment.id]},
         {
           onSuccess: () => {
-            queryClient.invalidateQueries(['comment']);
+            queryClient.invalidateQueries({queryKey: ['comment']});
           },
-        }
+        },
       );
     }
   };
@@ -214,7 +214,7 @@ function UserDisplayName({user}: UserDisplayNameProps) {
     return (
       <Link
         to={auth.getUserProfileLink(user)}
-        className="hover:underline text-base font-medium"
+        className="text-base font-medium hover:underline"
       >
         {user.display_name}
       </Link>

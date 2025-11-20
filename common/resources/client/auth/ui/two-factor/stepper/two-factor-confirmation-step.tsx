@@ -60,8 +60,8 @@ function CodeForm({onCancel, onConfirmed}: Props) {
   const {withConfirmedPassword, isLoading: confirmPasswordIsLoading} =
     usePasswordConfirmedAction();
   const isLoading =
-    confirmTwoFactor.isLoading ||
-    disableTwoFactor.isLoading ||
+    confirmTwoFactor.isPending ||
+    disableTwoFactor.isPending ||
     confirmPasswordIsLoading;
 
   return (
@@ -71,7 +71,7 @@ function CodeForm({onCancel, onConfirmed}: Props) {
         withConfirmedPassword(() => {
           confirmTwoFactor.mutate(values, {
             onSuccess: () => {
-              queryClient.invalidateQueries(['users']);
+              queryClient.invalidateQueries({queryKey: ['users']});
               onConfirmed();
             },
           });

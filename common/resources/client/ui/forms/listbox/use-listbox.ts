@@ -15,14 +15,15 @@ import {VirtualElement} from '@floating-ui/react-dom';
 
 export function useListbox<T>(
   props: ListboxProps & ListBoxChildren<T>,
-  ref?: Ref<HTMLElement>
+  ref?: Ref<HTMLElement>,
 ): UseListboxReturn {
   const {
     children,
     items,
     role = 'listbox',
     virtualFocus,
-    loopFocus = false,
+    focusLoopingMode = 'stay',
+    autoFocusFirstItem = true,
     onItemSelected,
     clearInputOnItemSelection,
     blurReferenceOnItemSelection,
@@ -46,18 +47,19 @@ export function useListbox<T>(
   const [inputValue, setInputValue] = useControlledState(
     props.inputValue,
     props.defaultInputValue || '',
-    props.onInputValueChange
+    props.onInputValueChange,
   );
 
   // mostly for combobox, so can show all collection items on dropdown icon click, even if user has filtered via input
   const [activeCollection, setActiveCollection] = useState<'all' | 'filtered'>(
-    'all'
+    'all',
   );
 
   const collections = buildListboxCollection({
     children,
     items,
-    inputValue,
+    // don't filter on client side if async, it will already be filtered on server
+    inputValue: isAsync ? undefined : inputValue,
     maxItems,
   });
   const collection =
@@ -71,7 +73,7 @@ export function useListbox<T>(
   // plain text labels for typeahead
   const listContent: (string | null)[] = useMemo(() => {
     return [...collection.values()].map(o =>
-      o.isDisabled ? null : o.textLabel
+      o.isDisabled ? null : o.textLabel,
     );
   }, [collection]);
 
@@ -81,7 +83,7 @@ export function useListbox<T>(
   const [isOpen, setIsOpen] = useControlledState(
     props.isOpen,
     props.defaultIsOpen,
-    props.onOpenChange
+    props.onOpenChange,
   );
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -114,7 +116,7 @@ export function useListbox<T>(
   // focus and scroll to specified index, in both virtual and regular mode.
   // will also skip disabled indices and focus next or previous non-disabled index instead
   const focusItem = useCallback(
-    (fallbackOperation: 'increment' | 'decrement', newIndex: number) => {
+    (fallbackOperation: 'increment' | 'decrement', newIndex: number | null) => {
       const items = [...collection.values()];
       const allItemsDisabled = !items.find(i => !i.isDisabled);
       const lastIndex = collection.size - 1;
@@ -135,11 +137,15 @@ export function useListbox<T>(
       newIndex = getNonDisabledIndex(
         items,
         newIndex,
-        loopFocus,
-        fallbackOperation
+        focusLoopingMode,
+        fallbackOperation,
       );
 
       setActiveIndex(newIndex);
+
+      if (newIndex == null) {
+        return;
+      }
 
       if (virtualFocus) {
         listItemsRef.current[newIndex]?.scrollIntoView({
@@ -149,7 +155,7 @@ export function useListbox<T>(
         listItemsRef.current[newIndex]?.focus();
       }
     },
-    [collection, virtualFocus, loopFocus]
+    [collection, virtualFocus, focusLoopingMode],
   );
 
   const onInputChange = useCallback(
@@ -165,17 +171,22 @@ export function useListbox<T>(
         selectValues('');
       }
 
-      focusItem('increment', 0);
+      if (autoFocusFirstItem && activeIndex == null) {
+        focusItem('increment', 0);
+      } else {
+        setActiveIndex(null);
+      }
     },
     [
       setInputValue,
       setIsOpen,
       setActiveCollection,
       selectValues,
-      isAsync,
       clearSelectionOnInputClear,
       focusItem,
-    ]
+      autoFocusFirstItem,
+      activeIndex,
+    ],
   );
 
   const handleItemSelection = (value: PrimitiveValue) => {
@@ -208,7 +219,7 @@ export function useListbox<T>(
     // even handlers
     handleItemSelection,
     onInputChange,
-    loopFocus,
+    focusLoopingMode,
 
     // config
     floatingWidth,
@@ -219,7 +230,7 @@ export function useListbox<T>(
     collections,
     virtualFocus,
     focusItem,
-    showEmptyMessage,
+    showEmptyMessage: showEmptyMessage && !!inputValue,
     allowCustomValue,
 
     // floating ui
@@ -258,8 +269,8 @@ export function useListbox<T>(
 function getNonDisabledIndex(
   items: CollectionItem<unknown>[],
   newIndex: number,
-  loopFocus: boolean,
-  operation: 'increment' | 'decrement'
+  focusLoopingMode: ListboxProps['focusLoopingMode'],
+  operation: 'increment' | 'decrement',
 ) {
   const lastIndex = items.length - 1;
   while (items[newIndex]?.isDisabled) {
@@ -267,22 +278,26 @@ function getNonDisabledIndex(
       newIndex++;
       if (newIndex >= lastIndex) {
         // loop from the start, if end reached
-        if (loopFocus) {
+        if (focusLoopingMode === 'loop') {
           newIndex = 0;
           // if focus is not looping, stay on the previous index
-        } else {
+        } else if (focusLoopingMode === 'stay') {
           return newIndex - 1;
+        } else {
+          return null;
         }
       }
     } else {
       newIndex--;
       // loop from the end, if start reached
       if (newIndex < 0) {
-        if (loopFocus) {
+        if (focusLoopingMode === 'loop') {
           newIndex = lastIndex;
           // if focus is not looping, stay on the previous index
-        } else {
+        } else if (focusLoopingMode === 'stay') {
           return newIndex + 1;
+        } else {
+          return null;
         }
       }
     }
@@ -299,11 +314,12 @@ function useControlledSelection(props: ListboxProps) {
   const [stateValues, setStateValues] = useControlledState<any>(
     !selectionEnabled ? undefined : props.selectedValue,
     !selectionEnabled ? undefined : props.defaultSelectedValue,
-    !selectionEnabled ? undefined : props.onSelectionChange
+    !selectionEnabled ? undefined : props.onSelectionChange,
   );
 
   const selectedValues = useMemo(() => {
-    if (stateValues == null) {
+    // allow specifying null as selected value, but not undefined
+    if (typeof stateValues === 'undefined') {
       return [];
     }
     return Array.isArray(stateValues) ? stateValues : [stateValues];
@@ -327,7 +343,7 @@ function useControlledSelection(props: ListboxProps) {
         });
       }
     },
-    [allowEmptySelection, selectedValues, selectionMode, setStateValues]
+    [allowEmptySelection, selectedValues, selectionMode, setStateValues],
   );
 
   return {

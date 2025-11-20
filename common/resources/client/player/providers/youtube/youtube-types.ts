@@ -6,8 +6,8 @@ export const enum YoutubeCommand {
   Pause = 'pauseVideo',
   Stop = 'stopVideo',
   Seek = 'seekTo',
-  // this will cue video without playing it, "loadVideoById" will cue it and start playback
-  Load = 'cueVideoById',
+  Cue = 'cueVideoById',
+  CueAndPlay = 'loadVideoById',
   Mute = 'mute',
   Unmute = 'unMute',
   SetVolume = 'setVolume',
@@ -20,7 +20,8 @@ export interface YouTubeCommandArg {
   [YoutubeCommand.Pause]: void;
   [YoutubeCommand.Stop]: void;
   [YoutubeCommand.Seek]: number;
-  [YoutubeCommand.Load]: string;
+  [YoutubeCommand.Cue]: string;
+  [YoutubeCommand.CueAndPlay]: string;
   [YoutubeCommand.Mute]: void;
   [YoutubeCommand.Unmute]: void;
   [YoutubeCommand.SetVolume]: number;

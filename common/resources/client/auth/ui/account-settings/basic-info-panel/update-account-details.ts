@@ -15,7 +15,8 @@ interface Payload {
 }
 
 export function useUpdateAccountDetails(form: UseFormReturn<Partial<User>>) {
-  return useMutation((props: Payload) => updateAccountDetails(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => updateAccountDetails(props),
     onSuccess: () => {
       toast(message('Updated account details'));
     },

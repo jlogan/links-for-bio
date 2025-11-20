@@ -1,7 +1,6 @@
 import React, {
   cloneElement,
   ComponentProps,
-  Key,
   ReactElement,
   ReactNode,
   useState,
@@ -71,7 +70,7 @@ export function DataTable<T extends TableDataItem>({
   const {trans} = useTrans();
   const {encodedFilters} = useBackendFilterUrlParams(filters);
   const [params, setParams] = useState<GetDatatableDataParams>({perPage: 15});
-  const [selectedRows, setSelectedRows] = useState<Key[]>([]);
+  const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
   const query = useDatatableData<T>(
     endpoint,
     {
@@ -79,12 +78,8 @@ export function DataTable<T extends TableDataItem>({
       ...queryParams,
       [BackendFiltersUrlKey]: encodedFilters,
     },
-    {
-      onSuccess: () => {
-        // clear selected rows when table is reloaded from backend to avoid stale ids
-        setSelectedRows([]);
-      },
-    }
+    undefined,
+    () => setSelectedRows([]),
   );
 
   const isFiltering = !!(params.query || params.filters || encodedFilters);
@@ -138,14 +133,14 @@ export function DataTable<T extends TableDataItem>({
 
       <div
         className={clsx(
-          'relative rounded',
-          (!isMobile || !collapseTableOnMobile) && 'border'
+          'relative rounded-panel',
+          (!isMobile || !collapseTableOnMobile) && 'border',
         )}
       >
         {query.isFetching && (
           <ProgressBar
             isIndeterminate
-            className="absolute top-0 left-0 w-full z-10"
+            className="absolute left-0 top-0 z-10 w-full"
             aria-label={trans({message: 'Loading'})}
             size="xs"
           />
@@ -170,7 +165,7 @@ export function DataTable<T extends TableDataItem>({
           />
         </div>
 
-        {(query.isFetched || query.isPreviousData) &&
+        {(query.isFetched || query.isPlaceholderData) &&
         !pagination?.data.length ? (
           <div className="pt-50">
             {cloneElement(emptyStateMessage, {

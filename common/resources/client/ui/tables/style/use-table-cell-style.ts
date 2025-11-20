@@ -7,7 +7,11 @@ interface Props {
   isHeader: boolean;
 }
 export function useTableCellStyle({index, isHeader}: Props) {
-  const {columns, cellHeight = 'h-46'} = useContext(TableContext);
+  const {
+    columns,
+    cellHeight = 'h-46',
+    headerCellHeight = 'h-46',
+  } = useContext(TableContext);
   const column = columns[index];
 
   const userPadding = column?.padding;
@@ -21,7 +25,7 @@ export function useTableCellStyle({index, isHeader}: Props) {
 
   return clsx(
     'flex items-center overflow-hidden whitespace-nowrap overflow-ellipsis outline-none focus-visible:outline focus-visible:outline-offset-2',
-    isHeader ? 'h-46' : cellHeight,
+    isHeader ? headerCellHeight : cellHeight,
     column?.width ?? 'flex-1',
     column?.maxWidth,
     column?.minWidth,

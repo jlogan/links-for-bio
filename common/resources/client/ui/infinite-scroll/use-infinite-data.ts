@@ -1,5 +1,7 @@
 import {
-  hashQueryKey,
+  hashKey,
+  InfiniteData,
+  keepPreviousData,
   useInfiniteQuery,
   UseInfiniteQueryResult,
 } from '@tanstack/react-query';
@@ -16,12 +18,14 @@ import {QueryKey} from '@tanstack/query-core/src/types';
 
 export type UseInfiniteDataResult<
   T,
-  E extends object = object
-> = UseInfiniteQueryResult<PaginationResponse<T> & E> & {
+  E extends object = object,
+> = UseInfiniteQueryResult<InfiniteData<PaginationResponse<T> & E>> & {
   items: T[];
   totalItems: number | null;
   // initial load is done and no results were returned from backend
   noResults: boolean;
+  // true when changing filters or sorting, not on initial load, background fetch or infinite load
+  isReloading: boolean;
   sortDescriptor: SortDescriptor;
   setSortDescriptor: (sortDescriptor: SortDescriptor) => void;
   searchQuery: string;
@@ -36,7 +40,7 @@ function buildQueryKey(
     queryParams,
   }: UseInfiniteDataProps<any>,
   sortDescriptor: SortDescriptor,
-  searchQuery: string = ''
+  searchQuery: string = '',
 ) {
   // make sure to always set default order dir and col so query keys are consistent
   if (!sortDescriptor.orderBy) {
@@ -66,7 +70,7 @@ export interface UseInfiniteDataProps<T> {
   transformResponse?: (response: Response<T>) => Response<T>;
 }
 export function useInfiniteData<T, E extends object = {}>(
-  props: UseInfiniteDataProps<T>
+  props: UseInfiniteDataProps<T>,
 ): UseInfiniteDataResult<T, E> {
   const {
     initialPage,
@@ -85,16 +89,16 @@ export function useInfiniteData<T, E extends object = {}>(
   });
 
   const queryKey = buildQueryKey(props, sortDescriptor, searchQuery);
-  const initialQueryKey = useRef(hashQueryKey(queryKey)).current;
+  const initialQueryKey = useRef(hashKey(queryKey)).current;
 
   const query = useInfiniteQuery({
-    keepPreviousData: willSortOrFilter,
+    placeholderData: willSortOrFilter ? keepPreviousData : undefined,
     queryKey,
-    queryFn: ({pageParam}) => {
+    queryFn: ({pageParam, signal}) => {
       const params: GetDatatableDataParams = {
         ...queryParams,
         perPage: initialPage?.per_page || queryParams?.perPage,
-        query: searchQuery,
+        query: (queryParams?.query as string) ?? searchQuery,
         paginate,
         ...sortDescriptor,
       };
@@ -103,11 +107,12 @@ export function useInfiniteData<T, E extends object = {}>(
       } else {
         params.page = pageParam || 1;
       }
-      return fetchData<T>(endpoint, params, transformResponse);
+      return fetchData<T>(endpoint, params, transformResponse, signal);
     },
+    initialPageParam: paginate === 'cursor' ? '' : 1,
     getNextPageParam: lastResponse => {
       if (!hasNextPage(lastResponse.pagination)) {
-        return undefined;
+        return null;
       }
       if ('next_cursor' in lastResponse.pagination) {
         return lastResponse.pagination.next_cursor;
@@ -117,7 +122,7 @@ export function useInfiniteData<T, E extends object = {}>(
     initialData: () => {
       // initial data will be for initial query key only, remove
       // initial data if query key changes, so query is reset
-      if (!initialPage || hashQueryKey(queryKey) !== initialQueryKey) {
+      if (!initialPage || hashKey(queryKey) !== initialQueryKey) {
         return undefined;
       }
 
@@ -143,6 +148,9 @@ export function useInfiniteData<T, E extends object = {}>(
     items,
     totalItems,
     noResults: query.data?.pages?.[0].pagination.data.length === 0,
+    // can't use "isRefetching", it's true for some reason when changing sorting or filters
+    isReloading:
+      query.isFetching && !query.isFetchingNextPage && query.isPlaceholderData,
     sortDescriptor,
     setSortDescriptor,
     searchQuery,
@@ -150,15 +158,21 @@ export function useInfiniteData<T, E extends object = {}>(
   } as UseInfiniteDataResult<T, E>;
 }
 
-function fetchData<T>(
+async function fetchData<T>(
   endpoint: string,
   params: GetDatatableDataParams,
-  transformResponse?: UseInfiniteDataProps<T>['transformResponse']
+  transformResponse?: UseInfiniteDataProps<T>['transformResponse'],
+  signal?: AbortSignal,
 ): Promise<Response<T>> {
-  return apiClient.get(endpoint, {params}).then(r => {
-    if (transformResponse) {
-      return transformResponse(r.data);
-    }
-    return r.data;
-  });
+  if (params.query) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+  return apiClient
+    .get(endpoint, {params, signal: params.query ? signal : undefined})
+    .then(r => {
+      if (transformResponse) {
+        return transformResponse(r.data);
+      }
+      return r.data;
+    });
 }

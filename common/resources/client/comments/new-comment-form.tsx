@@ -51,7 +51,7 @@ export function NewCommentForm({
       className={clsx('py-6 flex gap-24', className)}
       onSubmit={e => {
         e.preventDefault();
-        if (inputValue && !createComment.isLoading) {
+        if (inputValue && !createComment.isPending) {
           createComment.mutate(
             {
               ...payload,
@@ -64,7 +64,7 @@ export function NewCommentForm({
                 clearInput();
                 onSuccess?.();
               },
-            }
+            },
           );
         }
       }}
@@ -111,7 +111,7 @@ export function NewCommentForm({
               variant="outline"
               color="primary"
               type="submit"
-              disabled={createComment.isLoading || inputValue.length < 3}
+              disabled={createComment.isPending || inputValue.length < 3}
             >
               <Trans message="Comment" />
             </Button>

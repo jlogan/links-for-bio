@@ -76,7 +76,7 @@ export function CreateLocationDialog() {
           color="primary"
           type="submit"
           form={formId}
-          disabled={createLocalization.isLoading}
+          disabled={createLocalization.isPending}
         >
           <Trans message="Save" />
         </Button>

@@ -1,6 +1,6 @@
-import {useMutation} from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {UseFormReturn} from 'react-hook-form';
-import {apiClient, queryClient} from '@common/http/query-client';
+import {apiClient} from '@common/http/query-client';
 import {toast} from '@common/ui/toast/toast';
 import {DatatableDataQueryKey} from '@common/datatable/requests/paginated-resources';
 import {useTrans} from '@common/i18n/use-trans';
@@ -10,7 +10,7 @@ import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {PaginationResponse} from '@common/http/backend-response/pagination-response';
 import {NormalizedModel} from '@common/datatable/filters/normalized-model';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
-import {Channel} from '@common/channels/channel';
+import {Channel, ChannelConfig} from '@common/channels/channel';
 
 const endpoint = 'channel';
 
@@ -18,26 +18,33 @@ interface Response extends BackendResponse {
   channel: Channel;
 }
 
-export interface CreateChannelPayload extends Omit<Channel, 'content'> {
+export interface CreateChannelPayload {
+  name: string;
+  slug: string;
+  type: string;
+  public: boolean;
+  description?: string;
+  config: ChannelConfig;
   content: PaginationResponse<NormalizedModel>;
 }
 
 export function useCreateChannel(form: UseFormReturn<CreateChannelPayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation(
-    (payload: CreateChannelPayload) => createChannel(payload),
-    {
-      onSuccess: async response => {
-        await queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
-        toast(trans(message('Channel created')));
-        navigate(`/admin/channels/${response.channel.id}/edit`, {
-          replace: true,
-        });
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateChannelPayload) => createChannel(payload),
+    onSuccess: async response => {
+      await queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
+      toast(trans(message('Channel created')));
+      navigate(`/admin/channels/${response.channel.id}/edit`, {
+        replace: true,
+      });
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function createChannel(payload: CreateChannelPayload) {

@@ -20,17 +20,25 @@ import {UnfoldMoreIcon} from '@common/icons/material/UnfoldMore';
 import {UnfoldLessIcon} from '@common/icons/material/UnfoldLess';
 
 const MenubarRowClassName =
-  'flex items-center justify-center px-4 h-42 text-muted border-b overflow-hidden';
+  'flex items-center px-4 h-42 text-muted border-b overflow-hidden';
 
+interface Props extends MenubarButtonProps {
+  justify?: string;
+  hideInsertButton?: boolean;
+  imageDiskPrefix?: string;
+}
 export function ArticleBodyEditorMenubar({
   editor,
   size = 'md',
-}: MenubarButtonProps) {
+  justify = 'justify-center',
+  hideInsertButton = false,
+  imageDiskPrefix,
+}: Props) {
   const isMobile = useIsMobileMediaQuery();
   const [extendedVisible, setExtendedVisible] = useState(false);
   return (
     <div className={clsx(extendedVisible ? 'h-84' : 'h-42')}>
-      <div className={clsx(MenubarRowClassName, 'relative z-20')}>
+      <div className={clsx(MenubarRowClassName, justify, 'relative z-20')}>
         <FormatMenuTrigger editor={editor} size={size} />
         <Divider />
         <FontStyleButtons editor={editor} size={size} />
@@ -43,7 +51,6 @@ export function ArticleBodyEditorMenubar({
             className="flex-shrink-0"
             color={extendedVisible ? 'primary' : null}
             size={size}
-            radius="rounded"
             onClick={() => {
               setExtendedVisible(!extendedVisible);
             }}
@@ -51,18 +58,31 @@ export function ArticleBodyEditorMenubar({
             {extendedVisible ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
           </IconButton>
         ) : (
-          <ExtendedButtons editor={editor} size={size} />
+          <ExtendedButtons
+            editor={editor}
+            size={size}
+            hideInsertButton={hideInsertButton}
+            imageDiskPrefix={imageDiskPrefix}
+          />
         )}
       </div>
       <AnimatePresence>
         {extendedVisible && (
           <m.div
-            className={clsx(MenubarRowClassName, 'absolute w-full h-full flex')}
+            className={clsx(
+              MenubarRowClassName,
+              justify,
+              'absolute flex h-full w-full',
+            )}
             initial={{y: '-100%'}}
             animate={{y: 0}}
             exit={{y: '-100%'}}
           >
-            <ExtendedButtons editor={editor} size={size} />
+            <ExtendedButtons
+              editor={editor}
+              size={size}
+              imageDiskPrefix={imageDiskPrefix}
+            />
           </m.div>
         )}
       </AnimatePresence>
@@ -70,14 +90,19 @@ export function ArticleBodyEditorMenubar({
   );
 }
 
-function ExtendedButtons({editor, size = 'md'}: MenubarButtonProps) {
+function ExtendedButtons({
+  editor,
+  size = 'md',
+  hideInsertButton,
+  imageDiskPrefix,
+}: Props) {
   return (
     <Fragment>
       <ListButtons editor={editor} size={size} />
       <Divider />
       <LinkButton editor={editor} size={size} />
-      <ImageButton editor={editor} size={size} />
-      <InsertMenuTrigger editor={editor} size={size} />
+      <ImageButton editor={editor} size={size} diskPrefix={imageDiskPrefix} />
+      {!hideInsertButton && <InsertMenuTrigger editor={editor} size={size} />}
       <Divider />
       <ColorButtons editor={editor} size={size} />
       <Divider />

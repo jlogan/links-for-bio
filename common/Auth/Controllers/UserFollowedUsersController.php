@@ -2,7 +2,7 @@
 
 namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 
 class UserFollowedUsersController extends BaseController

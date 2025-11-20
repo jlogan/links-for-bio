@@ -20,7 +20,9 @@ export async function loadYoutubePoster(
   return loadImage(posterURL('maxresdefault'), 121) // 1080p (no padding)
     .catch(() => loadImage(posterURL('sddefault'), 121)) // 640p (padded 4:3)
     .catch(() => loadImage(posterURL('hqdefault'), 121)) // 480p (padded 4:3)
+    .catch(() => {})
     .then(img => {
+      if (!img) return;
       const poster = img.src;
       posterCache.set(videoId, poster);
       return poster;

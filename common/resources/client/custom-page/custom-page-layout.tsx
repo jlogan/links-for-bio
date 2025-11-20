@@ -5,6 +5,7 @@ import {Footer} from '../ui/footer/footer';
 import {CustomPageBody} from '@common/custom-page/custom-page-body';
 import {PageMetaTags} from '@common/http/page-meta-tags';
 import {PageStatus} from '@common/http/page-status';
+import {useEffect} from 'react';
 
 interface Props {
   slug?: string;
@@ -13,8 +14,14 @@ export function CustomPageLayout({slug}: Props) {
   const {pageSlug} = useParams();
   const query = useCustomPage(slug || pageSlug!);
 
+  useEffect(() => {
+    if (query.data?.page) {
+      window.scrollTo(0, 0);
+    }
+  }, [query]);
+
   return (
-    <div className="flex flex-col min-h-full bg">
+    <div className="flex flex-col min-h-screen bg">
       <PageMetaTags query={query} />
       <Navbar
         menuPosition="custom-page-navbar"

@@ -12,4 +12,11 @@ class CommentReport extends Model
         'user_id' => 'integer',
         'comment_id' => 'integer',
     ];
+
+    const MODEL_TYPE = 'comment_report';
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
+    }
 }

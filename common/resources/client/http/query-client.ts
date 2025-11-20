@@ -30,10 +30,12 @@ apiClient.defaults.headers = {
   },
 };
 
+// @ts-ignore
 apiClient.interceptors.request.use((config: AxiosRequestConfig) => {
   if (
     !config.url?.startsWith('auth') &&
     !config.url?.startsWith('secure') &&
+    !config.url?.startsWith('log-viewer') &&
     !isAbsoluteUrl(config?.url)
   ) {
     config.url = `api/v1/${config.url}`;
@@ -47,6 +49,9 @@ apiClient.interceptors.request.use((config: AxiosRequestConfig) => {
   }
   if (method === 'GET' && Array.isArray(config.params?.load)) {
     config.params.load = config.params.load.join(',');
+  }
+  if (method === 'GET' && Array.isArray(config.params?.loadCount)) {
+    config.params.loadCount = config.params.loadCount.join(',');
   }
 
   // add workspace query parameter
@@ -68,6 +73,13 @@ apiClient.interceptors.request.use((config: AxiosRequestConfig) => {
     config.params = {
       ...config.params,
       _method: method,
+    };
+  }
+
+  if (import.meta.env.SSR) {
+    config.headers = {
+      ...config.headers,
+      referer: 'http://localhost',
     };
   }
 

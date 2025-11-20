@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query';
+import {keepPreviousData, useQuery} from '@tanstack/react-query';
 import {apiClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
 import {NormalizedModel} from '@common/datatable/filters/normalized-model';
@@ -14,9 +14,11 @@ interface SearchParams {
 }
 
 export function useAddableContent(params: SearchParams) {
-  return useQuery(['search', params], () => search(params), {
-    enabled: !!params.query,
-    keepPreviousData: !!params.query,
+  return useQuery({
+    queryKey: ['search', params],
+    queryFn: () => search(params),
+    //enabled: !!params.query,
+    placeholderData: params.query ? keepPreviousData : undefined,
   });
 }
 

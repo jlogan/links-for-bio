@@ -21,7 +21,10 @@ const queryKey = (id: UserId, params?: Params) => {
 };
 
 export function useUser(id: UserId, params?: Params) {
-  return useQuery(queryKey(id, params), () => fetchUser(id, params));
+  return useQuery({
+    queryKey: queryKey(id, params),
+    queryFn: () => fetchUser(id, params),
+  });
 }
 
 function fetchUser(id: UserId, params?: Params): Promise<FetchUseUserResponse> {

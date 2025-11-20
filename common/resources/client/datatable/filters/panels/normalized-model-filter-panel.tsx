@@ -8,8 +8,7 @@ export function NormalizedModelFilterPanel({
   return (
     <FormNormalizedModelField
       name={`${filter.key}.value`}
-      modelType={filter.control.model}
-      openMenuOnFocus
+      endpoint={`normalized-models/${filter.control.model}`}
     />
   );
 }

@@ -8,10 +8,11 @@ import {showHttpErrorToast} from '@common/utils/http/show-http-error-toast';
 interface Response extends BackendResponse {}
 
 export function useUnbanUser(userId: number) {
-  return useMutation(() => unbanUser(userId), {
+  return useMutation({
+    mutationFn: () => unbanUser(userId),
     onSuccess: () => {
       toast(message('User unsuspended'));
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({queryKey: ['users']});
     },
     onError: r => showHttpErrorToast(r),
   });

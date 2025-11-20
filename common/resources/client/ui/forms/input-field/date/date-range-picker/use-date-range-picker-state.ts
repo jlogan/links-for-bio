@@ -10,7 +10,6 @@ import {
   minDate,
   startOfMonth,
   toCalendarDate,
-  toZoned,
   ZonedDateTime,
 } from '@internationalized/date';
 import {
@@ -22,6 +21,7 @@ import {useBaseDatePickerState} from '../use-base-date-picker-state';
 import {startOfDay} from '@common/utils/date/start-of-day';
 import {endOfDay} from '@common/utils/date/end-of-day';
 import {useCurrentDateTime} from '@common/i18n/use-current-date-time';
+import {toSafeZoned} from '@common/i18n/to-safe-zoned';
 
 export interface IsPlaceholderValue {
   start: boolean;
@@ -34,7 +34,7 @@ export type DateRangePickerState = BaseDatePickerState<
 >;
 
 export function useDateRangePickerState(
-  props: DatePickerValueProps<Partial<DateRangeValue>, DateRangeValue>
+  props: DatePickerValueProps<Partial<DateRangeValue>, DateRangeValue>,
 ): DateRangePickerState {
   const now = useCurrentDateTime();
   const [isPlaceholder, setIsPlaceholder] = useState<IsPlaceholderValue>({
@@ -48,7 +48,10 @@ export function useDateRangePickerState(
   const [internalValue, setInternalValue] = useControlledState(
     props.value ? completeRange(props.value, now) : undefined,
     !props.value ? completeRange(props.defaultValue, now) : undefined,
-    props.onChange
+    value => {
+      setIsPlaceholder({start: false, end: false});
+      setStateValue?.(value);
+    },
   );
 
   const {
@@ -96,9 +99,12 @@ export function useDateRangePickerState(
         end = minDate(end, max);
       }
 
-      return {start: toZoned(start, timezone), end: toZoned(end, timezone)};
+      return {
+        start: toSafeZoned(start, timezone),
+        end: toSafeZoned(end, timezone),
+      };
     },
-    [min, max, timezone]
+    [min, max, timezone],
   );
 
   const setSelectedValue = useCallback(
@@ -112,7 +118,7 @@ export function useDateRangePickerState(
       setCalendarDates(rangeToCalendarDates(value, max));
       setIsPlaceholder({start: false, end: false});
     },
-    [setInternalValue, constrainRange, max]
+    [setInternalValue, constrainRange, max],
   );
 
   const dayIsActive = useCallback(
@@ -122,7 +128,7 @@ export function useDateRangePickerState(
         (!isPlaceholder.end && isSameDay(day, highlightedRange.end))
       );
     },
-    [highlightedRange, isPlaceholder]
+    [highlightedRange, isPlaceholder],
   );
 
   const dayIsHighlighted = useCallback(
@@ -133,17 +139,17 @@ export function useDateRangePickerState(
         day.compare(highlightedRange.end) <= 0
       );
     },
-    [highlightedRange, isPlaceholder, isHighlighting]
+    [highlightedRange, isPlaceholder, isHighlighting],
   );
 
   const dayIsRangeStart = useCallback(
     (day: CalendarDate) => isSameDay(day, highlightedRange.start),
-    [highlightedRange]
+    [highlightedRange],
   );
 
   const dayIsRangeEnd = useCallback(
     (day: CalendarDate) => isSameDay(day, highlightedRange.end),
-    [highlightedRange]
+    [highlightedRange],
   );
 
   const getCellProps = useCallback(
@@ -152,7 +158,7 @@ export function useDateRangePickerState(
         onPointerEnter: () => {
           if (isHighlighting && isSameMonth) {
             setHighlightedRange(
-              makeRange({start: anchorDate!, end: date, timezone})
+              makeRange({start: anchorDate!, end: date, timezone}),
             );
           }
         },
@@ -163,10 +169,14 @@ export function useDateRangePickerState(
             setHighlightedRange(makeRange({start: date, end: date, timezone}));
           } else {
             const finalRange = makeRange({
-              start: startOfDay(toZoned(anchorDate!, timezone)),
-              end: endOfDay(toZoned(date, timezone)),
+              start: anchorDate!,
+              end: date,
               timezone,
             });
+            // cast to start and end of day after making range, because "makeRange"
+            // will flip start and end dates, if they are out of order
+            finalRange.start = startOfDay(finalRange.start);
+            finalRange.end = endOfDay(finalRange.end);
             setIsHighlighting(false);
             setAnchorDate(null);
             setSelectedValue?.(finalRange);
@@ -184,7 +194,7 @@ export function useDateRangePickerState(
       setCalendarIsOpen,
       closeDialogOnSelection,
       timezone,
-    ]
+    ],
   );
 
   return {
@@ -212,7 +222,7 @@ export function useDateRangePickerState(
 
 function rangeToCalendarDates(
   range: DateRangeValue,
-  max?: DateValue
+  max?: DateValue,
 ): CalendarDate[] {
   let start = toCalendarDate(startOfMonth(range.start));
   let end = toCalendarDate(endOfMonth(range.end));
@@ -236,8 +246,8 @@ interface MakeRangeProps {
   timezone: string;
 }
 function makeRange(props: MakeRangeProps): DateRangeValue {
-  const start = toZoned(props.start, props.timezone);
-  const end = toZoned(props.end, props.timezone);
+  const start = toSafeZoned(props.start, props.timezone);
+  const end = toSafeZoned(props.end, props.timezone);
   if (start.compare(end) > 0) {
     return {start: end, end: start};
   }
@@ -246,7 +256,7 @@ function makeRange(props: MakeRangeProps): DateRangeValue {
 
 function completeRange(
   range: Partial<DateRangeValue> | null | undefined,
-  now: ZonedDateTime
+  now: ZonedDateTime,
 ): DateRangeValue {
   if (range?.start && range?.end) {
     return range as DateRangeValue;

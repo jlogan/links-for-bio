@@ -2,7 +2,7 @@
 
 namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +28,7 @@ class BanController extends BaseController
                 ? null
                 : Arr::get($data, 'ban_until'),
             'comment' => Arr::get($data, 'comment'),
-            'created_by_type' => User::class,
+            'created_by_type' => User::MODEL_TYPE,
             'created_by_id' => Auth::id(),
         ]);
         $user->fill(['banned_at' => now()])->save();

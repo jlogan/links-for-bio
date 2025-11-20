@@ -27,11 +27,14 @@ export type ComboboxProps<T extends object> = Omit<
     endAdornmentIcon?: ReactElement<SvgIconProps>;
     useOptionLabelAsInputValue?: boolean;
     hideEndAdornment?: boolean;
+    onEndAdornmentClick?: () => void;
+    prependListbox?: boolean;
+    listboxClassName?: string;
   };
 
 function ComboBox<T extends object>(
   props: ComboboxProps<T> & {selectionMode: 'single'},
-  ref: Ref<HTMLInputElement>
+  ref: Ref<HTMLInputElement>,
 ) {
   const {
     children,
@@ -57,6 +60,11 @@ function ComboBox<T extends object>(
     blurReferenceOnItemSelection,
     isOpen: propsIsOpen,
     onOpenChange: propsOnOpenChange,
+    prependListbox,
+    listboxClassName,
+    onEndAdornmentClick,
+    autoFocusFirstItem = true,
+    focusLoopingMode,
     ...textFieldProps
   } = props;
 
@@ -70,7 +78,7 @@ function ComboBox<T extends object>(
       virtualFocus: true,
       clearSelectionOnInputClear: true,
     },
-    ref
+    ref,
   );
 
   const {
@@ -102,13 +110,16 @@ function ComboBox<T extends object>(
         setIsOpen(true);
       }
       e.target.select();
-    }
+    },
   );
 
   return (
     <Listbox
+      prepend={prependListbox}
+      className={listboxClassName}
       listbox={listbox}
       mobileOverlay={Popover}
+      isLoading={isLoading}
       onPointerDown={e => {
         // prevent focus from leaving input when scrolling listbox via mouse
         e.preventDefault();
@@ -120,7 +131,6 @@ function ComboBox<T extends object>(
         endAdornment={
           !hideEndAdornment ? (
             <IconButton
-              radius="rounded"
               size="md"
               tabIndex={-1}
               disabled={textFieldProps.disabled}
@@ -128,8 +138,12 @@ function ComboBox<T extends object>(
               onPointerDown={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                setActiveCollection('all');
-                setIsOpen(!isOpen);
+                if (onEndAdornmentClick) {
+                  onEndAdornmentClick();
+                } else {
+                  setActiveCollection('all');
+                  setIsOpen(!isOpen);
+                }
               }}
             >
               <ComboboxEndAdornment
@@ -165,6 +179,6 @@ function ComboBox<T extends object>(
 }
 
 const ComboBoxForwardRef = React.forwardRef(ComboBox) as <T extends object>(
-  props: ComboboxProps<T> & {ref?: Ref<HTMLInputElement>}
+  props: ComboboxProps<T> & {ref?: Ref<HTMLInputElement>},
 ) => ReactElement;
 export {ComboBoxForwardRef as ComboBox};

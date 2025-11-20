@@ -21,11 +21,15 @@ export function CheckoutPaypalDone() {
   useEffect(() => {
     const subscriptionId = params.get('subscriptionId');
     const status = params.get('status');
-    setMessageConfig(getRedirectMessageConfig(status, productId, priceId));
     if (subscriptionId && status === 'success') {
       storeSubscriptionDetailsLocally(subscriptionId).then(() => {
-        invalidateBootstrapData();
+        setMessageConfig(
+          getRedirectMessageConfig('success', productId, priceId),
+        );
+        window.location.href = '/billing';
       });
+    } else {
+      setMessageConfig(getRedirectMessageConfig(status, productId, priceId));
     }
   }, [priceId, productId, params, invalidateBootstrapData]);
 
@@ -40,7 +44,7 @@ export function CheckoutPaypalDone() {
 function getRedirectMessageConfig(
   status?: 'success' | 'error' | string | null,
   productId?: string,
-  priceId?: string
+  priceId?: string,
 ): BillingRedirectMessageConfig {
   switch (status) {
     case 'success':
@@ -61,7 +65,7 @@ function getRedirectMessageConfig(
 }
 
 function errorLink(productId?: string, priceId?: string): string {
-  return productId && priceId ? `/buy/${productId}/${priceId}` : '/';
+  return productId && priceId ? `/checkout/${productId}/${priceId}` : '/';
 }
 
 function storeSubscriptionDetailsLocally(subscriptionId: string) {

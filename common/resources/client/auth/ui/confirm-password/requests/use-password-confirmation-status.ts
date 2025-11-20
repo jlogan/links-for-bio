@@ -7,7 +7,10 @@ interface Response extends BackendResponse {
 }
 
 export function usePasswordConfirmationStatus() {
-  return useQuery(['password-confirmation-status'], () => fetchStatus());
+  return useQuery({
+    queryKey: ['password-confirmation-status'],
+    queryFn: () => fetchStatus(),
+  });
 }
 
 function fetchStatus(): Promise<Response> {

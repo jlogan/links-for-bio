@@ -24,21 +24,22 @@ const Endpoint = (id: number) => `channel/${id}`;
 export function useUpdateChannel(form: UseFormReturn<UpdateChannelPayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation(
-    (payload: UpdateChannelPayload) => updateChannel(payload),
-    {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(DatatableDataQueryKey('channel'));
-        toast(trans(message('Channel updated')));
-        navigate('/admin/channels');
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: UpdateChannelPayload) => updateChannel(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('channel'),
+      });
+      toast(trans(message('Channel updated')));
+      navigate('/admin/channels');
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function updateChannel({
   id,
+  content, // don't need to send content to the server
   ...payload
 }: UpdateChannelPayload): Promise<Response> {
   return apiClient.put(Endpoint(id), payload).then(r => r.data);

@@ -46,7 +46,7 @@ function SiteUrlSection() {
   const isInvalid = server.newAppUrl && server.newAppUrl !== server.app_url;
   if (isInvalid) {
     append = (
-      <div className="text-sm text-danger mt-20">
+      <div className="mt-20 text-sm text-danger">
         <Trans
           values={{
             baseUrl: server.app_url,
@@ -66,7 +66,7 @@ function SiteUrlSection() {
         name="server.app_url"
         label={<Trans message="Primary site url" />}
         description={
-          <LearnMoreLink link="https://support.vebto.com/help-center/articles/35/primary-site-url" />
+          <LearnMoreLink link="https://support.vebto.com/hc/articles/35/primary-site-url" />
         }
       />
       {append}
@@ -173,14 +173,14 @@ function SitemapSection() {
         variant="outline"
         size="xs"
         color="primary"
-        disabled={generateSitemap.isLoading}
+        disabled={generateSitemap.isPending}
         onClick={() => {
           generateSitemap.mutate();
         }}
       >
         <Trans message="Generate sitemap" />
       </Button>
-      <div className="text-sm text-muted mt-14">
+      <div className="mt-14 text-sm text-muted">
         <Trans
           message="Once generated, sitemap url will be: :url"
           values={{

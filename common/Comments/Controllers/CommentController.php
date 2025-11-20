@@ -30,9 +30,7 @@ class CommentController extends BaseController
         if (request('commentable_id') && request('commentable_type')) {
             $builder->where([
                 'commentable_id' => request('commentable_id'),
-                'commentable_type' => modelTypeToNamespace(
-                    request('commentable_type'),
-                ),
+                'commentable_type' => request('commentable_type'),
             ]);
         }
 

@@ -4,11 +4,26 @@ return [
     // admin
     ['method' => 'POST', 'name' => 'settings'],
     ['method' => 'POST', 'name' => 'admin/appearance'],
+    ['method' => 'PUT', 'name' => 'admin/appearance/seo-tags/{name}'],
     ['method' => 'POST', 'name' => 'cache/clear'],
     ['method' => 'POST', 'name' => 'artisan/call'],
     ['method' => 'POST', 'name' => 'admin/search/import'],
     ['method' => 'POST', 'name' => 'import-media/single-item'],
     ['method' => 'POST', 'name' => 'sitemap/generate'],
+
+    // Channels
+    ['method' => 'POST', 'name' => 'channel/{channel}/add'],
+    ['method' => 'POST', 'name' => 'channel/{channel}/remove'],
+    ['method' => 'POST', 'name' => 'channel/{id}/reorder-content'],
+    ['method' => 'POST', 'name' => 'channel/{channel}/update-content'],
+    ['method' => 'POST', 'name' => 'channel'],
+    ['method' => 'PUT', 'name' => 'channel/{channel}'],
+    ['method' => 'DELETE', 'name' => 'channel/{ids}'],
+    ['method' => 'POST', 'name' => 'channel/apply-preset'],
+
+    // logs
+    ['method' => 'POST', 'name' => 'logs/schedule/rerun/{id}'],
+    ['method' => 'DELETE', 'name' => 'logs/error/{identifier}'],
 
     // css theme
     ['method' => 'POST', 'name' => 'css-theme'],
@@ -64,6 +79,7 @@ return [
     ['method' => 'POST', 'origin' => 'admin', 'name' => 'users'],
     ['method' => 'DELETE', 'name' => 'users/{ids}'],
     ['method' => 'POST', 'name' => 'user-sessions/logout-other'],
+    ['method' => 'POST', 'name' => 'admin/users/impersonate/{user}'],
     [
         'method' => 'POST',
         'name' => 'auth/user/confirmed-two-factor-authentication',
@@ -106,6 +122,9 @@ return [
         'name' => 'file-entries/{entryIds}',
         'origin' => 'admin',
     ],
+
+    // comments
+    ['method' => 'DELETE', 'name' => 'comment/{comment}'],
 
     // admin
     [

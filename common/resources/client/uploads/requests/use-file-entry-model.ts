@@ -13,14 +13,14 @@ interface Options {
 
 export function useFileEntryModel(
   entryIdOrUrl: number | string | undefined,
-  options: Options = {enabled: true}
+  options: Options = {enabled: true},
 ) {
   const entryId = extractEntryId(entryIdOrUrl);
-  return useQuery(
-    ['file-entries', `${entryId}`],
-    () => fetchFileEntry(entryId!),
-    {enabled: !!entryId && options.enabled}
-  );
+  return useQuery({
+    queryKey: ['file-entries', `${entryId}`],
+    queryFn: () => fetchFileEntry(entryId!),
+    enabled: !!entryId && options.enabled,
+  });
 }
 
 function fetchFileEntry(entryId: number | string) {

@@ -20,8 +20,11 @@ export interface ListItemBaseProps extends ComponentPropsWithRef<'div'> {
   className?: string;
   showCheckmark?: boolean;
   elementType?: 'a' | JSXElementConstructor<any> | 'div';
+  target?: string;
   to?: To;
   href?: string;
+  radius?: string;
+  padding?: string;
 }
 
 export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
@@ -38,6 +41,8 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
       isSelected,
       showCheckmark,
       elementType = 'div',
+      radius,
+      padding,
       ...domProps
     } = props;
 
@@ -58,7 +63,7 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
 
     const iconClassName = clsx(
       'icon-sm rounded overflow-hidden flex-shrink-0',
-      !isDisabled && 'text-muted'
+      !isDisabled && 'text-muted',
     );
     const endSectionClassName = clsx(!isDisabled && 'text-muted');
 
@@ -74,16 +79,16 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
         {startIcon && <div className={iconClassName}>{startIcon}</div>}
         <div
           className={clsx(
-            'mr-auto w-full',
-            capitalizeFirst && 'first-letter:capitalize'
+            'min-w-auto mr-auto w-full overflow-hidden overflow-ellipsis',
+            capitalizeFirst && 'first-letter:capitalize',
           )}
         >
           {children}
           {description && (
             <div
               className={clsx(
-                'text-xs mt-4 whitespace-normal',
-                isDisabled ? 'text-disabled' : 'text-muted'
+                'mt-4 whitespace-normal text-xs',
+                isDisabled ? 'text-disabled' : 'text-muted',
               )}
             >
               {description}
@@ -97,7 +102,7 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
         )}
       </Element>
     );
-  }
+  },
 );
 
 function itemClassName({
@@ -108,6 +113,8 @@ function itemClassName({
   showCheckmark,
   endIcon,
   endSection,
+  radius,
+  padding: userPadding,
 }: ListItemBaseProps): string {
   let state: string = '';
   if (isDisabled) {
@@ -126,22 +133,25 @@ function itemClassName({
 
   let padding;
 
-  if (showCheckmark) {
+  if (userPadding) {
+    padding = userPadding;
+  } else if (showCheckmark) {
     if (endIcon || endSection) {
-      padding = 'pl-8 pr-8';
+      padding = 'pl-8 pr-8 py-8';
     } else {
-      padding = 'pl-8 pr-24';
+      padding = 'pl-8 pr-24 py-8';
     }
   } else {
-    padding = 'px-20';
+    padding = 'px-20 py-8';
   }
 
   return clsx(
     'w-full select-none outline-none cursor-pointer',
-    'py-8 text-sm truncate flex items-center gap-10',
+    'text-sm truncate flex items-center gap-10',
     !isDisabled && 'text-main',
     padding,
     state,
-    className
+    className,
+    radius,
   );
 }

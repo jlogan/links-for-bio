@@ -24,6 +24,15 @@ class DatasourceFilters
         return empty($this->filters);
     }
 
+    public function has(string $key): bool {
+        foreach ($this->filters as $filter) {
+            if ($filter['key'] === $key) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function where(string $key, string $operator, $value): self
     {
         if ($value instanceof Collection) {

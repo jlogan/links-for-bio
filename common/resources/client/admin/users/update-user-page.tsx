@@ -16,6 +16,7 @@ import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field'
 import {FileUploadProvider} from '@common/uploads/uploader/file-upload-provider';
 import {FormImageSelector} from '@common/ui/images/image-selector';
 import {queryClient} from '@common/http/query-client';
+import {ReportIcon} from '@common/icons/material/Report';
 
 export function UpdateUserPage() {
   const form = useForm<UpdateUserPayload>();
@@ -24,8 +25,9 @@ export function UpdateUserPage() {
   const updateUser = useUpdateUser(form);
   const resendConfirmationEmail = useResendVerificationEmail();
   const {data, isLoading} = useUser(userId!, {
-    with: ['subscriptions', 'roles', 'permissions'],
+    with: ['subscriptions', 'roles', 'permissions', 'bans'],
   });
+  const banReason = data?.user.bans?.[0]?.comment;
 
   useEffect(() => {
     if (data?.user && !form.getValues().id) {
@@ -53,7 +55,7 @@ export function UpdateUserPage() {
       color="primary"
       disabled={
         !require_email_confirmation ||
-        resendConfirmationEmail.isLoading ||
+        resendConfirmationEmail.isPending ||
         data?.user?.email_verified_at != null
       }
       onClick={() => {
@@ -73,12 +75,25 @@ export function UpdateUserPage() {
       title={
         <Trans values={{email: data?.user.email}} message="Edit “:email“" />
       }
-      isLoading={updateUser.isLoading}
+      subTitle={
+        banReason && (
+          <div className="flex items-center gap-4 text-sm text-danger">
+            <ReportIcon />
+            <div>
+              <Trans
+                message="Suspended: :reason"
+                values={{reason: banReason}}
+              />
+            </div>
+          </div>
+        )
+      }
+      isLoading={updateUser.isPending}
       avatarManager={
         <AvatarSection
           user={data!.user}
           onChange={() => {
-            queryClient.invalidateQueries(['users']);
+            queryClient.invalidateQueries({queryKey: ['users']});
           }}
         />
       }

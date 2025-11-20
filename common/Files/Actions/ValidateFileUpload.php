@@ -30,12 +30,10 @@ class ValidateFileUpload
 
     protected function validateAllowedExtensions(): string|null
     {
-        $allowedExtensions = app(Settings::class)->getJson(
-            'uploads.allowed_extensions',
-        );
+        $allowedExtensions = settings('uploads.allowed_extensions');
 
         if (
-            !empty($extensions) &&
+            !empty($allowedExtensions) &&
             !$this->extensionMatches($allowedExtensions)
         ) {
             return __('Files of this type are not allowed');
@@ -46,12 +44,10 @@ class ValidateFileUpload
 
     protected function validateBlockedExtensions(): string|null
     {
-        $blockedExtensions = app(Settings::class)->getJson(
-            'uploads.blocked_extensions',
-        );
+        $blockedExtensions = settings('uploads.blocked_extensions');
 
         if (
-            !empty($extensions) &&
+            !empty($blockedExtensions) &&
             $this->extensionMatches($blockedExtensions)
         ) {
             return __('Files of this type are not allowed');

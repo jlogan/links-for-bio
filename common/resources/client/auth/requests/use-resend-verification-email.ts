@@ -14,7 +14,8 @@ export interface ResendConfirmEmailPayload {
 }
 
 export function useResendVerificationEmail() {
-  return useMutation(resendEmail, {
+  return useMutation({
+    mutationFn: (payload: ResendConfirmEmailPayload) => resendEmail(payload),
     onSuccess: () => {
       toast(message('Email sent'));
     },
@@ -24,6 +25,6 @@ export function useResendVerificationEmail() {
 
 function resendEmail(payload: ResendConfirmEmailPayload): Promise<Response> {
   return apiClient
-    .post('auth/email/verification-notification', payload)
+    .post('resend-email-verification', payload)
     .then(response => response.data);
 }

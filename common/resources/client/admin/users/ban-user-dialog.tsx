@@ -71,7 +71,7 @@ export function BanUserDialog({user}: Props) {
           variant="flat"
           color="primary"
           type="submit"
-          disabled={banUser.isLoading}
+          disabled={banUser.isPending}
         >
           <Trans message="Suspend" />
         </Button>

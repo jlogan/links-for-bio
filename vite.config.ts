@@ -1,5 +1,5 @@
 import {defineConfig, Plugin} from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import laravel from 'laravel-vite-plugin';
 import replace from '@rollup/plugin-replace';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -24,12 +24,16 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      external: ['puppeteer', 'ioredis'],
+    },
   },
   plugins: [
     tsconfigPaths(),
     react(),
     laravel({
       input: ['resources/client/main.tsx'],
+      ssr: ['resources/client/server-entry.tsx'],
       refresh: false,
     }),
     basePath(),

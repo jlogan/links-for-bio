@@ -1,18 +1,17 @@
 <?php namespace Common\Pages;
 
-use App\User;
-use Common\Search\Searchable;
+use App\Models\User;
+use Common\Core\BaseModel;
 use Common\Tags\Tag;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 
-class CustomPage extends Model
+class CustomPage extends BaseModel
 {
-    use Searchable, HasFactory;
+    use HasFactory;
 
     const PAGE_TYPE = 'default';
     const MODEL_TYPE = 'customPage';

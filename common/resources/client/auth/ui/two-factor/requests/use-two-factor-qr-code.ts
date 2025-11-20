@@ -8,7 +8,10 @@ interface Response extends BackendResponse {
 }
 
 export function useTwoFactorQrCode() {
-  return useQuery(['two-factor-qr-code'], () => fetchCode());
+  return useQuery({
+    queryKey: ['two-factor-qr-code'],
+    queryFn: () => fetchCode(),
+  });
 }
 
 function fetchCode(): Promise<Response> {

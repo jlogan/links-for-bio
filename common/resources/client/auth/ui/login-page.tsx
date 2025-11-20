@@ -59,7 +59,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
     />
   );
 
-  const isInvalid = !form.formState.isValid;
+  const isInvalid = !!Object.keys(form.formState.errors).length;
 
   return (
     <AuthLayout heading={heading} message={message}>
@@ -100,7 +100,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           }
           required
         />
-        <FormCheckbox name="remember" className="block mb-32">
+        <FormCheckbox name="remember" className="mb-32 block">
           <Trans message="Stay signed in for a month" />
         </FormCheckbox>
         <Button
@@ -109,7 +109,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           variant="flat"
           color="primary"
           size="md"
-          disabled={login.isLoading}
+          disabled={login.isPending}
         >
           <Trans message="Continue" />
         </Button>
@@ -138,8 +138,8 @@ function getDemoFormDefaults(siteConfig: SiteConfigContextValue) {
     };
   } else {
     return {
-      email: 'admin@admin.com',
-      password: 'admin',
+      email: siteConfig.demo.email ?? 'admin@admin.com',
+      password: siteConfig.demo.password ?? 'admin',
     };
   }
 }

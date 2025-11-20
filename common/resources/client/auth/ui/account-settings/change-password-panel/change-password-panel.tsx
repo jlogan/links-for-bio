@@ -22,7 +22,7 @@ export function ChangePasswordPanel() {
           form={formId}
           variant="flat"
           color="primary"
-          disabled={!form.formState.isValid || updatePassword.isLoading}
+          disabled={!form.formState.isValid || updatePassword.isPending}
         >
           <Trans message="Update password" />
         </Button>

@@ -15,8 +15,9 @@ export interface Settings {
   };
   menus: MenuConfig[];
   base_url: string;
+  asset_url?: string;
   html_base_uri: string;
-  cookie_notice: {
+  cookie_notice?: {
     enable: boolean;
     position: 'top' | 'bottom';
     button?: MenuItemConfig;
@@ -24,7 +25,7 @@ export interface Settings {
   logging: {
     sentry_public?: string;
   };
-  themes: {
+  themes?: {
     default_id?: number | string | null;
     user_change: boolean;
   };
@@ -45,6 +46,7 @@ export interface Settings {
     integrated: boolean;
   };
   billing: {
+    integrated: boolean;
     enable: boolean;
     accepted_cards?: string | string[];
     paypal_test_mode: boolean;
@@ -121,9 +123,6 @@ export interface Settings {
     tracking_code?: string;
     gchart_api_key?: string;
   };
-  envato: {
-    enable: boolean;
-  };
 }
 
 export interface MenuConfig {
@@ -142,5 +141,6 @@ export interface MenuItemConfig {
   target?: '_blank' | '_self';
   roles?: number[];
   permissions?: string[];
+  settings?: Record<string, any>;
   icon?: IconTree[] | null;
 }

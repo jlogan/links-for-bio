@@ -2,7 +2,6 @@ import React, {Suspense} from 'react';
 import {FormProvider, useForm} from 'react-hook-form';
 import {FileUploadProvider} from '@common/uploads/uploader/file-upload-provider';
 import {ArticleEditorTitle} from '@common/article-editor/article-editor-title';
-import {EditorContent} from '@tiptap/react';
 import {ArticleEditorStickyHeader} from '@common/article-editor/article-editor-sticky-header';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {
@@ -12,7 +11,7 @@ import {
 import {FullPageLoader} from '@common/ui/progress/full-page-loader';
 
 const ArticleBodyEditor = React.lazy(
-  () => import('@common/article-editor/article-body-editor')
+  () => import('@common/article-editor/article-body-editor'),
 );
 
 export function CreateCustomPage() {
@@ -28,26 +27,26 @@ export function CreateCustomPage() {
       },
       {
         onSuccess: () => navigate('../', {relative: 'path'}),
-      }
+      },
     );
   };
 
   return (
     <Suspense fallback={<FullPageLoader />}>
       <ArticleBodyEditor>
-        {editor => (
+        {(content, editor) => (
           <FileUploadProvider>
             <FormProvider {...form}>
               <ArticleEditorStickyHeader
                 editor={editor}
-                isLoading={createPage.isLoading}
+                isLoading={createPage.isPending}
                 onSave={handleSave}
                 backLink="../"
               />
               <div className="mx-20">
                 <div className="prose dark:prose-invert mx-auto flex-auto">
                   <ArticleEditorTitle />
-                  <EditorContent editor={editor} />
+                  {content}
                 </div>
               </div>
             </FormProvider>

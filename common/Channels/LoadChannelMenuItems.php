@@ -2,14 +2,14 @@
 
 namespace Common\Channels;
 
-use App\Channel;
+use App\Models\Channel;
 use Illuminate\Support\Collection;
 
 class LoadChannelMenuItems
 {
     public function execute(): Collection
     {
-        return Channel::limit(20)
+        return Channel::limit(40)
             ->where('type', 'channel')
             ->get()
             ->map(

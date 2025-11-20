@@ -23,14 +23,16 @@ interface CommentListProps {
   canDeleteAllComments?: boolean;
   className?: string;
   children?: ReactNode;
+  perPage?: number;
 }
 export function CommentList({
   className,
   commentable,
   canDeleteAllComments = false,
   children,
+  perPage = 25,
 }: CommentListProps) {
-  const {items, totalItems, ...query} = useComments(commentable);
+  const {items, totalItems, ...query} = useComments(commentable, {perPage});
 
   if (query.isError) {
     return null;

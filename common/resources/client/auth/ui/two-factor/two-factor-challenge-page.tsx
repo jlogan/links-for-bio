@@ -74,7 +74,7 @@ export function TwoFactorChallengePage() {
           variant="flat"
           color="primary"
           size="md"
-          disabled={completeChallenge.isLoading}
+          disabled={completeChallenge.isPending}
         >
           <Trans message="Continue" />
         </Button>

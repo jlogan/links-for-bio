@@ -66,7 +66,7 @@ function TokenLine({token, isLast}: TokenLineProps) {
     <div
       className={clsx(
         'flex items-center gap-24',
-        !isLast && 'mb-12 pb-12 border-b'
+        !isLast && 'mb-12 pb-12 border-b',
       )}
     >
       <div className="text-sm">
@@ -114,8 +114,9 @@ function DeleteTokenButton({token}: DeleteTokenButtonProps) {
           deleteToken.mutate(
             {id: token.id},
             {
-              onSuccess: () => queryClient.invalidateQueries(['users']),
-            }
+              onSuccess: () =>
+                queryClient.invalidateQueries({queryKey: ['users']}),
+            },
           );
         }
       }}

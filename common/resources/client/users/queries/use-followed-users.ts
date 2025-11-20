@@ -10,7 +10,9 @@ interface Response extends BackendResponse {
 
 export function useFollowedUsers() {
   const {user} = useAuth();
-  return useQuery(['users', 'followed', 'ids'], () => fetchIds(), {
+  return useQuery({
+    queryKey: ['users', 'followed', 'ids'],
+    queryFn: () => fetchIds(),
     enabled: !!user,
   });
 }

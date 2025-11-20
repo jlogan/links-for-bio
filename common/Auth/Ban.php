@@ -13,6 +13,13 @@ class Ban extends Model
         'expired_at' => 'datetime',
     ];
 
+    const MODEL_TYPE = 'ban';
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
+    }
+
     protected static function booted(): void
     {
         static::created(function (Ban $ban) {});

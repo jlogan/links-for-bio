@@ -16,23 +16,26 @@ import {
   AccountSettingsSidenav,
 } from '@common/auth/ui/account-settings/account-settings-sidenav';
 import {SessionsPanel} from '@common/auth/ui/account-settings/sessions-panel/sessions-panel';
+import {useContext} from 'react';
+import {SiteConfigContext} from '@common/core/settings/site-config-context';
 
 export function AccountSettingsPage() {
+  const {auth} = useContext(SiteConfigContext);
   const {data, isLoading} = useUser('me', {
     with: ['roles', 'social_profiles', 'tokens'],
   });
   return (
-    <div className="bg-alt flex flex-col h-full">
+    <div className="min-h-screen bg-alt">
       <StaticPageTitle>
         <Trans message="Account Settings" />
       </StaticPageTitle>
-      <Navbar className="flex-shrink-0" menuPosition="account-settings-page" />
-      <div className="flex-auto overflow-auto">
-        <div className="container mx-auto my-24 px-24">
+      <Navbar menuPosition="account-settings-page" />
+      <div>
+        <div className="container mx-auto px-24 py-24">
           <h1 className="text-3xl">
             <Trans message="Account settings" />
           </h1>
-          <div className="mb-40 text-muted text-base">
+          <div className="mb-40 text-base text-muted">
             <Trans message="View and update your account details, profile and more." />
           </div>
           {isLoading || !data ? (
@@ -45,6 +48,9 @@ export function AccountSettingsPage() {
             <div className="flex items-start gap-24">
               <AccountSettingsSidenav />
               <main className="flex-auto">
+                {auth.accountSettingsPanels?.map(panel => (
+                  <panel.component key={panel.id} user={data.user} />
+                ))}
                 <BasicInfoPanel user={data.user} />
                 <SocialLoginPanel user={data.user} />
                 <ChangePasswordPanel />

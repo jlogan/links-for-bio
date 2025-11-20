@@ -5,6 +5,7 @@ import {Button} from '@common/ui/buttons/button';
 import {useStoreVote} from '@common/votes/requests/use-store-vote';
 import {useState} from 'react';
 import {FormattedNumber} from '@common/i18n/formatted-number';
+import clsx from 'clsx';
 
 interface Props {
   model: VotableModel;
@@ -25,18 +26,19 @@ export function ThumbButtons({model, className, showUpvotesOnly}: Props) {
   };
 
   return (
-    <div className={className}>
+    <div className={clsx(className, 'whitespace-nowrap')}>
       <Button
         className="gap-6"
         sizeClassName="px-8 py-4"
         color={currentVote === 'upvote' ? 'primary' : undefined}
-        disabled={changeVote.isLoading}
+        disabled={changeVote.isPending}
+        aria-label="Upvote"
         onClick={() => {
           changeVote.mutate(
             {voteType: 'upvote'},
             {
               onSuccess: response => syncLocalState(response.model),
-            }
+            },
           );
         }}
       >
@@ -50,13 +52,14 @@ export function ThumbButtons({model, className, showUpvotesOnly}: Props) {
           className="gap-6"
           sizeClassName="px-8 py-4"
           color={currentVote === 'downvote' ? 'primary' : undefined}
-          disabled={changeVote.isLoading}
+          disabled={changeVote.isPending}
+          aria-label="Downvote"
           onClick={() => {
             changeVote.mutate(
               {voteType: 'downvote'},
               {
                 onSuccess: response => syncLocalState(response.model),
-              }
+              },
             );
           }}
         >

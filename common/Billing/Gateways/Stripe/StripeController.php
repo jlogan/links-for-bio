@@ -13,7 +13,7 @@ class StripeController extends BaseController
     public function __construct(
         protected Request $request,
         protected Subscription $subscription,
-        protected Stripe $stripe
+        protected Stripe $stripe,
     ) {
         $this->middleware('auth');
     }
@@ -22,6 +22,7 @@ class StripeController extends BaseController
     {
         $data = $this->validate($this->request, [
             'product_id' => 'required|integer|exists:products,id',
+            'price_id' => 'integer|exists:prices,id',
             'start_date' => 'string',
         ]);
 
@@ -29,6 +30,7 @@ class StripeController extends BaseController
         $clientSecret = $this->stripe->subscriptions->createPartial(
             $product,
             Auth::user(),
+            $data['price_id'] ?? null,
         );
 
         return $this->success(['clientSecret' => $clientSecret]);
@@ -65,7 +67,7 @@ class StripeController extends BaseController
             ['expand' => ['invoice']],
         );
 
-        $this->stripe->storeSubscriptionDetailsLocally(
+        $this->stripe->subscriptions->sync(
             $paymentIntent->invoice->subscription,
         );
 

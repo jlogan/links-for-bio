@@ -1,8 +1,9 @@
 import {useLinkifiedString} from '@common/utils/hooks/use-linkified-string';
-import {Fragment, useLayoutEffect, useRef, useState} from 'react';
+import {Fragment, useRef, useState} from 'react';
 import {Button} from '@common/ui/buttons/button';
 import {Trans} from '@common/i18n/trans';
 import clsx from 'clsx';
+import {useLayoutEffect} from '@react-aria/utils';
 
 interface TruncatedDescriptionProps {
   description?: string;
@@ -40,7 +41,7 @@ export function TruncatedDescription({
           !isShowingAll && 'max-h-160 overflow-hidden',
           !isShowingAll &&
             isOverflowing &&
-            'after:absolute after:bottom-0 after:left-0 after:w-full after:h-20 after:bg-gradient-to-b after:from-transparent after:to-background'
+            'after:absolute after:bottom-0 after:left-0 after:h-20 after:w-full after:bg-gradient-to-b after:from-transparent after:to-background'
         )}
       >
         <div

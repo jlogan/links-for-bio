@@ -15,7 +15,8 @@ interface Payload {
 }
 
 export function useSubmitReport(model: Reportable) {
-  return useMutation((payload: Payload) => submitReport(model, payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => submitReport(model, payload),
     onSuccess: () => {
       toast(message('Thanks for reporting. We will review this content.'));
     },

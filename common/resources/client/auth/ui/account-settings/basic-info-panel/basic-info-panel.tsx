@@ -39,7 +39,7 @@ export function BasicInfoPanel({user}: Props) {
           variant="flat"
           color="primary"
           form={formId}
-          disabled={updateDetails.isLoading || !form.formState.isValid}
+          disabled={updateDetails.isPending || !form.formState.isValid}
         >
           <Trans message="Save" />
         </Button>

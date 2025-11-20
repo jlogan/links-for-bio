@@ -2,7 +2,7 @@
 
 namespace Common\Core\Policies;
 
-use App\User;
+use App\Models\User;
 use Arr;
 use Common\Files\FileEntry;
 use Common\Files\FileEntryUser;

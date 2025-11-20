@@ -11,9 +11,10 @@ export interface ConfirmTwoFactorPayload {
 }
 
 export function useConfirmTwoFactor(
-  form: UseFormReturn<ConfirmTwoFactorPayload>
+  form: UseFormReturn<ConfirmTwoFactorPayload>,
 ) {
-  return useMutation((payload: ConfirmTwoFactorPayload) => confirm(payload), {
+  return useMutation({
+    mutationFn: (payload: ConfirmTwoFactorPayload) => confirm(payload),
     onError: r => onFormQueryError(r, form),
   });
 }

@@ -29,6 +29,8 @@ import {useFileEntryModel} from '@common/uploads/requests/use-file-entry-model';
 import {Skeleton} from '@common/ui/skeleton/skeleton';
 import {AnimatePresence, m} from 'framer-motion';
 import {opacityAnimation} from '@common/ui/animation/opacity-animation';
+import {validateUpload} from '@common/uploads/uploader/validate-upload';
+import {UploadedFile} from '@common/uploads/uploaded-file';
 
 interface Props {
   className?: string;
@@ -43,6 +45,7 @@ interface Props {
   allowedFileTypes?: string[];
   maxFileSize?: number;
   diskPrefix: string;
+  disk?: Disk;
   showRemoveButton?: boolean;
   autoFocus?: boolean;
 }
@@ -53,6 +56,7 @@ export function FileEntryField({
   value,
   onChange,
   diskPrefix,
+  disk = Disk.uploads,
   showRemoveButton,
   invalid,
   errorMessage,
@@ -91,7 +95,7 @@ export function FileEntryField({
     },
     metadata: {
       diskPrefix,
-      disk: Disk.uploads,
+      disk,
     },
     onSuccess: (entry: FileEntry) => onChange?.(entry.url),
     onError: message => {
@@ -131,7 +135,7 @@ export function FileEntryField({
   return (
     <div className={clsx('text-sm', className)}>
       {label && (
-        <div className="flex items-center gap-24 justify-between">
+        <div className="flex items-center justify-between gap-24">
           <div id={labelId} className={inputFieldClassNames.label}>
             {label}
           </div>
@@ -166,14 +170,25 @@ export function FileEntryField({
               className="sr-only"
               onChange={e => {
                 if (e.target.files?.length) {
-                  uploadFile(e.target.files[0], uploadOptions);
+                  // "uploadFile" will validate, but need to validate here as well
+                  // because there's no easy way to listen for errors using "uploadFile"
+                  const errorMessage = validateUpload(
+                    new UploadedFile(e.target.files[0]),
+                    uploadOptions.restrictions
+                  );
+                  if (errorMessage && inputRef.current) {
+                    inputRef.current.value = '';
+                    toast.danger(errorMessage);
+                  } else {
+                    uploadFile(e.target.files[0], uploadOptions);
+                  }
                 }
               }}
             />
           </FileInputField>
           {uploadStatus === 'inProgress' && (
             <ProgressBar
-              className="absolute top-0 left-0 right-0"
+              className="absolute left-0 right-0 top-0"
               size="xs"
               value={percentage}
             />
@@ -214,13 +229,13 @@ function FileInputField({
           <button
             ref={buttonRef}
             type="button"
-            className="flex-shrink-0 bg-primary text-on-primary rounded text-sm font-semibold px-10 py-2 outline-none"
+            className="flex-shrink-0 rounded bg-primary px-10 py-2 text-sm font-semibold text-on-primary outline-none"
             onClick={() => handleUpload()}
           >
             <Trans message="Replace file" />
           </button>
           <AnimatePresence initial={false} mode="wait">
-            <div className="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
+            <div className="min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
               {currentEntry ? (
                 <m.div key="file-entry-name" {...opacityAnimation}>
                   {currentEntry.name}

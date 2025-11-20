@@ -2,7 +2,7 @@
 
 namespace Common\Files;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\BaseUser;
 
 class FileEntryUser extends BaseUser
@@ -13,7 +13,7 @@ class FileEntryUser extends BaseUser
 
     public function getMorphClass()
     {
-        return User::class;
+        return User::MODEL_TYPE;
     }
 
     protected $hidden = [
@@ -34,6 +34,22 @@ class FileEntryUser extends BaseUser
 
     public function getEntryPermissionsAttribute()
     {
+        if ($this->pivot->owner) {
+            return [
+                'edit' => true,
+                'view' => true,
+                'download' => true,
+            ];
+        }
+
         return $this->pivot->permissions;
+    }
+
+    public function toArray(bool $showAll = false): array
+    {
+        return array_merge(
+            $this->attributesToArray(),
+            $this->relationsToArray(),
+        );
     }
 }

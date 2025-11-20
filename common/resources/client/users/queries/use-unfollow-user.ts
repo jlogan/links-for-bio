@@ -13,11 +13,12 @@ interface Payload {
 }
 
 export function useUnfollowUser() {
-  return useMutation((payload: Payload) => unfollowUser(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => unfollowUser(payload),
     onSuccess: async (response, {user}) => {
-      await queryClient.invalidateQueries(['users']);
+      await queryClient.invalidateQueries({queryKey: ['users']});
       toast(
-        message('Stopped following :name', {values: {name: user.display_name}})
+        message('Stopped following :name', {values: {name: user.display_name}}),
       );
     },
     onError: r => showHttpErrorToast(r),

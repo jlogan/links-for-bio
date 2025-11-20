@@ -2,36 +2,100 @@
 
 namespace Common\Channels;
 
-use App\Channel;
+use App\Http\Resources\ChannelResource;
+use App\Models\Channel;
+use App\Services\ChannelPresets;
 use Common\Core\BaseController;
+use Common\Core\Prerender\Actions\ReplacePlaceholders;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class ChannelController extends BaseController
 {
     public function index(): Response
     {
-        $this->authorize('index', [
-            Channel::class,
-            request('userId'),
-            request('type'),
+        $this->authorize('index', [Channel::class, 'channel']);
+
+        $pagination = (new PaginateChannels())->execute(request()->all());
+
+        return $this->success([
+            'pagination' => $pagination,
+            'presets' => (new ChannelPresets())->getAll(),
         ]);
-
-        $pagination = app(PaginateChannels::class)->execute(request()->all());
-
-        return $this->success(['pagination' => $pagination]);
     }
 
-    public function show(Channel $channel): Response
+    public function show(Channel $channel)
     {
         $this->authorize('show', $channel);
 
-        $channel->loadContent(request()->all());
+        $loader = request('loader', 'channelPage');
 
-        if (request()->get('returnContentOnly')) {
-            return response()->json(['pagination' => $channel->content]);
-        } else {
-            return $this->success(['channel' => $channel->toArray()]);
+        $params = request()->all();
+        if ($loader === 'editUserListPage') {
+            $params['normalizeContent'] = true;
+        } elseif ($loader === 'editChannelPage') {
+            $params['normalizeContent'] = true;
+            $params['perPage'] = $params['perPage'] ?? 100;
         }
+
+        $channel->loadContent($params);
+        if (
+            $loader === 'channelPage' &&
+            $channel->shouldRestrictContent() &&
+            !$channel->restriction
+        ) {
+            abort(404);
+        }
+
+        $channel =
+            $loader === 'channelPage' && class_exists(ChannelResource::class)
+                ? new ChannelResource($channel)
+                : $channel;
+
+        // return only content for pagination
+        if (request()->get('returnContentOnly')) {
+            return [
+                'pagination' => $channel->toArray(request())['content'],
+            ];
+        }
+
+        $data = [
+            'channel' => $channel,
+            'loader' => $loader,
+        ];
+
+        if ($loader === 'channelPage') {
+            // used as default value during SSR in layout selector button
+            $channel->config = array_merge($channel->config, [
+                'selectedLayout' => Arr::get(
+                    $_COOKIE,
+                    "channel-layout-{$channel->config['contentModel']}",
+                    false,
+                ),
+                'seoTitle' => isset($channel->config['seoTitle'])
+                    ? app(ReplacePlaceholders::class)->execute(
+                        $channel->config['seoTitle'],
+                        $data,
+                    )
+                    : $channel->name,
+                'seoDescription' => isset($channel->config['seoDescription'])
+                    ? app(ReplacePlaceholders::class)->execute(
+                        $channel->config['seoDescription'],
+                        $data,
+                    )
+                    : $channel->description ?? $channel->name,
+            ]);
+        }
+
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'channelPage' ? 'channel-page' : null,
+            'data' => [
+                'channel' => $channel,
+                'loader' => $loader,
+            ],
+        ]);
     }
 
     public function store(CrupdateChannelRequest $request): Response
@@ -49,7 +113,7 @@ class ChannelController extends BaseController
         Channel $channel,
         CrupdateChannelRequest $request,
     ): Response {
-        $this->authorize('store', $channel);
+        $this->authorize('update', $channel);
 
         $channel = app(CrupdateChannel::class)->execute(
             $request->validationData(),
@@ -93,16 +157,59 @@ class ChannelController extends BaseController
 
     public function searchForAddableContent(): Response
     {
-        $this->authorize('index', Channel::class);
-
         $namespace = modelTypeToNamespace(request('modelType'));
+        $this->authorize('index', $namespace);
 
-        $results = app($namespace)
-            ->search(request('query'))
-            ->take(request('limit', 5))
+        $builder = app($namespace);
+
+        if (request('query')) {
+            $builder = $builder->mysqlSearch(request('query'));
+        }
+
+        $results = $builder
+            ->take(20)
             ->get()
-            ->map(fn($result) => $result->toNormalizedArray());
+            ->filter(function ($result) {
+                if (request('modelType') === 'channel') {
+                    // exclude user lists
+                    return $result->type === 'channel';
+                }
+                return true;
+            })
+            ->map(fn($result) => $result->toNormalizedArray())
+            ->slice(0, request('limit', 10))
+            ->values();
 
         return $this->success(['results' => $results]);
+    }
+
+    public function applyPreset()
+    {
+        $this->authorize('destroy', Channel::class);
+
+        $data = request()->validate([
+            'preset' => 'required|string',
+        ]);
+
+        $ids = Channel::where('type', 'channel')->pluck('id');
+        DB::table('channelables')
+            ->whereIn('channel_id', $ids)
+            ->delete();
+        Channel::whereIn('id', $ids)->delete();
+
+        (new ChannelPresets())->apply($data['preset']);
+
+        if (settings('homepage.type') === 'channels') {
+            $homepage = Channel::where('name', 'homepage')->first();
+            if ($homepage) {
+                settings()->save(['homepage.value' => $homepage->id]);
+            } else {
+                settings()->save(['homepage.value' => null]);
+            }
+        }
+
+        Cache::flush();
+
+        return $this->success();
     }
 }

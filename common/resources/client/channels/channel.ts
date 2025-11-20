@@ -10,19 +10,25 @@ export type ChannelContentItem<T = unknown> = T & {
 
 export interface ChannelConfig {
   autoUpdateMethod?: string;
+  autoUpdateProvider?: string;
   disablePagination?: boolean;
   disablePlayback?: boolean;
-  restriction?: string;
-  restrictionModelId?: 'urlParam' | number;
+  restriction?: string | null;
+  restrictionModelId?: 'urlParam' | number | null;
   contentModel: string;
   contentType: 'listAll' | 'manual' | 'autoUpdate';
   contentOrder: string;
+  // layout user selected manually, it's stored in a cookie and set as this
+  // prop in channel controller so there are no mismatches during SSR
+  selectedLayout?: string;
   layout: string;
   nestedLayout: string;
   hideTitle?: boolean;
   lockSlug?: boolean;
   preventDeletion?: boolean;
   actions?: {tooltip: string; icon: string; route: string}[];
+  adminDescription?: string;
+  paginationType?: 'infiniteScroll' | 'lengthAware' | 'simple';
 }
 
 export interface Channel<T = ChannelContentItem> {
@@ -39,6 +45,6 @@ export interface Channel<T = ChannelContentItem> {
   items_count?: number;
   user?: User;
   updated_at?: string;
-  restriction?: {name: string; model_type: string};
+  restriction?: {id: number; name: string; model_type: string};
   content?: PaginationResponse<T>;
 }

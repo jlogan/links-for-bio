@@ -11,7 +11,7 @@ export function TwoFactorDisabledStep({onEnabled}: Props) {
   const enableTwoFactor = useEnableTwoFactor();
   const {withConfirmedPassword, isLoading: confirmPasswordIsLoading} =
     usePasswordConfirmedAction();
-  const isLoading = enableTwoFactor.isLoading || confirmPasswordIsLoading;
+  const isLoading = enableTwoFactor.isPending || confirmPasswordIsLoading;
 
   return (
     <TwoFactorStepperLayout

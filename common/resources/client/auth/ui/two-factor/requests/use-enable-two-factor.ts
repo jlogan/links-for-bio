@@ -6,7 +6,8 @@ import {showHttpErrorToast} from '@common/utils/http/show-http-error-toast';
 interface Response extends BackendResponse {}
 
 export function useEnableTwoFactor() {
-  return useMutation(enable, {
+  return useMutation({
+    mutationFn: enable,
     onError: r => showHttpErrorToast(r),
   });
 }

@@ -2,7 +2,7 @@
 
 namespace Common\Core\Bootstrap;
 
-use App\User;
+use App\Models\User;
 use Common\Localizations\Localization;
 use Illuminate\Support\Str;
 use Spatie\Color\Hex;
@@ -24,11 +24,11 @@ class MobileBootstrapData extends BaseBootstrapData
                 ->toArray(),
         ];
 
-        $themes['light']['colors'] = $this->mapColorsToRgba(
-            $themes['light']['colors'],
+        $themes['light']['values'] = $this->transformValuesForFlutter(
+            $themes['light']['values'],
         );
-        $themes['dark']['colors'] = $this->mapColorsToRgba(
-            $themes['dark']['colors'],
+        $themes['dark']['values'] = $this->transformValuesForFlutter(
+            $themes['dark']['values'],
         );
 
         $this->data = [
@@ -36,12 +36,28 @@ class MobileBootstrapData extends BaseBootstrapData
             'user' => $this->getCurrentUser(),
             'menus' => $this->getMobileMenus(),
             'settings' => [
-                'social.google.enable' => (bool) $this->settings->get(
+                'social.google.enable' => (bool) settings(
                     'social.google.enable',
+                ),
+                'require_email_confirmation' => (bool) settings(
+                    'require_email_confirmation',
+                ),
+                'registration.disable' => (bool) settings(
+                    'registration.disable',
                 ),
             ],
             'locales' => Localization::get(),
         ];
+
+        if (settings('i18n.enable')) {
+            $langCode = request('activeLocale') ?: app()->getLocale();
+            foreach ($this->data['locales'] as $locale) {
+                if ($locale->language === $langCode) {
+                    $locale->loadLines();
+                    break;
+                }
+            }
+        }
 
         $this->logActiveSession();
 
@@ -50,7 +66,6 @@ class MobileBootstrapData extends BaseBootstrapData
 
     public function refreshToken(string $deviceName): self
     {
-        /* @var User $user */
         $user = $this->data['user'];
         if ($user) {
             $user['access_token'] = $user->refreshApiToken($deviceName);
@@ -61,7 +76,6 @@ class MobileBootstrapData extends BaseBootstrapData
 
     public function getCurrentUser(): ?User
     {
-        /* @var User $user */
         if ($user = $this->request->user()) {
             return $this->loadFcmToken($user);
         }
@@ -72,7 +86,7 @@ class MobileBootstrapData extends BaseBootstrapData
     {
         return array_values(
             array_filter(
-                $this->settings->getJson('menus'),
+                settings('menus'),
                 fn($menu) => collect($menu['positions'])->some(
                     fn($position) => Str::startsWith($position, 'mobile-app'),
                 ),
@@ -80,21 +94,39 @@ class MobileBootstrapData extends BaseBootstrapData
         );
     }
 
-    private function mapColorsToRgba(array $colors): array
+    private function transformValuesForFlutter(array $colors): array
     {
         if (!class_exists(Hex::class)) {
             return $colors;
         }
 
-        return array_map(function ($color) {
-            if (str_ends_with($color, '%')) {
-                return (int) str_replace('%', '', $color);
-            } else {
-                $color = str_replace(' ', ',', $color);
-                $rgb = Rgb::fromString("rgb($color)");
-                return [$rgb->red(), $rgb->green(), $rgb->blue(), 1.0];
-            }
-        }, $colors);
+        $radiusValues = [
+            '--be-button-radius',
+            '--be-input-radius',
+            '--be-panel-radius',
+        ];
+
+        $valuesToSkip = ['--be-navbar-color'];
+
+        return collect($colors)
+            ->map(function ($value, $name) use ($valuesToSkip, $radiusValues) {
+                if (in_array($name, $radiusValues)) {
+                    if (str_ends_with($value, 'rem')) {
+                        return (float) str_replace('rem', '', $value) * 16;
+                    } else {
+                        return (float) str_replace('px', '', $value);
+                    }
+                } elseif (in_array($name, $valuesToSkip)) {
+                    return $value;
+                } elseif (str_ends_with($value, '%')) {
+                    return (int) str_replace('%', '', $value);
+                } else {
+                    $value = str_replace(' ', ',', $value);
+                    $rgb = Rgb::fromString("rgb($value)");
+                    return [$rgb->red(), $rgb->green(), $rgb->blue(), 1.0];
+                }
+            })
+            ->toArray();
     }
 
     private function loadFcmToken(User $user): User

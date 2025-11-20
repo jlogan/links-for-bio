@@ -56,7 +56,7 @@ export function SessionsPanel({user}: Props) {
       <Button
         variant="outline"
         color="primary"
-        disabled={checkingPasswordStatus || logoutOther.isLoading}
+        disabled={checkingPasswordStatus || logoutOther.isPending}
         onClick={() => {
           withConfirmedPassword(password => {
             logoutOther.mutate(
@@ -65,7 +65,7 @@ export function SessionsPanel({user}: Props) {
                 onSuccess: () => {
                   toast(message('Logged out other sessions.'));
                 },
-              }
+              },
             );
           });
         }}

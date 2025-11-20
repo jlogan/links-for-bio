@@ -53,7 +53,7 @@ export function ConfirmPasswordDialog() {
           variant="flat"
           color="primary"
           form={formId}
-          disabled={confirmPassword.isLoading}
+          disabled={confirmPassword.isPending}
         >
           <Trans message="Confirm" />
         </Button>

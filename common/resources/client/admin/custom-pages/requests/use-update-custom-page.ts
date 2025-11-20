@@ -16,24 +16,23 @@ interface Response extends BackendResponse {
 export function useUpdateCustomPage(endpoint?: string) {
   const {pageId} = useParams();
   const finalEndpoint = `${endpoint || 'custom-pages'}/${pageId}`;
-  return useMutation(
-    (payload: CreateCustomPagePayload) => updatePage(payload, finalEndpoint),
-    {
-      onError: err => showHttpErrorToast(err),
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(['custom-pages']);
-        await queryClient.invalidateQueries(
-          DatatableDataQueryKey(finalEndpoint)
-        );
-        toast(message('Page updated'));
-      },
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: CreateCustomPagePayload) =>
+      updatePage(payload, finalEndpoint),
+    onError: err => showHttpErrorToast(err),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ['custom-pages']});
+      await queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(finalEndpoint),
+      });
+      toast(message('Page updated'));
+    },
+  });
 }
 
 function updatePage(
   payload: CreateCustomPagePayload,
-  endpoint: string
+  endpoint: string,
 ): Promise<Response> {
   return apiClient.put(`${endpoint}`, payload).then(r => r.data);
 }

@@ -19,7 +19,7 @@ class S3CorsController extends BaseController
     {
         $cors = [
             [
-                'AllowedOrigins' => [parse_url(config('app.url'), PHP_URL_HOST)],
+                'AllowedOrigins' => [config('app.url')],
                 'AllowedMethods' => ['GET', 'HEAD', 'POST', 'PUT'],
                 'MaxAgeSeconds' => 3000,
                 'AllowedHeaders' => ['*'],

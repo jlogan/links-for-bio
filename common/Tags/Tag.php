@@ -3,14 +3,15 @@
 namespace Common\Tags;
 
 use Carbon\Carbon;
+use Common\Core\BaseModel;
 use Common\Files\FileEntry;
-use Common\Search\Searchable;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Laravel\Scout\Searchable;
 
-class Tag extends Model
+class Tag extends BaseModel
 {
     use Searchable;
 
@@ -22,12 +23,24 @@ class Tag extends Model
     protected $casts = ['id' => 'integer'];
     protected $appends = ['model_type'];
 
+    protected function displayName(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                return $value ?: $attributes['name'] ?? null;
+            },
+            set: function ($value, $attributes) {
+                return $value ?: $attributes['name'];
+            },
+        );
+    }
+
     public function files(): MorphToMany
     {
         return $this->morphedByMany(FileEntry::class, 'taggable');
     }
 
-    public function attachEntries(array $ids, int $userId = null)
+    public function attachEntries(array $ids, int $userId = null): void
     {
         if ($userId) {
             $ids = collect($ids)->mapWithKeys(function ($id) use ($userId) {
@@ -38,7 +51,7 @@ class Tag extends Model
         $this->files()->syncWithoutDetaching($ids);
     }
 
-    public function detachEntries(array $ids, int $userId = null)
+    public function detachEntries(array $ids, int $userId = null): void
     {
         $query = $this->files();
 
@@ -138,7 +151,7 @@ class Tag extends Model
         ];
     }
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         return [
             'id' => $this->id,

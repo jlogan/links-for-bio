@@ -61,7 +61,7 @@ export interface DatePickerFilterControl {
 
 export interface CustomFilterControl {
   type: FilterControlType.Custom;
-  panel: ComponentType<{filter: BackendFilter}>;
+  panel: ComponentType<{filter: BackendFilter<CustomFilterControl>}>;
   listItem: ComponentType<FilterListControlProps<number, CustomFilterControl>>;
   defaultValue?: any;
 }

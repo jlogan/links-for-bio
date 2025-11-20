@@ -39,6 +39,6 @@ export const useDialogStore = create<DialogStore>()(
 );
 
 export const openDialog = useDialogStore.getState().openDialog;
-export const closeDialog = (value: any) => {
+export const closeDialog = (value?: any) => {
   useDialogStore.getState().closeActiveDialog(value);
 };

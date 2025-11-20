@@ -14,13 +14,11 @@ interface Props {
   children: ReactNode;
 }
 export function EditChannelPageLayout({children}: Props) {
-  const query = useChannel(undefined, {
-    normalizeContent: 'true',
-  });
+  const query = useChannel(undefined, 'editChannelPage');
   if (query.data) {
     return <PageContent channel={query.data.channel}>{children}</PageContent>;
   }
-  return <PageStatus query={query} />;
+  return <PageStatus query={query} loaderIsScreen={false} />;
 }
 
 interface PageContentProps {
@@ -45,7 +43,7 @@ function PageContent({channel, children}: PageContentProps) {
       title={
         <Trans message="Edit “:name“ channel" values={{name: channel.name}} />
       }
-      isLoading={updateChannel.isLoading}
+      isLoading={updateChannel.isPending}
     >
       {children}
     </CrupdateResourceLayout>

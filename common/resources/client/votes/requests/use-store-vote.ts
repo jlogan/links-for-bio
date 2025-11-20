@@ -13,7 +13,8 @@ interface Payload {
 }
 
 export function useStoreVote(model: VotableModel) {
-  return useMutation((payload: Payload) => changeVote(model, payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => changeVote(model, payload),
     onSuccess: response => {
       //
     },

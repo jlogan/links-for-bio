@@ -9,7 +9,8 @@ import {Reportable} from '@common/reports/Reportable';
 interface Response extends BackendResponse {}
 
 export function useDeleteReport(model: Reportable) {
-  return useMutation(() => deleteReport(model), {
+  return useMutation({
+    mutationFn: () => deleteReport(model),
     onSuccess: () => {
       toast(message('Report removed'));
     },

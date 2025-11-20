@@ -35,7 +35,7 @@ export function CreateNewTokenDialog() {
         createToken.mutate(values, {
           onSuccess: response => {
             setPlainTextToken(response.plainTextToken);
-            queryClient.invalidateQueries(['users']);
+            queryClient.invalidateQueries({queryKey: ['users']});
           },
         });
       }}
@@ -71,7 +71,7 @@ export function CreateNewTokenDialog() {
             color="primary"
             type="submit"
             form={formId}
-            disabled={createToken.isLoading}
+            disabled={createToken.isPending}
           >
             <Trans message="Create" />
           </Button>

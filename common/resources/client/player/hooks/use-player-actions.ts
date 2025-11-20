@@ -42,6 +42,7 @@ export function usePlayerActions() {
       exitPip: s.exitPip,
       setTextTrackVisibility: s.setTextTrackVisibility,
       setCurrentTextTrack: s.setCurrentTextTrack,
+      setCurrentAudioTrack: s.setCurrentAudioTrack,
       setIsSeeking: s.setIsSeeking,
       setControlsVisible: s.setControlsVisible,
       cue: s.cue,

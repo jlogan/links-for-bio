@@ -6,8 +6,9 @@ import {ChannelContentConfig} from '@common/admin/channels/channel-editor/channe
 
 interface Props {
   config: ChannelContentConfig;
+  className?: string;
 }
-export function ContentOrderField({config}: Props) {
+export function ContentOrderField({config, className}: Props) {
   const {watch} = useFormContext<UpdateChannelPayload>();
   const contentType = watch('config.contentType');
   const modelConfig = config.models[watch('config.contentModel')];
@@ -15,7 +16,7 @@ export function ContentOrderField({config}: Props) {
 
   return (
     <FormSelect
-      className="my-24"
+      className={className}
       selectionMode="single"
       name="config.contentOrder"
       label={<Trans message="How to order content" />}

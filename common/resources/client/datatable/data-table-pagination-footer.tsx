@@ -19,7 +19,7 @@ const defaultPerPage = 15;
 const perPageOptions = [{key: 10}, {key: 15}, {key: 20}, {key: 50}, {key: 100}];
 
 type DataTablePaginationFooterProps = {
-  query: UseQueryResult<PaginatedBackendResponse<unknown>>;
+  query: UseQueryResult<PaginatedBackendResponse<unknown>, unknown>;
   onPerPageChange?: (perPage: number) => void;
   onPageChange?: (page: number) => void;
   className?: string;
@@ -37,7 +37,7 @@ export function DataTablePaginationFooter({
 
   if (!pagination) return null;
 
-  const perPageSelect = (
+  const perPageSelect = onPerPageChange ? (
     <Select
       minWidth="min-w-auto"
       selectionMode="single"
@@ -46,9 +46,7 @@ export function DataTablePaginationFooter({
       size="xs"
       label={<Trans message="Items per page" />}
       selectedValue={pagination.per_page || defaultPerPage}
-      onSelectionChange={value => {
-        onPerPageChange?.(value as number);
-      }}
+      onSelectionChange={value => onPerPageChange(value as number)}
     >
       {perPageOptions.map(option => (
         <Item key={option.key} value={option.key}>
@@ -56,17 +54,17 @@ export function DataTablePaginationFooter({
         </Item>
       ))}
     </Select>
-  );
+  ) : null;
 
   return (
     <div
       className={clsx(
-        'flex items-center justify-end gap-20 px-20 h-54 select-none',
-        className
+        'flex h-54 select-none items-center justify-end gap-20 px-20',
+        className,
       )}
     >
       {!isMobile && perPageSelect}
-      {pagination.from && pagination.to && 'total' in pagination && (
+      {pagination.from && pagination.to && 'total' in pagination ? (
         <div className="text-sm">
           <Trans
             message=":from - :to of :total"
@@ -77,7 +75,7 @@ export function DataTablePaginationFooter({
             }}
           />
         </div>
-      )}
+      ) : null}
       <div className="text-muted">
         <IconButton
           disabled={query.isFetching || pagination.current_page < 2}

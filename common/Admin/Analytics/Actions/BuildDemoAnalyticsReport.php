@@ -2,7 +2,7 @@
 
 namespace Common\Admin\Analytics\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Database\Metrics\MetricDateRange;
 use Illuminate\Support\Arr;
 

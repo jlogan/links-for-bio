@@ -2,10 +2,9 @@
 
 namespace Common\Channels;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
-use Common\Search\Searchable;
-use Illuminate\Database\Eloquent\Model;
+use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
@@ -13,17 +12,18 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-abstract class BaseChannel extends Model
+abstract class BaseChannel extends BaseModel
 {
-    use Searchable;
-
     const MODEL_TYPE = 'channel';
     protected $guarded = ['id'];
     protected $appends = ['model_type'];
-    protected $hidden = ['pivot'];
+    protected $hidden = ['pivot', 'internal'];
 
     protected $casts = [
         'id' => 'integer',
+        'public' => 'boolean',
+        'internal' => 'boolean',
+        'user_id' => 'integer',
     ];
 
     protected static function booted(): void
@@ -31,7 +31,7 @@ abstract class BaseChannel extends Model
         // touch parent channels
         static::updated(function (self $channel) {
             $parentIds = DB::table('channelables')
-                ->where('channelable_type', static::class)
+                ->where('channelable_type', static::MODEL_TYPE)
                 ->where('channelable_id', $channel->id)
                 ->pluck('channel_id');
             static::withoutEvents(function () use ($parentIds) {
@@ -120,13 +120,16 @@ abstract class BaseChannel extends Model
     {
         $restriction = null;
         $modelName = $this->config['restriction'];
-        $modelId = $this->config['restrictionModelId'];
-        $model = app(modelTypeToNamespace($modelName))
-            ->select(['id', 'name', 'display_name']);
+        $modelId = $this->config['restrictionModelId'] ?? null;
+        $model = app(modelTypeToNamespace($modelName))->select([
+            'id',
+            'name',
+            'display_name',
+        ]);
 
         if ($modelId === 'urlParam' && $urlParam) {
             $restriction = $model->where('name', $urlParam)->first();
-        } else if (isset($modelId) && $modelId !== 'urlParam') {
+        } elseif (isset($modelId) && $modelId !== 'urlParam') {
             $restriction = $model->find($modelId);
         }
 
@@ -139,7 +142,7 @@ abstract class BaseChannel extends Model
 
     public function loadContent(array $params = [], self $parent = null): static
     {
-        $channelContent = app(LoadChannelContent::class)->execute(
+        $channelContent = (new LoadChannelContent())->execute(
             $this,
             $params,
             $parent,
@@ -165,6 +168,14 @@ abstract class BaseChannel extends Model
     ): void {
         $method =
             $autoUpdateMethod ?? Arr::get($this->config, 'autoUpdateMethod');
+
+        if (
+            !$method ||
+            Arr::get($this->config, 'contentType') !== 'autoUpdate'
+        ) {
+            return;
+        }
+
         $content = $this->loadContentFromExternal($method);
 
         // bail if we could not fetch any content
@@ -193,7 +204,31 @@ abstract class BaseChannel extends Model
         $this->touch();
     }
 
+    public function shouldRestrictContent()
+    {
+        // when channel is set to auto update, content will be filtered when auto updating
+        return Arr::get($this->config, 'contentType') !== 'autoUpdate' &&
+            Arr::get($this->config, 'restriction');
+    }
+
     abstract protected function loadContentFromExternal(
         string $autoUpdateMethod,
     ): Collection|array|null;
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $type = request('channelType');
+        if (ctype_digit($value)) {
+            $channel = $this->when(
+                $type,
+                fn($q) => $q->where('type', $type),
+            )->findOrFail($value);
+        } else {
+            $channel = $this->where('slug', $value)
+                ->when($type, fn($q) => $q->where('type', $type))
+                ->firstOrFail();
+        }
+
+        return $channel;
+    }
 }

@@ -4,12 +4,30 @@ import {useSelectedLocale} from './selected-locale';
 import {handlePluralMessage} from './handle-plural-message';
 import {MessageDescriptor} from './message-descriptor';
 
+function hasOwn(obj: any, key: string): boolean {
+  if (obj == null) {
+    return false;
+  }
+  if (Object.hasOwn !== undefined) {
+    return Object.hasOwn(obj, key);
+  }
+  return Object.hasOwnProperty(key);
+}
+
 export const Trans = memo((props: MessageDescriptor) => {
   const {message: initialMessage, values} = props;
   const {lines, localeCode} = useSelectedLocale();
-  let translatedMessage = lines?.[initialMessage] || initialMessage;
+  let translatedMessage: string | undefined;
 
-  if (!values) {
+  if (hasOwn(lines, initialMessage)) {
+    translatedMessage = lines?.[initialMessage];
+  } else if (hasOwn(lines, initialMessage?.toLowerCase())) {
+    translatedMessage = lines?.[initialMessage.toLowerCase()];
+  } else {
+    translatedMessage = initialMessage;
+  }
+
+  if (!values || !translatedMessage) {
     return <Fragment>{translatedMessage}</Fragment>;
   }
 
@@ -32,7 +50,7 @@ export const Trans = memo((props: MessageDescriptor) => {
       nodePlaceholders.push(key);
       // value is primitive, can do simple string replace
     } else if (value != undefined) {
-      translatedMessage = translatedMessage.replace(`:${key}`, `${value}`);
+      translatedMessage = translatedMessage?.replace(`:${key}`, `${value}`);
     }
   });
 
@@ -91,7 +109,7 @@ export const Trans = memo((props: MessageDescriptor) => {
 
 export function areEqual<T extends MessageDescriptor = MessageDescriptor>(
   prevProps: T,
-  nextProps: T
+  nextProps: T,
 ): boolean {
   const {values, ...otherProps} = prevProps;
   const {values: nextValues, ...nextOtherProps} = nextProps;

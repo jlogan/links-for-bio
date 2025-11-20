@@ -20,10 +20,11 @@ export interface UpdateUserPayload
 
 export function useUpdateUser(form: UseFormReturn<UpdateUserPayload>) {
   const navigate = useNavigate();
-  return useMutation((props: UpdateUserPayload) => updateUser(props), {
+  return useMutation({
+    mutationFn: (props: UpdateUserPayload) => updateUser(props),
     onSuccess: (response, props) => {
       toast(message('User updated'));
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({queryKey: ['users']});
       navigate('/admin/users');
     },
     onError: r => onFormQueryError(r, form),

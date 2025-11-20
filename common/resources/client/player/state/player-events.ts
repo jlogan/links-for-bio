@@ -1,11 +1,11 @@
-import {MediaStreamType} from '@common/player/state/player-state';
+import {AudioTrack, MediaStreamType} from '@common/player/state/player-state';
 import {YouTubePlayerState} from '@common/player/providers/youtube/youtube-types';
 import {MediaItem} from '@common/player/media-item';
 
 export interface PlayerEvents {
   play: void;
   pause: void;
-  error: {sourceEvent?: any} | void;
+  error: {sourceEvent?: any; fatal?: boolean} | void;
   buffering: {isBuffering: boolean};
   buffered: {seconds: number};
   progress: {currentTime: number};
@@ -16,6 +16,8 @@ export interface PlayerEvents {
   textTracks: {tracks: TextTrack[]};
   currentTextTrackChange: {trackId: number};
   textTrackVisibilityChange: {isVisible: boolean};
+  audioTracks: {tracks: AudioTrack[]};
+  currentAudioTrackChange: {trackId: number};
   durationChange: {duration: number};
   streamTypeChange: {streamType: MediaStreamType};
   posterLoaded: {url: string};

@@ -1,27 +1,30 @@
 <?php namespace Common\Billing;
 
-use App\User;
-use Carbon\Carbon;
+use App\Models\User;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Gateways\Paypal\Paypal;
 use Common\Billing\Gateways\Stripe\Stripe;
+use Common\Billing\Invoices\Invoice;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
 use Common\Billing\Subscriptions\SubscriptionFactory;
-use Common\Search\Searchable;
+use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
-class Subscription extends Model
+class Subscription extends BaseModel
 {
-    use HasFactory, Searchable;
+    use HasFactory;
+
+    public const MODEL_TYPE = 'subscription';
 
     protected $guarded = ['id'];
 
     protected $appends = [
         'on_grace_period',
+        'past_due',
         'on_trial',
         'valid',
         'active',
@@ -33,6 +36,9 @@ class Subscription extends Model
         'price_id' => 'integer',
         'product_id' => 'integer',
         'quantity' => 'integer',
+        'trial_ends_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'renews_at' => 'datetime',
     ];
 
     public function getOnGracePeriodAttribute(): bool
@@ -43,6 +49,11 @@ class Subscription extends Model
     public function getOnTrialAttribute(): bool
     {
         return $this->onTrial();
+    }
+
+    public function getPastDueAttribute(): bool
+    {
+        return $this->gateway()?->isSubscriptionPastDue($this) ?? false;
     }
 
     public function getValidAttribute(): bool
@@ -59,13 +70,11 @@ class Subscription extends Model
     {
         return $this->cancelled();
     }
-    protected $dates = [
-        'trial_ends_at',
-        'ends_at',
-        'renews_at',
-        'created_at',
-        'updated_at',
-    ];
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 
     public function user(): BelongsTo
     {
@@ -84,11 +93,7 @@ class Subscription extends Model
 
     public function onTrial(): bool
     {
-        if (!is_null($this->trial_ends_at)) {
-            return Carbon::now()->lt($this->trial_ends_at);
-        } else {
-            return false;
-        }
+        return $this->trial_ends_at?->isFuture() ?? false;
     }
 
     /**
@@ -99,9 +104,24 @@ class Subscription extends Model
         return $this->active() || $this->onTrial() || $this->onGracePeriod();
     }
 
+    public function ended(): bool
+    {
+        return $this->cancelled() && !$this->onGracePeriod();
+    }
+
     public function active(): bool
     {
-        return is_null($this->ends_at) || $this->onGracePeriod();
+        if ($this->ended()) {
+            return false;
+        }
+
+        // first payment failed, don't show billing page and allow opening checkout routes
+        $gateway = $this->gateway();
+        if ($gateway?->isSubscriptionIncomplete($this)) {
+            return false;
+        }
+
+        return !$this->ended();
     }
 
     /**
@@ -117,16 +137,12 @@ class Subscription extends Model
      */
     public function onGracePeriod(): bool
     {
-        if (!is_null($endsAt = $this->ends_at)) {
-            return Carbon::now()->lt(Carbon::instance($endsAt));
-        } else {
-            return false;
-        }
+        return $this->ends_at?->isFuture() ?? false;
     }
 
     public function changePlan(Product $newProduct, Price $newPrice): self
     {
-        $isSuccess = $this->gateway()->changePlan(
+        $isSuccess = $this->gateway()?->changePlan(
             $this,
             $newProduct,
             $newPrice,
@@ -183,6 +199,7 @@ class Subscription extends Model
     {
         $this->cancel(false);
         $this->delete();
+        $this->invoices()->delete();
 
         $this->user->update([
             'card_last_four' => null,
@@ -242,6 +259,15 @@ class Subscription extends Model
         return null;
     }
 
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->this->gateway_name,
+            'model_type' => self::MODEL_TYPE,
+        ];
+    }
+
     public function toSearchableArray(): array
     {
         return [
@@ -278,5 +304,10 @@ class Subscription extends Model
     protected static function newFactory()
     {
         return SubscriptionFactory::new();
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
     }
 }

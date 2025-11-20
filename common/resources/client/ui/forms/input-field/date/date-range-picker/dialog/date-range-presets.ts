@@ -2,19 +2,20 @@ import {DateRangeValue} from '../date-range-value';
 import {message} from '@common/i18n/message';
 import {MessageDescriptor} from '@common/i18n/message-descriptor';
 import {
+  endOfMonth,
   endOfWeek,
   endOfYear,
-  now,
+  startOfMonth,
   startOfWeek,
   startOfYear,
 } from '@internationalized/date';
 import {startOfDay} from '@common/utils/date/start-of-day';
 import {endOfDay} from '@common/utils/date/end-of-day';
 import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
-import {getUserTimezone} from '@common/i18n/get-user-timezone';
+import {getCurrentDateTime} from '@common/i18n/use-current-date-time';
 
-const Now = startOfDay(now(getUserTimezone()));
-const locale = getBootstrapData().i18n?.language || 'en';
+const Now = startOfDay(getCurrentDateTime());
+const locale = getBootstrapData()?.i18n?.language || 'en';
 
 export interface DateRangePreset {
   key: number;
@@ -72,15 +73,6 @@ export const DateRangePresets: DateRangePreset[] = [
     }),
   },
   {
-    key: 5,
-    label: message('Last 14 days'),
-    getRangeValue: () => ({
-      preset: 5,
-      start: Now.subtract({days: 14}),
-      end: endOfDay(Now),
-    }),
-  },
-  {
     key: 6,
     label: message('Last 30 days'),
     getRangeValue: () => ({
@@ -109,18 +101,27 @@ export const DateRangePresets: DateRangePreset[] = [
   },
   {
     key: 9,
-    label: message('This year'),
+    label: message('This month'),
     getRangeValue: () => ({
       preset: 9,
+      start: startOfMonth(Now),
+      end: endOfMonth(endOfDay(Now)),
+    }),
+  },
+  {
+    key: 10,
+    label: message('This year'),
+    getRangeValue: () => ({
+      preset: 10,
       start: startOfYear(Now),
       end: endOfYear(endOfDay(Now)),
     }),
   },
   {
-    key: 10,
+    key: 11,
     label: message('Last year'),
     getRangeValue: () => ({
-      preset: 10,
+      preset: 11,
       start: startOfYear(Now).subtract({years: 1}),
       end: endOfYear(endOfDay(Now)).subtract({years: 1}),
     }),

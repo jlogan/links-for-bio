@@ -2,12 +2,13 @@
 
 namespace Common\Channels;
 
-use App\Channel;
+use App\Models\Channel;
 use BadMethodCallException;
 use Common\Core\Prerender\Actions\ReplacePlaceholders;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -20,11 +21,22 @@ class LoadChannelContent
         Channel $parent = null,
     ): ?AbstractPaginator {
         $params['perPage'] = $params['perPage'] ?? 50;
+        $params['paginate'] = $this->resolvePaginateType($channel, $params);
         if (!isset($params['orderBy']) && !isset($params['order'])) {
             $params['order'] = Arr::get($channel->config, 'contentOrder');
         }
 
-        $this->applyRestriction($channel, $params, $parent);
+        if (
+            $channel->shouldRestrictContent()
+            // Arr::get($params, 'loader') !== 'editChannelPage'
+        ) {
+            $this->applyRestriction($channel, $params, $parent);
+            // If restriction could not be loaded bail. This is used to cancel content loading and return 404,
+            // if, for example, loading genre channel, but specified genre does not exist.
+            if (!$channel->restriction) {
+                return new Paginator([], 50);
+            }
+        }
 
         $contentType = Arr::get($channel->config, 'contentType');
 
@@ -35,14 +47,22 @@ class LoadChannelContent
                 $parent,
             );
         } else {
-            $paramsKey = json_encode($params);
-            return Cache::remember(
-                // use "updated at" so channel changes from admin area will automatically
-                // cause new cache item, without having to clear cache manually
-                "channels.$channel->id.$channel->updated_at.$paramsKey",
-                1440,
-                fn() => $this->loadCuratedContent($channel, $params),
-            );
+            // only cache channels that have other nested channels as content
+            $shouldCache =
+                Arr::get($channel->config, 'contentModel') ===
+                Channel::MODEL_TYPE;
+            if (!$shouldCache) {
+                return $this->loadCuratedContent($channel, $params);
+            } else {
+                $paramsKey = json_encode($params);
+                return Cache::remember(
+                    // use "updated at" so channel changes from admin area will automatically
+                    // cause new cache item, without having to clear cache manually
+                    "channels.$channel->id.$channel->updated_at.$paramsKey",
+                    now()->addHours(24),
+                    fn() => $this->loadCuratedContent($channel, $params),
+                );
+            }
         }
     }
 
@@ -91,24 +111,26 @@ class LoadChannelContent
             $pagination = $datasource->paginate();
         }
 
-        $pagination->transform(function (Model $model) use ($channel, $params) {
-            $model['channelable_id'] = $model->pivot->id;
-            $model['channelable_order'] = $model->pivot->order;
-            if ($model instanceof Channel) {
-                $model->loadContent(
-                    array_merge($params, [
-                        // clear parent channel pagination params and only load 12 items per nested channel
-                        'perPage' => 12,
-                        'page' => 1,
-                        'paginate' => 'simple',
-                        // clear this so nested channel always uses sorting order set in that channel's config
-                        'order' => null,
-                    ]),
-                    $channel,
-                );
-            }
-            return $model;
-        });
+        $pagination
+            ->filter(fn($model) => $model->pivot)
+            ->transform(function (Model $model) use ($channel, $params) {
+                $model['channelable_id'] = $model->pivot->id;
+                $model['channelable_order'] = $model->pivot->order;
+                if ($model instanceof Channel) {
+                    $model->loadContent(
+                        array_merge($params, [
+                            // clear parent channel pagination params and only load 12 items per nested channel
+                            'perPage' => 12,
+                            'page' => 1,
+                            'paginate' => 'simple',
+                            // clear this so nested channel always uses sorting order set in that channel's config
+                            'order' => null,
+                        ]),
+                        $channel,
+                    );
+                }
+                return $model;
+            });
         return $pagination;
     }
 
@@ -117,19 +139,35 @@ class LoadChannelContent
         array $params = [],
         Channel $parent = null,
     ): void {
-        if (Arr::get($channel->config, 'restriction')) {
-            $urlParam = Arr::get($params, 'restriction');
-            $restriction =
-                $parent->restriction ??
-                $channel->loadRestrictionModel($urlParam);
-            if ($restriction) {
-                $channel->setAttribute('restriction', $restriction);
-                $channel->name =
-                    app(ReplacePlaceholders::class)->execute($channel->name, [
-                        'channel' => $channel,
-                    ]) ?:
-                    $channel->name;
-            }
+        $urlParam = Arr::get($params, 'restriction');
+        $restriction =
+            $parent->restriction ?? $channel->loadRestrictionModel($urlParam);
+        if ($restriction) {
+            $channel->setAttribute('restriction', $restriction);
+            $channel->name =
+                app(ReplacePlaceholders::class)->execute($channel->name, [
+                    'channel' => $channel,
+                ]) ?:
+                $channel->name;
         }
+    }
+
+    protected function resolvePaginateType(
+        Channel $channel,
+        array $params,
+    ): string {
+        if (isset($params['paginate'])) {
+            return $params['paginate'];
+        }
+
+        if (isset($channel->config['paginationType'])) {
+            return match ($channel->config['paginationType']) {
+                'lengthAware' => 'lengthAware',
+                // simple and infinite scroll
+                default => 'simple',
+            };
+        }
+
+        return 'simple';
     }
 }

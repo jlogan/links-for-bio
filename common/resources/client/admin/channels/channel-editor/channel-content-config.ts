@@ -11,6 +11,7 @@ export interface ChannelContentConfig {
       sortMethods: string[];
       layoutMethods: string[];
       autoUpdateMethods?: string[];
+      restrictions?: string[];
     }
   >;
   sortingMethods: Record<
@@ -31,9 +32,19 @@ export interface ChannelContentConfig {
     string,
     {
       label: MessageDescriptor;
-      localOnly?: boolean;
-      tmdbOnly?: boolean;
+      providers: string[];
+      value?: {
+        label: MessageDescriptor;
+        inputType: 'text' | 'number';
+      };
     }
   >;
   userSelectableLayouts: string[];
+  restrictions: Record<
+    string,
+    {
+      label: MessageDescriptor;
+      value: string;
+    }
+  >;
 }

@@ -1,13 +1,23 @@
-import {useUser} from '../use-user';
-import {Trans} from '../../../i18n/trans';
-import mailSentSvg from './mail-sent.svg';
-import {SvgImage} from '../../../ui/images/svg-image/svg-image';
-import {Button} from '../../../ui/buttons/button';
-import {useResendVerificationEmail} from '../../requests/use-resend-verification-email';
-import {useIsDarkMode} from '../../../ui/themes/use-is-dark-mode';
-import {useSettings} from '../../../core/settings/use-settings';
+import {useUser} from '@common/auth/ui/use-user';
+import {Trans} from '@common/i18n/trans';
+import {Button} from '@common/ui/buttons/button';
+import {useResendVerificationEmail} from '@common/auth/requests/use-resend-verification-email';
+import {useIsDarkMode} from '@common/ui/themes/use-is-dark-mode';
+import {useSettings} from '@common/core/settings/use-settings';
+import {useLogout} from '@common/auth/requests/logout';
+import {Form} from '@common/ui/forms/form';
+import {useForm} from 'react-hook-form';
+import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field';
+import {useTrans} from '@common/i18n/use-trans';
+import {message} from '@common/i18n/message';
+import {KeyboardArrowLeftIcon} from '@common/icons/material/KeyboardArrowLeft';
+import {
+  useValidateEmailVerificationOtp,
+  ValidateEmailVerificationOtpPayload,
+} from '@common/auth/requests/use-validate-email-verification-otp';
 
 export function EmailVerificationPage() {
+  const {trans} = useTrans();
   const {data} = useUser('me');
   const resendEmail = useResendVerificationEmail();
   const {
@@ -15,42 +25,95 @@ export function EmailVerificationPage() {
   } = useSettings();
   const isDarkMode = useIsDarkMode();
   const logoSrc = isDarkMode ? logo_light : logo_dark;
+  const logout = useLogout();
+
+  const form = useForm<ValidateEmailVerificationOtpPayload>();
+  const validateOtp = useValidateEmailVerificationOtp(form);
 
   return (
-    <div className="flex flex-col items-center p-24 bg-alt w-full min-h-full">
-      {logoSrc && (
-        <img
-          src={logoSrc}
-          alt="Site logo"
-          className="my-60 block h-42 w-auto"
-        />
-      )}
-      <div className="bg-paper px-14 py-28 rounded shadow border max-w-580 flex flex-col items-center text-center">
-        <SvgImage src={mailSentSvg} className="h-144" />
-        <h1 className="text-3xl mt-40 mb-20">
-          <Trans message="Verify your email" />
-        </h1>
-        <div className="mb-24 text-sm">
-          <Trans
-            message="We've sent an email to “:email“ to verify your email address and activate your account. The link in the the email will expire in 24 hours."
-            values={{email: data?.user.email}}
-          />
-        </div>
-        <div className="text-sm">
-          <Trans message="If you did not receive an email, click the button below and we will send you another one." />
-        </div>
+    <div className="flex min-h-screen w-screen bg-alt p-24">
+      <div className="mx-auto mt-40 max-w-440">
         <Button
-          className="mt-30"
-          variant="flat"
-          color="primary"
-          disabled={resendEmail.isLoading || !data?.user.email}
-          onClick={() => {
-            resendEmail.mutate({email: data!.user.email});
-          }}
+          variant="outline"
+          onClick={() => logout.mutate()}
+          startIcon={<KeyboardArrowLeftIcon />}
+          size="xs"
+          className="mb-54 mr-auto"
         >
-          <Trans message="Resend email" />
+          <Trans message="Logout" />
         </Button>
+        {logoSrc && (
+          <img
+            src={logoSrc}
+            alt="Site logo"
+            className="mx-auto mb-44 block h-42 w-auto"
+          />
+        )}
+        <div className="text-center">
+          <h1 className="mb-24 text-3xl">
+            <Trans message="Verify your email" />
+          </h1>
+          <h2 className="text-lg">
+            <Trans
+              message="Enter the verification code we sent to :email"
+              values={{email: maskEmailAddress(data?.user.email)}}
+            />
+          </h2>
+          <Form
+            form={form}
+            onSubmit={values => validateOtp.mutate(values)}
+            className="my-16"
+          >
+            <FormTextField
+              name="code"
+              label={<Trans message="Code" />}
+              placeholder={trans(message('Enter your verification code'))}
+              autoFocus
+              autoComplete="one-time-code"
+              autoCorrect="off"
+              autoCapitalize="off"
+              maxLength={6}
+              inputMode="numeric"
+              required
+            />
+            <Button
+              type="submit"
+              variant="flat"
+              color="primary"
+              size="md"
+              className="mt-24 w-full"
+              disabled={validateOtp.isPending}
+            >
+              <Trans message="Next" />
+            </Button>
+          </Form>
+          <div className="mb-24 text-sm">
+            <Trans
+              message="If you don't see the email in your inbox, check your spam folder and promotions tab. If you still don't see it, <a>request a resend</a>."
+              values={{
+                a: text => (
+                  <Button
+                    variant="link"
+                    color="primary"
+                    disabled={resendEmail.isPending || !data?.user.email}
+                    onClick={() => {
+                      resendEmail.mutate({email: data!.user.email});
+                    }}
+                  >
+                    {text}
+                  </Button>
+                ),
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function maskEmailAddress(email: string | undefined) {
+  if (!email) return '*******************';
+  const [username, domain] = email.split('@');
+  return `${username.slice(0, 2)}****@${domain}`;
 }

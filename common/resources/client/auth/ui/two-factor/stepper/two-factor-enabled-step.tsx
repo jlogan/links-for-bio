@@ -20,8 +20,8 @@ export function TwoFactorEnabledStep({user, onDisabled}: Props) {
   const {withConfirmedPassword, isLoading: confirmPasswordIsLoading} =
     usePasswordConfirmedAction();
   const isLoading =
-    disableTwoFactor.isLoading ||
-    regenerateCodes.isLoading ||
+    disableTwoFactor.isPending ||
+    regenerateCodes.isPending ||
     confirmPasswordIsLoading;
 
   const actions = (
@@ -32,7 +32,7 @@ export function TwoFactorEnabledStep({user, onDisabled}: Props) {
           withConfirmedPassword(() => {
             regenerateCodes.mutate(undefined, {
               onSuccess: () => {
-                queryClient.invalidateQueries(['users']);
+                queryClient.invalidateQueries({queryKey: ['users']});
               },
             });
           })

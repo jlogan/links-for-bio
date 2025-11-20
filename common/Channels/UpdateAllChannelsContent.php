@@ -2,19 +2,24 @@
 
 namespace Common\Channels;
 
+use App\Models\Channel;
 use Illuminate\Console\Command;
 
 class UpdateAllChannelsContent extends Command
 {
     protected $signature = 'channels:update';
 
-    public function handle()
+    public function handle(): void
     {
-        app(BaseChannel::class)
+        $this->info('Updating channels content...');
+
+        $channels = app(Channel::class)
+            ->where('type', 'channel')
             ->limit(20)
-            ->get()
-            ->each(function (BaseChannel $channel) {
-                $channel->updateContentFromExternal();
-            });
+            ->get();
+
+        $this->withProgressBar($channels, function (Channel $channel) {
+            $channel->updateContentFromExternal();
+        });
     }
 }

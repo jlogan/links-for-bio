@@ -1,6 +1,6 @@
 import {SlugEditor, SlugEditorProps} from '@common/ui/slug-editor';
 import {useController, useFormContext} from 'react-hook-form';
-import React, {Fragment, useEffect, useRef} from 'react';
+import React, {Fragment, ReactNode, useEffect, useRef} from 'react';
 import clsx from 'clsx';
 import {useStickySentinel} from '@common/utils/hooks/sticky-sentinel';
 import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
@@ -17,16 +17,22 @@ import {CreateCustomPagePayload} from '@common/admin/custom-pages/requests/use-c
 interface StickyHeaderProps {
   editor: Editor;
   allowSlugEditing?: boolean;
-  onSave: (editorContent: string) => void;
+  onSave?: (editorContent: string) => void;
+  saveButton?: ReactNode;
   backLink: string;
-  isLoading: boolean;
+  isLoading?: boolean;
+  slugPrefix?: string;
+  imageDiskPrefix?: string;
 }
 export function ArticleEditorStickyHeader({
   editor,
   allowSlugEditing = true,
   onSave,
-  isLoading,
+  saveButton,
+  isLoading = false,
   backLink,
+  slugPrefix = 'pages',
+  imageDiskPrefix,
 }: StickyHeaderProps) {
   const {isSticky, sentinelRef} = useStickySentinel();
   const isMobile = useIsMobileMediaQuery();
@@ -34,13 +40,8 @@ export function ArticleEditorStickyHeader({
   return (
     <Fragment>
       <div ref={sentinelRef} />
-      <div
-        className={clsx(
-          'sticky top-0 z-10 mb-20 bg-paper',
-          isSticky && 'shadow'
-        )}
-      >
-        <div className="px-20 py-10 flex items-center justify-between sm:justify-start gap-20 border-b text-muted">
+      <div className={clsx('sticky top-0 z-10 mb-20 bg', isSticky && 'shadow')}>
+        <div className="flex items-center justify-between gap-20 border-b px-20 py-10 text-muted sm:justify-start">
           {!isMobile && (
             <Fragment>
               <Button
@@ -58,7 +59,7 @@ export function ArticleEditorStickyHeader({
                   <FormSlugEditor
                     name="slug"
                     showLinkIcon={false}
-                    prefix="pages"
+                    prefix={slugPrefix}
                   />
                 )}
               </div>
@@ -66,14 +67,21 @@ export function ArticleEditorStickyHeader({
           )}
           {editor && <HistoryButtons editor={editor} />}
           {!isMobile && <ModeButton editor={editor} />}
-          <SaveButton
-            onSave={() => {
-              onSave(editor.getHTML());
-            }}
-            isLoading={isLoading}
-          />
+          {onSave && (
+            <SaveButton
+              onSave={() => {
+                onSave(editor.getHTML());
+              }}
+              isLoading={isLoading}
+            />
+          )}
+          {saveButton}
         </div>
-        <ArticleBodyEditorMenubar editor={editor} size="sm" />
+        <ArticleBodyEditorMenubar
+          editor={editor}
+          size="sm"
+          imageDiskPrefix={imageDiskPrefix}
+        />
       </div>
     </Fragment>
   );

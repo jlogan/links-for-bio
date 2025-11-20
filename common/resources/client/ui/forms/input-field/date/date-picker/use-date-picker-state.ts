@@ -5,11 +5,11 @@ import {
   DateValue,
   isSameDay,
   toCalendarDate,
-  toZoned,
   ZonedDateTime,
 } from '@internationalized/date';
 import {useBaseDatePickerState} from '../use-base-date-picker-state';
 import {useCurrentDateTime} from '@common/i18n/use-current-date-time';
+import {toSafeZoned} from '@common/i18n/to-safe-zoned';
 
 export type Granularity = 'day' | 'minute';
 
@@ -36,7 +36,7 @@ export interface BaseDatePickerState<T = ZonedDateTime, P = boolean> {
   closeDialogOnSelection: boolean;
   getCellProps: (
     date: CalendarDate,
-    isSameMonth: boolean
+    isSameMonth: boolean,
   ) => HTMLAttributes<HTMLElement>;
 }
 
@@ -50,11 +50,11 @@ export interface DatePickerValueProps<V, CV = V> {
   closeDialogOnSelection?: boolean;
 }
 export function useDatePickerState(
-  props: DatePickerValueProps<ZonedDateTime>
+  props: DatePickerValueProps<ZonedDateTime>,
 ): BaseDatePickerState {
   const now = useCurrentDateTime();
   const [isPlaceholder, setIsPlaceholder] = useState(
-    !props.value && !props.defaultValue
+    !props.value && !props.defaultValue,
   );
 
   // if user clears the date, we will want to still keep an
@@ -63,7 +63,10 @@ export function useDatePickerState(
   const [internalValue, setInternalValue] = useControlledState(
     props.value || now,
     props.defaultValue || now,
-    setStateValue
+    value => {
+      setIsPlaceholder(false);
+      setStateValue?.(value);
+    },
   );
 
   const {
@@ -98,17 +101,17 @@ export function useDatePickerState(
       // preserve time
       const value = internalValue
         ? internalValue.set(newValue)
-        : toZoned(newValue, timezone);
+        : toSafeZoned(newValue, timezone);
       setInternalValue(value);
       setCalendarDates([toCalendarDate(value)]);
       setIsPlaceholder(false);
     },
-    [setInternalValue, min, max, internalValue, timezone]
+    [setInternalValue, min, max, internalValue, timezone],
   );
 
   const dayIsActive = useCallback(
     (day: DateValue) => !isPlaceholder && isSameDay(internalValue, day),
-    [internalValue, isPlaceholder]
+    [internalValue, isPlaceholder],
   );
 
   const getCellProps = useCallback(
@@ -122,7 +125,7 @@ export function useDatePickerState(
         },
       };
     },
-    [setSelectedValue, setCalendarIsOpen, closeDialogOnSelection]
+    [setSelectedValue, setCalendarIsOpen, closeDialogOnSelection],
   );
 
   return {

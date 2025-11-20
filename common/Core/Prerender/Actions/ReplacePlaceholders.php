@@ -9,40 +9,19 @@ use Illuminate\Support\Str;
 
 class ReplacePlaceholders
 {
-    /**
-     * @var AppUrlGenerator
-     */
-    private $urls;
+    private array $allData;
 
-    /**
-     * @var array
-     */
-    private $allData;
-
-    /**
-     * @param AppUrlGenerator $urls
-     */
-    public function __construct(AppUrlGenerator $urls)
+    public function __construct(protected AppUrlGenerator $urls)
     {
-        $this->urls = $urls;
     }
 
-    /**
-     * @param array|string $config
-     * @param array $data
-     * @return array|string
-     */
-    public function execute($config, $data)
+    public function execute(array|string $config, array $data): array|string
     {
         $this->allData = $data;
         return $this->replace($config);
     }
 
-    /**
-     * @param array|string $config
-     * @return array|string
-     */
-    private function replace($config)
+    private function replace(array|string $config): array|string
     {
         if (is_array($config)) {
             if (array_key_exists('_ifNotNull', $config)) {
@@ -64,11 +43,7 @@ class ReplacePlaceholders
         }
     }
 
-    /**
-     * @param $config
-     * @return array
-     */
-    private function replaceLoop($config)
+    private function replaceLoop(array $config): array
     {
         $dataSelector = strtolower($config['dataSelector']);
         $loopData = Arr::get($this->allData, $dataSelector);
@@ -119,12 +94,7 @@ class ReplacePlaceholders
             : $generated->values()->toArray();
     }
 
-    /**
-     * @param string|string[] $template
-     * @param array $originalData
-     * @return string|string[]
-     */
-    private function replaceString($template, $originalData)
+    private function replaceString(mixed $template, array $originalData): mixed
     {
         $data = [];
         foreach ($originalData as $key => $value) {
@@ -157,7 +127,7 @@ class ReplacePlaceholders
                     // "new_releases" => "newReleases"
                     $method = Str::camel($resource);
                     return $this->urls->$method(
-                        Arr::get($data, $resource) ?: $data,
+                        Arr::get($data, $resource) ?: $data, $data,
                     );
                 }
 
@@ -188,12 +158,7 @@ class ReplacePlaceholders
         );
     }
 
-    /**
-     * @param array $data
-     * @param string $item
-     * @return mixed|void
-     */
-    private function findUsingDotNotation($data, $item)
+    private function findUsingDotNotation(array $data, string $item)
     {
         foreach (explode('?:', $item) as $itemVariant) {
             if ($value = Arr::get($data, $itemVariant)) {

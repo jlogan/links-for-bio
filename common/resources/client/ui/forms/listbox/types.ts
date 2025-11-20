@@ -1,5 +1,6 @@
 import React, {MutableRefObject, ReactElement, ReactNode} from 'react';
 import {
+  OffsetOptions,
   Placement,
   ReferenceType,
   UseFloatingReturn,
@@ -9,7 +10,6 @@ import {
   buildListboxCollection,
   ListboxCollection,
 } from './build-listbox-collection';
-import {Options as OffsetOptions} from '@floating-ui/core/src/middleware/offset';
 import {ListboxItemProps} from './item';
 
 export type PrimitiveValue = string | number;
@@ -41,7 +41,8 @@ export interface ListBoxChildren<T> {
 export type ListboxProps = SelectionProps & {
   role?: 'listbox' | 'menu';
   virtualFocus?: boolean;
-  loopFocus?: boolean;
+  focusLoopingMode?: 'loop' | 'stay' | 'deselect';
+  autoFocusFirstItem?: boolean;
   autoUpdatePosition?: boolean;
   floatingWidth?: 'auto' | 'matchTrigger';
   floatingMinWidth?: string;
@@ -73,11 +74,11 @@ export interface UseListboxReturn {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   focusItem: (
     fallbackOperation: 'increment' | 'decrement',
-    newIndex: number
+    newIndex: number,
   ) => void;
 
   allowCustomValue: ListboxProps['allowCustomValue']; // for combobox
-  loopFocus: ListboxProps['loopFocus'];
+  focusLoopingMode: ListboxProps['focusLoopingMode'];
   floatingWidth: ListboxProps['floatingWidth'];
   floatingMinWidth: ListboxProps['floatingMinWidth'];
   floatingMaxHeight: ListboxProps['floatingMaxHeight'];
@@ -92,7 +93,7 @@ export interface UseListboxReturn {
     floating: React.MutableRefObject<HTMLElement | null>;
   };
   reference: (instance: ReferenceType | null) => void;
-  floating: UseFloatingReturn['floating'];
+  floating: UseFloatingReturn['refs']['setFloating'];
   listboxId: string;
   role: ListboxProps['role'];
   listContent: (string | null)[];

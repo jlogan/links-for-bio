@@ -7,14 +7,13 @@ import {FormProvider, useForm} from 'react-hook-form';
 import {useUpdateCustomPage} from '@common/admin/custom-pages/requests/use-update-custom-page';
 import {FileUploadProvider} from '@common/uploads/uploader/file-upload-provider';
 import {ArticleEditorTitle} from '@common/article-editor/article-editor-title';
-import {EditorContent} from '@tiptap/react';
 import {ArticleEditorStickyHeader} from '@common/article-editor/article-editor-sticky-header';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {CreateCustomPagePayload} from '@common/admin/custom-pages/requests/use-create-custom-page';
 import {FullPageLoader} from '@common/ui/progress/full-page-loader';
 
 const ArticleBodyEditor = React.lazy(
-  () => import('@common/article-editor/article-body-editor')
+  () => import('@common/article-editor/article-body-editor'),
 );
 
 export function EditCustomPage() {
@@ -54,26 +53,26 @@ function PageContent({page}: PageContentProps) {
       },
       {
         onSuccess: () => navigate('../..', {relative: 'path'}),
-      }
+      },
     );
   };
 
   return (
     <Suspense fallback={<FullPageLoader />}>
       <ArticleBodyEditor initialContent={page.body}>
-        {editor => (
+        {(content, editor) => (
           <FileUploadProvider>
             <FormProvider {...form}>
               <ArticleEditorStickyHeader
                 editor={editor}
                 backLink="../.."
-                isLoading={crupdatePage.isLoading}
+                isLoading={crupdatePage.isPending}
                 onSave={handleSave}
               />
               <div className="mx-20">
                 <div className="prose dark:prose-invert mx-auto flex-auto">
                   <ArticleEditorTitle />
-                  <EditorContent editor={editor} />
+                  {content}
                 </div>
               </div>
             </FormProvider>

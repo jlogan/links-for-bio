@@ -10,23 +10,27 @@ interface Props<T extends FieldValues> {
   onSubmit: SubmitHandler<T>;
   form: UseFormReturn<T>;
   title: ReactNode;
+  subTitle?: ReactNode;
   isLoading: boolean;
   children: ReactNode;
   actions?: ReactNode;
   backButton?: ReactNode;
   disableSaveWhenNotDirty?: boolean;
   wrapInContainer?: boolean;
+  submitButtonText?: ReactNode;
 }
 export function CrupdateResourceLayout<T extends FieldValues>({
   onSubmit,
   form,
   title,
+  subTitle,
   children,
   actions,
   backButton,
   isLoading = false,
   disableSaveWhenNotDirty = false,
   wrapInContainer = true,
+  submitButtonText,
 }: Props<T>) {
   const {isSticky, sentinelRef} = useStickySentinel();
   const isDirty = !disableSaveWhenNotDirty
@@ -42,20 +46,23 @@ export function CrupdateResourceLayout<T extends FieldValues>({
       <div ref={sentinelRef} />
       <div
         className={clsx(
-          'sticky top-0 my-12 md:my-24 z-10 transition-shadow',
-          isSticky && 'bg-paper shadow'
+          'sticky top-0 z-10 my-12 transition-shadow md:my-24',
+          isSticky && 'bg shadow',
         )}
       >
         <div
           className={clsx(
-            'flex items-center md:items-start gap-24 py-14',
-            wrapInContainer && 'container mx-auto px-24'
+            'flex items-center gap-24 py-14 md:items-start',
+            wrapInContainer && 'container mx-auto px-24',
           )}
         >
           {backButton}
-          <h1 className="text-xl md:text-3xl whitespace-nowrap overflow-hidden overflow-ellipsis md:mr-64">
-            {title}
-          </h1>
+          <div className="overflow-hidden overflow-ellipsis md:mr-64">
+            <h1 className="overflow-hidden overflow-ellipsis whitespace-nowrap text-xl md:text-3xl">
+              {title}
+            </h1>
+            {subTitle && <div className="mt-4">{subTitle}</div>}
+          </div>
           <div className="mr-auto"></div>
           {actions}
           <Button
@@ -64,7 +71,7 @@ export function CrupdateResourceLayout<T extends FieldValues>({
             type="submit"
             disabled={isLoading || !isDirty}
           >
-            <Trans message="Save" />
+            {submitButtonText ?? <Trans message="Save" />}
           </Button>
         </div>
       </div>

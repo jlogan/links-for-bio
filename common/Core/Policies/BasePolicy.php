@@ -2,8 +2,9 @@
 
 namespace Common\Core\Policies;
 
-use App\User;
+use App\Models\User;
 use Common\Core\Exceptions\AccessResponseWithAction;
+use Common\Core\Exceptions\AccessResponseWithPermission;
 use Common\Settings\Settings;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -75,6 +76,18 @@ abstract class BasePolicy
         return $model?->hasPermission($permission) ?? false;
     }
 
+    protected function authorizePermission(
+        ?User $user,
+        string $permission,
+    ): AccessResponseWithPermission {
+        return new AccessResponseWithPermission(
+            $this->hasPermission($user, $permission),
+            $permission,
+            '',
+            403,
+        );
+    }
+
     protected function parseNamespace(
         string $namespace,
         string $ability = 'create',
@@ -105,7 +118,7 @@ abstract class BasePolicy
     protected function upgradeAction(): ?array
     {
         if ($this->settings->get('billing.enable')) {
-            return ['label' => __('Upgrade'), 'action' => '/billing/pricing'];
+            return ['label' => __('Upgrade'), 'action' => '/pricing'];
         } else {
             return null;
         }

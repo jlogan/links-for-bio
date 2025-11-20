@@ -1,6 +1,5 @@
 <?php namespace Common\Billing\Gateways\Paypal;
 
-use App\User;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
@@ -14,8 +13,18 @@ class Paypal implements CommonSubscriptionGatewayActions
     public function __construct(
         protected Settings $settings,
         protected PaypalPlans $plans,
-        protected PaypalSubscriptions $subscriptions,
+        public PaypalSubscriptions $subscriptions,
     ) {
+    }
+
+    public function isSubscriptionIncomplete(Subscription $subscription): bool
+    {
+        return $this->subscriptions->isIncomplete($subscription);
+    }
+
+    public function isSubscriptionPastDue(Subscription $subscription): bool
+    {
+        return $this->subscriptions->isPastDue($subscription);
     }
 
     public function isEnabled(): bool
@@ -31,31 +40,6 @@ class Paypal implements CommonSubscriptionGatewayActions
     public function deletePlan(Product $product): bool
     {
         return $this->plans->delete($product);
-    }
-
-    public function storeSubscriptionDetailsLocally(
-        string $paypalSubscriptionId,
-        User $user,
-    ): bool {
-        $response = $this->paypal()->get(
-            "billing/subscriptions/$paypalSubscriptionId",
-        );
-
-        if ($response->successful() && $response['status'] === 'ACTIVE') {
-            $price = Price::where(
-                'paypal_id',
-                $response['plan_id'],
-            )->firstOrFail();
-            if (!$user->paypal_id) {
-                $user
-                    ->fill(['paypal_id' => $response['subscriber']['payer_id']])
-                    ->save();
-            }
-            $user->subscribe('paypal', $response['id'], $price);
-            return true;
-        }
-
-        return false;
     }
 
     public function changePlan(
@@ -82,10 +66,5 @@ class Paypal implements CommonSubscriptionGatewayActions
         array $gatewayParams = [],
     ): bool {
         return $this->subscriptions->resume($subscription, $gatewayParams);
-    }
-
-    public function findSubscription(Subscription $subscription): array
-    {
-        return $this->subscriptions->find($subscription);
     }
 }

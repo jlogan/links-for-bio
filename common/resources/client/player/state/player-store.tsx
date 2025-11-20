@@ -24,17 +24,14 @@ import {
 import {createPipSlice, PipSlice} from '@common/player/state/pip/pip-slice';
 import {subscribeWithSelector} from 'zustand/middleware';
 
-// todo: for play logging: https://css-tricks.com/send-an-http-request-on-page-exit/
-// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
-
 export const createPlayerStore = (
   id: string | number,
-  options: PlayerStoreOptions
+  options: PlayerStoreOptions,
 ) => {
   // initialData from options should take priority over local storage data
   const initialData = deepMerge(
     getPlayerStateFromLocalStorage(id, options),
-    options.initialData || {}
+    options.initialData || {},
   );
 
   const setInLocalStorage = (key: string, value: any) => {
@@ -58,9 +55,13 @@ export const createPlayerStore = (
               s.controlsVisible = true;
             });
           },
-          error: () => {
+          error: e => {
             set(s => {
-              s.isPlaying = false;
+              // there could be a number of non-fatal errors where player will continue to
+              // work properly, like autoplay error from HTML5 video or buffer full from HLS
+              if (e?.fatal) {
+                s.isPlaying = false;
+              }
             });
           },
           durationChange: payload => {
@@ -80,6 +81,12 @@ export const createPlayerStore = (
           },
           playbackQualities: ({qualities}) => {
             set({playbackQualities: qualities});
+          },
+          audioTracks: ({tracks}) => {
+            set({audioTracks: tracks});
+          },
+          currentAudioTrackChange: ({trackId}) => {
+            set({currentAudioTrack: trackId});
           },
           playbackQualityChange: ({quality}) => {
             set({playbackQuality: quality});
@@ -107,6 +114,7 @@ export const createPlayerStore = (
                 get().appendToQueue(items);
               }
             }
+
             get().playNext();
           },
           posterLoaded: ({url}) => {
@@ -259,6 +267,16 @@ export const createPlayerStore = (
               media = queue.getNext();
             }
 
+            // YouTube provider will not play the same tray unless we wait some time after playback end
+            if (get().repeat === 'one' && get().providerName === 'youtube') {
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            // allow user to handle playing next track
+            if (options.onBeforePlayNext?.(media)) {
+              return;
+            }
+
             if (media) {
               await get().play(media);
             } else {
@@ -274,6 +292,11 @@ export const createPlayerStore = (
               media = queue.getLast();
             } else if (get().repeat !== 'one') {
               media = queue.getPrevious();
+            }
+
+            // allow user to handle playing previous track
+            if (options.onBeforePlayPrevious?.(media)) {
+              return;
             }
 
             if (media) {
@@ -302,10 +325,10 @@ export const createPlayerStore = (
                   unsubscribe();
                   resolve();
                 },
-                error: () => {
+                error: e => {
                   clearTimeout(timeoutId);
                   unsubscribe();
-                  reject();
+                  reject('Could not cue media');
                 },
               });
 
@@ -328,7 +351,7 @@ export const createPlayerStore = (
           },
           async overrideQueue(
             mediaItems: MediaItem[],
-            queuePointer: number = 0
+            queuePointer: number = 0,
           ): Promise<any> {
             if (!mediaItems?.length) return;
             const items = [...mediaItems];
@@ -356,12 +379,12 @@ export const createPlayerStore = (
               s.shuffledQueue = prependToArrayAtIndex(
                 s.shuffledQueue,
                 shuffledNewItems,
-                index
+                index,
               );
               s.originalQueue = prependToArrayAtIndex(
                 s.originalQueue,
                 mediaItems,
-                index
+                index,
               );
             });
             if (options.persistQueueInLocalStorage) {
@@ -371,10 +394,10 @@ export const createPlayerStore = (
           removeFromQueue: mediaItems => {
             set(s => {
               s.shuffledQueue = s.shuffledQueue.filter(
-                item => !mediaItems.find(m => isSameMedia(m, item))
+                item => !mediaItems.find(m => isSameMedia(m, item)),
               );
               s.originalQueue = s.originalQueue.filter(
-                item => !mediaItems.find(m => isSameMedia(m, item))
+                item => !mediaItems.find(m => isSameMedia(m, item)),
               );
             });
             if (options.persistQueueInLocalStorage) {
@@ -389,6 +412,11 @@ export const createPlayerStore = (
           textTrackIsVisible: false,
           setTextTrackVisibility: isVisible => {
             get().providerApi?.setTextTrackVisibility?.(isVisible);
+          },
+          audioTracks: [],
+          currentAudioTrack: -1,
+          setCurrentAudioTrack: trackId => {
+            get().providerApi?.setCurrentAudioTrack?.(trackId);
           },
           destroy: () => {
             get().destroyFullscreen();
@@ -410,7 +438,7 @@ export const createPlayerStore = (
             const mediaId =
               initialData.cuedMediaId || initialData.queue?.[0]?.id;
             const mediaToCue = initialData.queue?.find(
-              media => media.id === mediaId
+              media => media.id === mediaId,
             );
             if (mediaToCue) {
               await get().cue(mediaToCue);
@@ -426,7 +454,7 @@ export const createPlayerStore = (
             listeners.forEach(l => l[event]?.({state: get(), ...payload}));
           },
         };
-      })
-    )
+      }),
+    ),
   );
 };

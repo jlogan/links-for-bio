@@ -20,24 +20,23 @@ export interface CreateCustomPagePayload {
 
 export function useCreateCustomPage(endpoint?: string) {
   const finalEndpoint = endpoint || 'custom-pages';
-  return useMutation(
-    (payload: CreateCustomPagePayload) => createPage(payload, finalEndpoint),
-    {
-      onError: err => showHttpErrorToast(err),
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(['custom-pages']);
-        await queryClient.invalidateQueries(
-          DatatableDataQueryKey(finalEndpoint)
-        );
-        toast(message('Page created'));
-      },
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: CreateCustomPagePayload) =>
+      createPage(payload, finalEndpoint),
+    onError: err => showHttpErrorToast(err),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: ['custom-pages']});
+      await queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(finalEndpoint),
+      });
+      toast(message('Page created'));
+    },
+  });
 }
 
 function createPage(
   payload: CreateCustomPagePayload,
-  endpoint: string
+  endpoint: string,
 ): Promise<Response> {
   return apiClient.post(`${endpoint}`, payload).then(r => r.data);
 }

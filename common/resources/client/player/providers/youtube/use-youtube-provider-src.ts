@@ -2,6 +2,7 @@ import {usePlayerStore} from '@common/player/hooks/use-player-store';
 import {useCallback, useEffect, useState} from 'react';
 import {YoutubeMediaItem} from '@common/player/media-item';
 import {usePlayerActions} from '@common/player/hooks/use-player-actions';
+import {youtubeIdFromSrc} from '@common/player/utils/youtube-id-from-src';
 
 const queryString =
   '&controls=0&disablekb=1&enablejsapi=1&iv_load_policy=3&modestbranding=1&playsinline=1&rel=0&showinfo=0';
@@ -69,8 +70,4 @@ export function useYoutubeProviderSrc(
       : undefined,
     origin,
   };
-}
-
-function youtubeIdFromSrc(src: string) {
-  return src.match(/((?:\w|-){11})/)?.[0];
 }

@@ -14,6 +14,7 @@ trait OrdersByWeightedScore
         string $negativeCol = 'downvotes',
     ): Builder {
         return $query
+            ->select($query->getQuery()->columns ?? '*')
             ->addSelect([
                 DB::raw(
                     "(($positiveCol + 1.9208) / ($positiveCol + $negativeCol) -.96 * SQRT(($positiveCol * $negativeCol) / ($positiveCol + $negativeCol) + 0.9604) / ($positiveCol + $negativeCol)) / (1 + 3.8416 / ($positiveCol + $negativeCol)) AS weighted_score",

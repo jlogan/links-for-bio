@@ -5,4 +5,5 @@ export interface VotableModel {
   score: number;
   model_type: string;
   current_vote?: 'upvote' | 'downvote';
+  reports_count?: number;
 }

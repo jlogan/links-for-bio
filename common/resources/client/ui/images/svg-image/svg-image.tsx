@@ -2,6 +2,7 @@ import axios from 'axios';
 import {useQuery} from '@tanstack/react-query';
 import {memo} from 'react';
 import clsx from 'clsx';
+import {getAssetUrl} from '@common/utils/urls/get-asset-url';
 
 type DangerousHtml = {__html: string} | undefined;
 
@@ -17,9 +18,9 @@ export const SvgImage = memo(({src, className, height = 'h-full'}: Props) => {
   return (
     <div
       className={clsx(
-        'inline-block bg-no-repeat svg-image-container',
+        'svg-image-container inline-block bg-no-repeat',
         height,
-        className
+        className,
       )}
       dangerouslySetInnerHTML={svgString}
     />
@@ -27,7 +28,9 @@ export const SvgImage = memo(({src, className, height = 'h-full'}: Props) => {
 });
 
 function useSvgImageContent(src: string) {
-  return useQuery(['svgImage', src], () => fetchSvgImageContent(src), {
+  return useQuery({
+    queryKey: ['svgImage', getAssetUrl(src)],
+    queryFn: () => fetchSvgImageContent(src),
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

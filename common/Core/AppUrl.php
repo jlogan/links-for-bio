@@ -2,46 +2,44 @@
 
 namespace Common\Core;
 
-use Common\Domains\CustomDomain;
-use Config;
-use DB;
 use Illuminate\Support\Arr;
-use Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class AppUrl
 {
     /**
      * If host in .env file and current request did not match, but
      * we were able to find a matching custom domain in database.
-     *
-     * @var CustomDomain|null
      */
-    public $matchedCustomDomain = null;
+    public ?object $matchedCustomDomain = null;
 
     /**
      * Url "app.url" config item was changed to dynamically.
-     *
-     * @var string|null
      */
-    public $newAppUrl;
+    public ?string $newAppUrl = null;
 
     /**
      * Whether hosts from APP_URL in .env file and current request match.
      * This will strip "www" and schemes from both and only compare hosts.
-     *
-     * @var bool
      */
-    public $envAndCurrentHostsAreEqual;
+    public bool $envAndCurrentHostsAreEqual;
 
-    /**
-     * @var string
-     */
-    public $htmlBaseUri;
+    public string $htmlBaseUri;
 
-    public function init()
+    public string $originalAppUrl;
+
+    public function init(): static
     {
-        if (config('common.site.dynamic_app_url')) {
-          $this->maybeDynamicallyUpdate();
+        $this->originalAppUrl = config('app.url');
+        if (
+            config('common.site.dynamic_app_url') ||
+            !config('common.site.installed')
+        ) {
+            $this->maybeDynamicallyUpdate();
+        } else {
+            $this->envAndCurrentHostsAreEqual = true;
         }
         $this->registerHtmlBaseUri();
         return $this;
@@ -71,10 +69,17 @@ class AppUrl
         $customDomainsEnabled = config('common.site.enable_custom_domains');
         $endsWithSlash = Str::endsWith(Arr::get($envParts, 'path'), '/');
 
+        // update app.url if not installed yet, or if only scheme, slash or www is different
         if (
-            $this->envAndCurrentHostsAreEqual &&
+            ($this->envAndCurrentHostsAreEqual ||
+                !config('common.site.installed')) &&
             ($schemeIsDifferent || $endsWithSlash || !$hostsWithWwwAreEqual)
         ) {
+            if (!config('common.site.installed')) {
+                $this->handleInstallationAppUrl();
+                return;
+            }
+
             $this->newAppUrl =
                 $request->getSchemeAndHttpHost() .
                 rtrim(Arr::get($envParts, 'path'), '/');
@@ -82,7 +87,7 @@ class AppUrl
             // update social auth urls as well
             foreach (config('services') as $serviceName => $serviceConfig) {
                 if (isset($serviceConfig['redirect'])) {
-                    Config::set(
+                    config(
                         "services.$serviceName.redirect",
                         "$this->newAppUrl/secure/auth/social/$serviceName/callback",
                     );
@@ -102,7 +107,41 @@ class AppUrl
         }
     }
 
-    private function registerHtmlBaseUri()
+    protected function handleInstallationAppUrl(): void
+    {
+        // create new request so main laravel request is not instantiated yet,
+        // and "normalizeRequestUri" on CommonProvider works properly
+        $request = SymfonyRequest::createFromGlobals();
+
+        $pathParts = [
+            ...explode('/', $request->getBaseUrl()),
+            ...explode('/', $request->getPathInfo()),
+        ];
+
+        $pathParts = array_values(
+            array_filter($pathParts, fn($part) => $part !== ''),
+        );
+
+        // get path parts up to "install" segment (if it exists), in case site is not installed at root domain
+        $domainParts = [];
+        foreach ($pathParts as $key => $part) {
+            if ($part !== 'install') {
+                $domainParts[] = $part;
+            } else {
+                break;
+            }
+        }
+
+        $this->newAppUrl = request()->getSchemeAndHttpHost();
+
+        if (!empty($pathParts)) {
+            $this->newAppUrl .= '/' . implode('/', $domainParts);
+        }
+
+        config(['app.url' => $this->newAppUrl]);
+    }
+
+    protected function registerHtmlBaseUri(): void
     {
         $htmlBaseUri = '/';
 
@@ -114,10 +153,7 @@ class AppUrl
         $this->htmlBaseUri = $htmlBaseUri;
     }
 
-    /**
-     * @return string
-     */
-    public function getRequestHost()
+    public function getRequestHost(): string
     {
         return $this->getHostFrom(app('request')->getHost());
     }

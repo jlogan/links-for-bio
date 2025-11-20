@@ -15,22 +15,21 @@ export interface TwoFactorChallengePayload {
   recovery_code?: string;
 }
 export function useTwoFactorChallenge(
-  form: UseFormReturn<TwoFactorChallengePayload>
+  form: UseFormReturn<TwoFactorChallengePayload>,
 ) {
   const handleSuccess = useHandleLoginSuccess();
-  return useMutation(
-    (payload: TwoFactorChallengePayload) => completeChallenge(payload),
-    {
-      onSuccess: response => {
-        handleSuccess(response);
-      },
-      onError: r => onFormQueryError(r, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: TwoFactorChallengePayload) =>
+      completeChallenge(payload),
+    onSuccess: response => {
+      handleSuccess(response);
+    },
+    onError: r => onFormQueryError(r, form),
+  });
 }
 
 function completeChallenge(
-  payload: TwoFactorChallengePayload
+  payload: TwoFactorChallengePayload,
 ): Promise<Response> {
   return apiClient
     .post('auth/two-factor-challenge', payload)

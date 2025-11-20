@@ -6,6 +6,7 @@ import React from 'react';
 import {useDeleteSelectedRows} from '../requests/delete-selected-rows';
 import {useDataTable} from './data-table-context';
 import {useDialogContext} from '@common/ui/overlays/dialog/dialog-context';
+import {errorStatusIs} from '@common/utils/http/error-status-is';
 
 export function DeleteSelectedItemsAction() {
   return (
@@ -20,11 +21,11 @@ export function DeleteSelectedItemsAction() {
 
 function DeleteItemsDialog() {
   const deleteSelectedRows = useDeleteSelectedRows();
-  const {selectedRows} = useDataTable();
+  const {selectedRows, setSelectedRows} = useDataTable();
   const {close} = useDialogContext();
   return (
     <ConfirmationDialog
-      isLoading={deleteSelectedRows.isLoading}
+      isLoading={deleteSelectedRows.isPending}
       title={
         <Trans
           message="Delete [one 1 item|other :count items]?"
@@ -37,7 +38,15 @@ function DeleteItemsDialog() {
       confirm={<Trans message="Delete" />}
       isDanger
       onConfirm={() => {
-        deleteSelectedRows.mutate(undefined, {onSuccess: () => close()});
+        deleteSelectedRows.mutate(undefined, {
+          onSuccess: () => close(),
+          onError: err => {
+            if (errorStatusIs(err, 422)) {
+              setSelectedRows([]);
+              close();
+            }
+          },
+        });
       }}
     />
   );

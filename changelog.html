@@ -1,3 +1,92 @@
+<h2>2024 May 24 - Version 3.0.8</h2>
+<ul>
+  <li>new: errors on the site will now show more details, if logged in as admin.</li>
+  <li>new: translations can now be downloaded and uploaded as .json file</li>
+  <li>new: added CRON, outgoing email and error logs in admin area</li>
+  <li>new: changed email verification to use one time password, instead of verification link</li>
+  <li>new: improve link image positioning in biolink page</li>
+  <li>fix: outline button color change in biolink editor</li>
+  <li>fix: shortening urls without providing protocol</li>
+  <li>fix: some layout issues in user profile page</li>
+</ul>
+
+<h2>2024 May 11 - Version 3.0.7</h2>
+<ul>
+  <li>new: request password before allowing user to delete account</li>
+  <li>new: allow sitemap generation via command line</li>
+  <li>fix: subscription activation sometimes being delayed when using stripe</li>
+  <li>fix: paypal subscription state sometimes not syncing with the site</li>
+  <li>fix: hidden plans being used for discount calculation</li>
+  <li>fix: incorrect link in checkout error page</li>
+  <li>fix: urls with unicode characters sometimes not working</li>
+  <li>fix: some issues with colorpicker in biolink editor</li>
+  <li>fix: old settings sometimes being cached</li>
+  <li>fix: article editor info block duplicating sometimes</li>
+  <li>fix: resending email verification from admin area</li>
+  <li>fix: some issues with appearance editor color pickers</li>
+  <li>fix: seo tags being duplicated sometimes</li>
+  <li>
+    fix: mark all notification as unread, instead of just visible ones via mark as unread button
+  </li>
+  <li>fix: api docs authentication</li>
+  <li>fix: mobile menu sometimes opening links in new window</li>
+  <li>fix: cookie notice layout on mobile</li>
+</ul>
+
+<h2>2024 January 05 - Version 3.0.6</h2>
+<ul>
+  <li>
+    new: it's now possible to change default font, border radius and navbar color from appearance
+    editor.
+  </li>
+  <li>fix: a few issues with user passwords and login</li>
+  <li>fix: issue with when switching from stripe test mode to live</li>
+  <li>fix: custom landing page SEO tags not showing sometimes</li>
+  <li>fix: date range picker issue when starting selection from end date</li>
+</ul>
+
+<h2>2023 November 11 - Version 3.0.5</h2>
+<ul>
+  <li>new: link page options can now be disabled via permissions</li>
+  <li>new: check branded domains against blacklisted domain list</li>
+  <li>new: check alias against blacklisted keywords</li>
+  <li>new: added social icons in the icon selector in menu manager</li>
+  <li>new: added logout button to verify email page</li>
+  <li>new: show user suspension reason on edit user page</li>
+  <li>fix: same alias not working on different branded domains</li>
+  <li>fix: landing page input text color in dark mode</li>
+  <li>fix: make default alias searchable</li>
+  <li>fix: hide upgrade button in navbar if subscriptions are disabled</li>
+  <li>fix: default logo broken after installation</li>
+  <li>fix: wrong endpoints in api documentation</li>
+  <li>fix: plan not allowing removal of all permissions</li>
+  <li>fix: disable user change plan button if subscription is created from admin area</li>
+  <li>fix: reset scroll position when navigating between custom pages</li>
+  <li>fix: datepicker keyboard input not working sometimes</li>
+</ul>
+
+<h2>2023 October 7 - Version 3.0.4</h2>
+<ul>
+  <li>new: improved first page load speed</li>
+  <li>new: improved SEO tags editor in admin area</li>
+  <li>new: SEO tags for link, biolink and link group can now be configured separately.</li>
+  <li>fix: global custom domains added from admin area not working sometimes.</li>
+  <li>fix: some translation issues on landing page</li>
+  <li>fix: clicking on geochart region sometimes not working</li>
+  <li>ix: biolink save button not activating after editing alias field</li>
+  <li>fix: appearance editor values not updating sometimes without page reload</li>
+  <li>fix: mobile logo sometimes getting deleted</li>
+  <li>fix: permission issue with guest role</li>
+  <li>fix: allow removing sentry dsn in settings page</li>
+  <li>fix: hidden plans still visible on change plan page</li>
+  <li>fix: annual subscription sometimes not getting selected</li>
+  <li>fix: file upload field not clearing when there's an error</li>
+  <li>fix: paypal subscription issue</li>
+  <li>fix: issues with "api.access" permission</li>
+  <li>fix: confirmation dialog not closing sometimes</li>
+  <li>fix: landing page background issues on iOS</li>
+</ul>
+
 <h2>2023 May 17 - Version 3.0.3</h2>
 <ul>
   <li>new: click report can now be filtered by country and can display cities in geo chart</li>

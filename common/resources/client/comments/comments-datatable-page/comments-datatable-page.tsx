@@ -28,7 +28,7 @@ interface Props {
 export function CommentsDatatablePage({hideTitle, commentable}: Props) {
   const filters = useMemo(() => {
     return CommentsDatatableFilters.filter(
-      f => f.key !== 'commentable_id' || !commentable
+      f => f.key !== 'commentable_id' || !commentable,
     );
   }, [commentable]);
   const {encodedFilters} = useBackendFilterUrlParams(filters);
@@ -39,15 +39,15 @@ export function CommentsDatatablePage({hideTitle, commentable}: Props) {
     {
       ...params,
       with: 'commentable',
+      withCount: 'reports',
       filters: encodedFilters,
       commentable_type: commentable?.model_type,
       commentable_id: commentable?.id,
     },
-    {
-      onSuccess: () => {
-        setSelectedComments([]);
-      },
-    }
+    undefined,
+    () => {
+      setSelectedComments([]);
+    },
   );
 
   const toggleComment = useCallback(
@@ -61,7 +61,7 @@ export function CommentsDatatablePage({hideTitle, commentable}: Props) {
       }
       setSelectedComments(newValues);
     },
-    [selectedComments, setSelectedComments]
+    [selectedComments, setSelectedComments],
   );
 
   const isFiltering = !!(params.query || params.filters || encodedFilters);
@@ -107,7 +107,7 @@ export function CommentsDatatablePage({hideTitle, commentable}: Props) {
         {query.isLoading ? (
           <FullPageLoader className="min-h-200" />
         ) : (
-          <div className="border-x border-t rounded">
+          <div className="rounded border-x border-t">
             {pagination?.data.map(comment => (
               <CommentDatatableItem
                 key={comment.id}
@@ -119,7 +119,7 @@ export function CommentsDatatablePage({hideTitle, commentable}: Props) {
           </div>
         )}
 
-        {(query.isFetched || query.isPreviousData) &&
+        {(query.isFetched || query.isPlaceholderData) &&
         !pagination?.data.length ? (
           <DataTableEmptyStateMessage
             className="pt-50"

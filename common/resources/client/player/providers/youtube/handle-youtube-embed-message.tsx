@@ -16,7 +16,9 @@ export function handleYoutubeEmbedMessage(
   iframeRef: RefObject<HTMLIFrameElement>,
   store: PlayerStoreApi
 ) {
-  const data = JSON.parse(e.data) as YouTubeMessage;
+  const data = (
+    typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+  ) as YouTubeMessage;
   const info = data.info;
   const internalState = internalStateRef.current;
   const emit = store.getState().emit;

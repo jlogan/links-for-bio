@@ -11,9 +11,10 @@ export interface ConfirmPasswordPayload {
 }
 
 export function useConfirmPassword(
-  form: UseFormReturn<ConfirmPasswordPayload>
+  form: UseFormReturn<ConfirmPasswordPayload>,
 ) {
-  return useMutation((payload: ConfirmPasswordPayload) => confirm(payload), {
+  return useMutation({
+    mutationFn: (payload: ConfirmPasswordPayload) => confirm(payload),
     onError: r => onFormQueryError(r, form),
   });
 }

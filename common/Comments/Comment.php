@@ -2,20 +2,19 @@
 
 namespace Common\Comments;
 
-use App\User;
+use App\Models\User;
+use Common\Core\BaseModel;
 use Common\Files\Traits\HandlesEntryPaths;
-use Common\Search\Searchable;
 use Common\Votes\OrdersByWeightedScore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Comment extends Model
+class Comment extends BaseModel
 {
-    use HandlesEntryPaths, HasFactory, Searchable, OrdersByWeightedScore;
+    use HandlesEntryPaths, HasFactory, OrdersByWeightedScore;
 
     const MODEL_TYPE = 'comment';
 
@@ -67,6 +66,15 @@ class Comment extends Model
             return 0;
         }
         return count(explode('/', $this->getRawOriginal('path')));
+    }
+
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->content,
+            'model_type' => self::MODEL_TYPE,
+        ];
     }
 
     public function toSearchableArray(): array

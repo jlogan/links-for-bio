@@ -14,12 +14,13 @@ interface Payload {
 }
 
 export function useDeleteComments() {
-  return useMutation((payload: Payload) => deleteComments(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => deleteComments(payload),
     onSuccess: (response, payload) => {
       toast(
         message('[one Comment deleted|other Deleted :count comments]', {
           values: {count: payload.commentIds.length},
-        })
+        }),
       );
     },
     onError: err => showHttpErrorToast(err),

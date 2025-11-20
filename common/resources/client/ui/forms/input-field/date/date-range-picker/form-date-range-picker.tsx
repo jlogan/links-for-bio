@@ -17,7 +17,7 @@ interface FormDateRange {
   preset?: number;
 }
 
-interface FormDateRangePickerProps extends DateRangePickerProps {
+export interface FormDateRangePickerProps extends DateRangePickerProps {
   name: string;
 }
 export function FormDateRangePicker(props: FormDateRangePickerProps) {

@@ -10,7 +10,8 @@ interface Payload {
 }
 
 export function useLogoutOtherSessions() {
-  return useMutation((payload: Payload) => logoutOther(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => logoutOther(payload),
     onError: r => showHttpErrorToast(r),
   });
 }

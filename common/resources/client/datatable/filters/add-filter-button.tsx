@@ -15,6 +15,7 @@ interface AddFilterButtonProps {
   variant?: ButtonProps['variant'];
   disabled?: boolean;
   size?: ButtonProps['size'];
+  className?: string;
 }
 export function AddFilterButton({
   filters,
@@ -23,6 +24,7 @@ export function AddFilterButton({
   variant = 'outline',
   size = 'sm',
   disabled,
+  className,
 }: AddFilterButtonProps) {
   const isMobile = useIsMobileMediaQuery();
 
@@ -33,6 +35,7 @@ export function AddFilterButton({
       startIcon={icon}
       disabled={disabled}
       size={size}
+      className={className}
     >
       <Trans message="Filter" />
     </Button>
@@ -44,7 +47,7 @@ export function AddFilterButton({
       size="sm"
       variant={variant}
       disabled={disabled}
-      radius="rounded"
+      className={className}
     >
       {icon}
     </IconButton>

@@ -22,7 +22,7 @@ class LoadChildComments
         $childComments = app(Comment::class)
             ->with(['user' => fn($builder) => $builder->compact()])
             ->where('commentable_id', $commentable->id)
-            ->where('commentable_type', get_class($commentable))
+            ->where('commentable_type', $commentable->getMorphClass())
             ->childrenOnly()
             ->where(fn(Builder $builder) => $builder->whereRaw("path $paths"))
             ->orderBy('path', 'asc')

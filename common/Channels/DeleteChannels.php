@@ -2,7 +2,7 @@
 
 namespace Common\Channels;
 
-use App\Channel;
+use App\Models\Channel;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -10,21 +10,30 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteChannels
 {
-    public function execute(Collection $channels): void
+    public function execute(Collection $channels): int
     {
-        $channelIds = $channels
-            ->filter(
-                fn(Channel $channel) => !Arr::get(
-                    $channel->config,
-                    'preventDeletion',
-                ),
+        if (
+            $channels->some(
+                fn(Channel $channel) => $channel->internal ||
+                    Arr::get($channel->config, 'preventDeletion'),
             )
-            ->pluck('id');
+        ) {
+            abort(422, __("Internal channels can't be deleted"));
+        }
+
+        if (
+            settings('homepage.type') === 'channels' &&
+            $channels->contains('id', (int) settings('homepage.value'))
+        ) {
+            abort(422, __('You can not delete the homepage channel'));
+        }
+
+        $channelIds = $channels->pluck('id')->toArray();
 
         // touch all channels that have channels we're deleting
         // nested so cache for them is cleared properly
         $parentChannelIds = DB::table('channelables')
-            ->where('channelable_type', Channel::class)
+            ->where('channelable_type', Channel::MODEL_TYPE)
             ->whereIn('channelable_id', $channelIds)
             ->pluck('channel_id');
         Channel::whereIn('id', $parentChannelIds)->update([
@@ -35,5 +44,7 @@ class DeleteChannels
             ->whereIn('channel_id', $channelIds)
             ->delete();
         Channel::whereIn('id', $channelIds)->delete();
+
+        return count($channelIds);
     }
 }

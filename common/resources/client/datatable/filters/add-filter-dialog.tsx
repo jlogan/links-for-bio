@@ -1,6 +1,7 @@
 import {Dialog} from '../../ui/overlays/dialog/dialog';
 import {
   BackendFilter,
+  CustomFilterControl,
   DatePickerFilterControl,
   FilterBooleanToggleControl,
   FilterChipFieldControl,
@@ -11,7 +12,7 @@ import {
   FilterTextInputControl,
 } from './backend-filter';
 import {Trans} from '../../i18n/trans';
-import {Key, useState} from 'react';
+import {useState} from 'react';
 import {DialogHeader} from '../../ui/overlays/dialog/dialog-header';
 import {DialogBody} from '../../ui/overlays/dialog/dialog-body';
 import {useBackendFilterUrlParams} from './backend-filter-url-params';
@@ -42,9 +43,11 @@ export function AddFilterDialog({filters}: AddFilterDialogProps) {
   const {formId} = useDialogContext();
 
   // expand currently active filters
-  const [expandedFilters, setExpandedFilters] = useState<Key[]>(() => {
-    return decodedFilters.map(f => f.key);
-  });
+  const [expandedFilters, setExpandedFilters] = useState<(string | number)[]>(
+    () => {
+      return decodedFilters.map(f => f.key);
+    },
+  );
 
   const clearButton = (
     <Button
@@ -94,8 +97,8 @@ export function AddFilterDialog({filters}: AddFilterDialogProps) {
 
 interface FilterListProps {
   filters: BackendFilter[];
-  expandedFilters: Key[];
-  setExpandedFilters: (value: Key[]) => void;
+  expandedFilters: (string | number)[];
+  setExpandedFilters: (value: (string | number)[]) => void;
 }
 function FilterList({
   filters,
@@ -130,7 +133,7 @@ function FilterList({
           // remove undefined and non-expanded filters, so "clear" button will correctly remove active filters
           .filter(
             ([key, fieldValue]) =>
-              expandedFilters.includes(key) && fieldValue !== undefined
+              expandedFilters.includes(key) && fieldValue !== undefined,
           )
           .map(([key, fieldValue]) => ({
             key,
@@ -148,7 +151,6 @@ function FilterList({
       >
         {filters.map(filter => (
           <AccordionItem
-            dataTestId={`filter-${filter.key}-toggle`}
             startIcon={
               <Checkbox checked={expandedFilters.includes(filter.key)} />
             }
@@ -160,10 +162,10 @@ function FilterList({
             {filter.description && (
               <div
                 className={clsx(
-                  'text-muted text-xs',
+                  'text-xs text-muted',
                   // boolean filter will have nothing in the panel, no need to add margin
                   filter.control.type !== FilterControlType.BooleanToggle &&
-                    'mb-14'
+                    'mb-14',
                 )}
               >
                 <Trans {...filter.description} />
@@ -220,7 +222,11 @@ export function AddFilterDialogPanel({filter}: ActiveFilterPanelProps) {
       );
     case 'custom':
       const CustomComponent = filter.control.panel;
-      return <CustomComponent filter={filter} />;
+      return (
+        <CustomComponent
+          filter={filter as BackendFilter<CustomFilterControl>}
+        />
+      );
     default:
       return null;
   }

@@ -8,9 +8,9 @@ use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File as FileFacade;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Storage;
 use Symfony\Component\Mime\MimeTypes;
 
 class StoreFile
@@ -39,8 +39,10 @@ class StoreFile
             $payload->filename === '.htaccess' ||
             // dont store php files in public disk
             ($payload->public && $this->isPhpFile($payload, $fileOptions)) ||
-            // prevent path traversal in user specified folder
-            ($payload->diskPrefix && Str::contains($payload->diskPrefix, '..'))
+            // prevent path traversal or storing at root in user specified folder
+            ($payload->diskPrefix &&
+                (Str::contains($payload->diskPrefix, '..') ||
+                    $payload->diskPrefix === '/'))
         ) {
             abort(403);
         }
@@ -102,7 +104,11 @@ class StoreFile
         FileEntryPayload $payload,
         array $fileOptions,
     ): bool {
-        if ($payload->clientExtension === 'php') {
+        if (
+            Str::of($payload->clientExtension)
+                ->lower()
+                ->startsWith(['php', 'phtml'])
+        ) {
             return true;
         }
 

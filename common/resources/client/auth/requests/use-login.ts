@@ -27,7 +27,8 @@ export interface LoginPayload {
 
 export function useLogin(form: UseFormReturn<LoginPayload>) {
   const handleSuccess = useHandleLoginSuccess();
-  return useMutation(login, {
+  return useMutation({
+    mutationFn: login,
     onSuccess: response => {
       if (!response.two_factor) {
         handleSuccess(response);
@@ -47,7 +48,7 @@ export function useHandleLoginSuccess() {
       setBootstrapData(response.bootstrapData);
       navigate(getRedirectUri(), {replace: true});
     },
-    [navigate, setBootstrapData, getRedirectUri]
+    [navigate, setBootstrapData, getRedirectUri],
   );
 }
 

@@ -80,7 +80,7 @@ export function UpdateLocalizationDialog({
           color="primary"
           type="submit"
           form={formId}
-          disabled={updateLocalization.isLoading}
+          disabled={updateLocalization.isPending}
         >
           <Trans message="Save" />
         </Button>

@@ -16,10 +16,6 @@ return new class extends Migration {
                 ->unsignedBigInteger('downvotes')
                 ->default(0)
                 ->index();
-            $table
-                ->unsignedBigInteger('reports_count')
-                ->default(0)
-                ->index();
         });
     }
 

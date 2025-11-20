@@ -12,5 +12,5 @@ export function useBillingUser() {
 }
 
 export function invalidateBillingUserQuery() {
-  queryClient.invalidateQueries(['users']);
+  queryClient.invalidateQueries({queryKey: ['users']});
 }

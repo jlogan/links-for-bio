@@ -15,7 +15,8 @@ export interface UpdatePasswordPayload {
 }
 
 export function useUpdatePassword(form: UseFormReturn<UpdatePasswordPayload>) {
-  return useMutation((props: UpdatePasswordPayload) => updatePassword(props), {
+  return useMutation({
+    mutationFn: (props: UpdatePasswordPayload) => updatePassword(props),
     onSuccess: () => {
       toast(message('Password changed'));
     },

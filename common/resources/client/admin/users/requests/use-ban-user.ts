@@ -19,12 +19,13 @@ export interface BanUserPayload {
 
 export function useBanUser(
   form: UseFormReturn<BanUserPayload>,
-  userId: number
+  userId: number,
 ) {
-  return useMutation((payload: BanUserPayload) => banUser(userId, payload), {
-    onSuccess: () => {
+  return useMutation({
+    mutationFn: (payload: BanUserPayload) => banUser(userId, payload),
+    onSuccess: async () => {
       toast(message('User suspended'));
-      queryClient.invalidateQueries(['users']);
+      await queryClient.invalidateQueries({queryKey: ['users']});
     },
     onError: r => onFormQueryError(r, form),
   });
