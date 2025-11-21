@@ -4,34 +4,58 @@ if (version_compare(PHP_VERSION, '8.1') === -1) {
   exit('You need at least PHP 8.1 to install this application.');
 }
 
-// if not installed yet, redirect to public dir
-if (
-  !file_exists(__DIR__ . '/.env') ||
-  !preg_match('/INSTALLED=(true|1)/', file_get_contents(__DIR__ . '/.env'))
-) {
-  // create .htaccess files
-  $rootHtaccess = __DIR__ . '/.htaccess';
-  $rootHtaccessStub = __DIR__ . '/htaccess.example';
-  $publicHtaccess = __DIR__ . '/public/.htaccess';
-  $publicHtaccessStub = __DIR__ . '/public/htaccess.example';
+// Check if app is installed
+$isInstalled = false;
+if (file_exists(__DIR__ . '/.env')) {
+  $envContent = file_get_contents(__DIR__ . '/.env');
+  $isInstalled = preg_match('/INSTALLED=(true|1)/', $envContent);
+}
 
-  $shouldReload = false;
+// If installed, redirect to public directory
+if ($isInstalled) {
+  $publicPath = '/public' . $_SERVER['REQUEST_URI'];
+  header("Location: $publicPath");
+  exit;
+}
 
-  try {
-    if (!file_exists($rootHtaccess)) {
-      $contents = file_get_contents($rootHtaccessStub);
-      file_put_contents($rootHtaccess, $contents);
+// If not installed yet, try to create .htaccess files (for Apache servers)
+// But don't fail if server doesn't support .htaccess (e.g., Nginx)
+$rootHtaccess = __DIR__ . '/.htaccess';
+$rootHtaccessStub = __DIR__ . '/htaccess.example';
+$publicHtaccess = __DIR__ . '/public/.htaccess';
+$publicHtaccessStub = __DIR__ . '/public/htaccess.example';
+
+$shouldReload = false;
+
+try {
+  if (!file_exists($rootHtaccess) && file_exists($rootHtaccessStub)) {
+    $contents = file_get_contents($rootHtaccessStub);
+    if (@file_put_contents($rootHtaccess, $contents)) {
       $shouldReload = true;
     }
-
-    if (!file_exists($publicHtaccess)) {
-      $contents = file_get_contents($publicHtaccessStub);
-      file_put_contents($publicHtaccess, $contents);
-      $shouldReload = true;
-    }
-  } catch (Exception $e) {
-    //
   }
+
+  if (!file_exists($publicHtaccess) && file_exists($publicHtaccessStub)) {
+    $contents = file_get_contents($publicHtaccessStub);
+    if (@file_put_contents($publicHtaccess, $contents)) {
+      $shouldReload = true;
+    }
+  }
+} catch (Exception $e) {
+  // Silently fail - server might not support .htaccess (e.g., Nginx)
+}
+
+// If .htaccess files were created, reload to let them take effect
+// Otherwise, redirect to public directory anyway (works for Nginx/other servers)
+if ($shouldReload) {
+  // Reload to let .htaccess take effect - will be handled by the HTML below
+} else {
+  // Server doesn't support .htaccess or files already exist
+  // Redirect to public directory directly
+  $requestUri = $_SERVER['REQUEST_URI'];
+  $publicPath = '/public' . ($requestUri === '/' ? '' : $requestUri);
+  header("Location: $publicPath");
+  exit;
 }
 ?>
 

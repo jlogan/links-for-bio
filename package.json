@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",
-    "build": "node_modules/.bin/tsc --skipLibCheck && vite build && vite build --ssr resources/client/server-entry.tsx",
-    "ssr": "vite build --ssr resources/client/server-entry.tsx && NODE_ENV=production node ./bootstrap/ssr/server-entry.mjs",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 node_modules/.bin/tsc --skipLibCheck && NODE_OPTIONS=--max-old-space-size=4096 node_modules/.bin/vite build && NODE_OPTIONS=--max-old-space-size=4096 node_modules/.bin/vite build --ssr resources/client/server-entry.tsx",
+    "ssr": "node_modules/.bin/vite build --ssr resources/client/server-entry.tsx && NODE_ENV=production node ./bootstrap/ssr/server-entry.mjs",
     "preview": "vite preview",
     "iconIndex": "node ./scripts/create-icon-index.js",
     "extract": "node ./resources/scripts/extract-translations.js"
