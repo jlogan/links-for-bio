@@ -24,19 +24,19 @@ import { mergeProps, useObjectRef, useViewportSize, useLayoutEffect, getScrollPa
 import { useFocusManager, FocusScope } from "@react-aria/focus";
 import { offset, shift, flip, size, arrow, useFloating, autoUpdate } from "@floating-ui/react-dom";
 import { mergeRefs } from "react-merge-refs";
-import { createPortal, flushSync } from "react-dom";
+import { createPortal } from "react-dom";
 import { useNavigate as useNavigate$1, useLocation, createPath, resolvePath, Link, NavLink, Navigate, Outlet, useSearchParams, useParams, Route, Routes } from "react-router-dom";
 import { NumberFormatter } from "@internationalized/number";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import { useControlledState } from "@react-stately/utils";
 import { useIsSSR } from "@react-aria/ssr";
 import dot from "dot-object";
-import useClipboard from "react-use-clipboard";
 import { enableMapSet, produce } from "immer";
 import axiosRetry from "axios-retry";
 import { Upload } from "tus-js-client";
 import { getCookie as getCookie$1 } from "react-use-cookie";
 import match from "mime-match";
+import useClipboard from "react-use-clipboard";
 import getVideoId from "get-video-id";
 import { parseColor } from "@react-stately/color";
 let activeWorkspaceId = 0;
@@ -6359,14 +6359,14 @@ function PolicyCheckboxes() {
     policy.id
   )) });
 }
-const endpoint$2 = (slugOrId) => `custom-pages/${slugOrId}`;
+const endpoint$1 = (slugOrId) => `custom-pages/${slugOrId}`;
 function useCustomPage(pageId) {
   const params = useParams();
   if (!pageId) {
     pageId = params.pageId;
   }
   return useQuery({
-    queryKey: [endpoint$2(pageId)],
+    queryKey: [endpoint$1(pageId)],
     queryFn: () => fetchCustomPage(pageId),
     initialData: () => {
       var _a;
@@ -6378,7 +6378,7 @@ function useCustomPage(pageId) {
   });
 }
 function fetchCustomPage(slugOrId) {
-  return apiClient.get(endpoint$2(slugOrId)).then((response) => response.data);
+  return apiClient.get(endpoint$1(slugOrId)).then((response) => response.data);
 }
 const NotificationsIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" }),
@@ -6739,24 +6739,24 @@ function NavbarAuthButtons({
 function DesktopButtons({ primaryButtonColor }) {
   const { registration } = useSettings();
   return /* @__PURE__ */ jsxs("div", { className: "text-sm max-md:hidden", children: [
-    !registration.disable && /* @__PURE__ */ jsx(
-      Button,
-      {
-        elementType: Link,
-        to: "/register",
-        variant: "text",
-        className: "mr-10",
-        children: /* @__PURE__ */ jsx(Trans, { message: "Register" })
-      }
-    ),
     /* @__PURE__ */ jsx(
       Button,
       {
         elementType: Link,
         to: "/login",
+        variant: "text",
+        className: "mr-10",
+        children: /* @__PURE__ */ jsx(Trans, { message: "Login" })
+      }
+    ),
+    !registration.disable && /* @__PURE__ */ jsx(
+      Button,
+      {
+        elementType: Link,
+        to: "/register",
         variant: "raised",
         color: primaryButtonColor,
-        children: /* @__PURE__ */ jsx(Trans, { message: "Login" })
+        children: /* @__PURE__ */ jsx(Trans, { message: "Sign up" })
       }
     )
   ] });
@@ -6768,7 +6768,7 @@ function MobileButtons() {
     /* @__PURE__ */ jsx(IconButton, { size: "md", className: "md:hidden", children: /* @__PURE__ */ jsx(PersonIcon, {}) }),
     /* @__PURE__ */ jsxs(Menu, { children: [
       /* @__PURE__ */ jsx(Item$1, { value: "login", onSelected: () => navigate("/login"), children: /* @__PURE__ */ jsx(Trans, { message: "Login" }) }),
-      !registration.disable && /* @__PURE__ */ jsx(Item$1, { value: "register", onSelected: () => navigate("/register"), children: /* @__PURE__ */ jsx(Trans, { message: "Register" }) })
+      !registration.disable && /* @__PURE__ */ jsx(Item$1, { value: "register", onSelected: () => navigate("/register"), children: /* @__PURE__ */ jsx(Trans, { message: "Sign up" }) })
     ] })
   ] });
 }
@@ -7537,842 +7537,125 @@ function DynamicHomepage({ homepageResolver }) {
   }
   return (homepageResolver == null ? void 0 : homepageResolver(homepage == null ? void 0 : homepage.type)) || null;
 }
-function AdHost({ slot, className }) {
-  var _a;
-  const settings = useSettings();
-  const { isSubscribed } = useAuth();
-  const adCode2 = useMemo(() => {
-    return dot.pick(`ads.${slot}`, settings);
-  }, [slot, settings]);
-  if (((_a = settings.ads) == null ? void 0 : _a.disable) || isSubscribed || !adCode2)
-    return null;
-  return /* @__PURE__ */ jsx(InvariantAd, { className, slot, adCode: adCode2 });
-}
-const InvariantAd = memo(
-  ({ slot, adCode: adCode2, className }) => {
-    const ref = useRef(null);
-    const id2 = useId();
-    useEffect(() => {
-      if (ref.current) {
-        loadAdScripts(adCode2, ref.current).then(() => {
-          executeAdJavascript(adCode2, id2);
-        });
-      }
-      return () => {
-        delete window["google_ad_modifications"];
-      };
-    }, [adCode2, id2]);
-    useEffect(() => {
-      if (ref.current) {
-        const scrollParent = getScrollParent(ref.current);
-        if (scrollParent) {
-          const observer = new MutationObserver(function() {
-            scrollParent.style.height = "";
-            scrollParent.style.minHeight = "";
-          });
-          observer.observe(scrollParent, {
-            attributes: true,
-            attributeFilter: ["style"]
-          });
-          return () => observer.disconnect();
-        }
-      }
-    }, []);
-    return /* @__PURE__ */ jsx(
-      "div",
-      {
-        ref,
-        id: id2,
-        className: clsx(
-          "ad-host flex max-h-[600px] min-h-90 w-full max-w-full items-center justify-center overflow-hidden",
-          `${slot.replace(/\./g, "-")}-host`,
-          className
-        ),
-        dangerouslySetInnerHTML: { __html: getAdHtml(adCode2) }
-      }
-    );
-  },
-  () => {
-    return false;
-  }
+const InsertLinkIcon = createSvgIcon(
+  /* @__PURE__ */ jsx("path", { d: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" }),
+  "InsertLinkOutlined"
 );
-function getAdHtml(adCode2) {
-  return adCode2 == null ? void 0 : adCode2.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").trim();
-}
-function loadAdScripts(adCode2, parentEl) {
-  const promises = [];
-  const pattern2 = /<script.*?src=['"](.*?)['"]/g;
-  let match2;
-  while (match2 = pattern2.exec(adCode2)) {
-    if (match2[1]) {
-      promises.push(lazyLoader.loadAsset(match2[1], { type: "js", parentEl }));
-    }
-  }
-  return Promise.all(promises);
-}
-function executeAdJavascript(adCode, id) {
-  const pattern = /<script\b[^>]*>([\s\S]*?)<\/script>/g;
-  let content;
-  while (content = pattern.exec(adCode)) {
-    if (content[1]) {
-      const r = `var d = document.createElement('div'); d.innerHTML = $1; document.getElementById('${id}').appendChild(d.firstChild);`;
-      const toEval = content[1].replace(/document.write\((.+?)\);/, r);
-      eval(toEval);
-    }
-  }
-}
-function urlIsValid(url) {
-  if (!url.match(/^[a-zA-Z]+:\/\//)) {
-    url = "https://" + url;
-  }
-  try {
-    new URL(url);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-function LandingPageNewLinkForm({ content: content2 }) {
-  const { trans } = useTrans();
-  const lightThemeVars = useLightThemeVariables();
-  const { verify, isVerifying } = useRecaptcha("link_creation");
-  const {
-    links: { default_type }
-  } = useSettings();
-  const inputRef = useRef(null);
-  const [longUrl, setLongUrl] = useState("");
-  const [shortUrl, setShortUrl] = useState("");
-  const [, copyToClipboard] = useClipboard(shortUrl, {
-    successDuration: 100
-  });
-  const createPayload = {
-    long_url: longUrl,
-    type: default_type || "direct"
-  };
-  const createLink = useMutation({
-    mutationFn: () => postCreateLink(createPayload),
-    onSuccess: (response) => {
-      var _a;
-      toast.positive(trans(message("Link shortened")));
-      flushSync(() => {
-        setShortUrl(response.link.short_url);
-      });
-      (_a = inputRef.current) == null ? void 0 : _a.select();
-    },
-    onError: (err) => showHttpErrorToast(
-      err,
-      message("Could not shorten link. Please try again later"),
-      "long_url"
-    )
-  });
-  return /* @__PURE__ */ jsx(
-    "form",
-    {
-      className: "mt-60 w-full md:mt-80",
-      onSubmit: async (e) => {
-        e.preventDefault();
-        if (createLink.isPending || isVerifying)
-          return;
-        if (shortUrl) {
-          flushSync(() => {
-            copyToClipboard();
-            setShortUrl("");
-            setLongUrl("");
-          });
-          toast.positive(message("Copied link to clipboard"));
-          return;
-        }
-        if (!urlIsValid(longUrl)) {
-          toast.danger(message("This url is invalid."));
-        } else {
-          const isValid = await verify();
-          if (isValid) {
-            createLink.mutate();
-          }
-        }
-      },
-      children: /* @__PURE__ */ jsx(
-        TextField,
-        {
-          inputRef,
-          background: "bg-white",
-          inputRadius: "rounded-full",
-          style: lightThemeVars,
-          size: "lg",
-          placeholder: trans(message(content2.actions.inputText)),
-          value: shortUrl || longUrl,
-          onChange: (e) => setLongUrl(e.target.value),
-          endAppend: /* @__PURE__ */ jsx(
-            Button,
-            {
-              radius: "rounded-r-full",
-              type: "submit",
-              variant: "flat",
-              color: "primary",
-              className: "min-w-160",
-              children: shortUrl ? /* @__PURE__ */ jsx(Trans, { message: "Copy" }) : /* @__PURE__ */ jsx(Trans, { message: content2.actions.inputButton })
-            }
-          )
-        }
-      )
-    }
-  );
-}
-function postCreateLink(values) {
-  return apiClient.post(`link`, values).then((r2) => r2.data);
-}
-const endpoint$1 = "homepage/stats";
-function useLandingPageStats() {
-  return useQuery({
-    queryKey: [endpoint$1],
-    queryFn: () => getLandingPageStats(),
-    initialData: () => {
-      var _a, _b;
-      if ((_b = (_a = getBootstrapData().loaders) == null ? void 0 : _a.landingPage) == null ? void 0 : _b.stats) {
-        return {
-          stats: getBootstrapData().loaders.landingPage.stats
-        };
-      }
-    }
-  });
-}
-function getLandingPageStats() {
-  return apiClient.get(endpoint$1).then((response) => response.data);
-}
+const BarChartIcon = createSvgIcon(
+  /* @__PURE__ */ jsx("path", { d: "M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z" }),
+  "BarChartOutlined"
+);
 const LinkIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M17 7h-4v2h4c1.65 0 3 1.35 3 3s-1.35 3-3 3h-4v2h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-2zm-3-4h8v2H8z" }),
   "LinkOutlined"
 );
-const MouseIcon = createSvgIcon(
-  /* @__PURE__ */ jsx("path", { d: "M20 9c-.04-4.39-3.6-7.93-8-7.93S4.04 4.61 4 9v6c0 4.42 3.58 8 8 8s8-3.58 8-8V9zm-2 0h-5V3.16c2.81.47 4.96 2.9 5 5.84zm-7-5.84V9H6c.04-2.94 2.19-5.37 5-5.84zM18 15c0 3.31-2.69 6-6 6s-6-2.69-6-6v-4h12v4z" }),
-  "MouseOutlined"
+const DashboardIcon = createSvgIcon(
+  /* @__PURE__ */ jsx("path", { d: "M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z" }),
+  "DashboardOutlined"
 );
-const FormattedNumber = memo(
-  ({ value, ...options }) => {
-    const formatter = useNumberFormatter(options);
-    if (isNaN(value)) {
-      value = 0;
-    }
-    return /* @__PURE__ */ jsx(Fragment, { children: formatter.format(value) });
-  },
-  shallowEqual
+const FavoriteIcon = createSvgIcon(
+  /* @__PURE__ */ jsx("path", { d: "m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" }),
+  "FavoriteOutlined"
 );
-function LandingPageStats() {
-  const { data } = useLandingPageStats();
-  if (!data)
-    return null;
-  return /* @__PURE__ */ jsxs("div", { className: "landing-container py-90 border-t flex gap-60 justify-between overflow-x-auto", children: [
-    /* @__PURE__ */ jsx(
-      StatLayout,
-      {
-        label: /* @__PURE__ */ jsx(Trans, { message: "Total links shortened" }),
-        icon: /* @__PURE__ */ jsx(LinkIcon, {}),
-        number: data.stats.links
-      }
-    ),
-    /* @__PURE__ */ jsx(
-      StatLayout,
-      {
-        label: /* @__PURE__ */ jsx(Trans, { message: "Total link clicks" }),
-        icon: /* @__PURE__ */ jsx(MouseIcon, {}),
-        number: data.stats.clicks
-      }
-    ),
-    /* @__PURE__ */ jsx(
-      StatLayout,
-      {
-        label: /* @__PURE__ */ jsx(Trans, { message: "Users signed up" }),
-        icon: /* @__PURE__ */ jsx(PersonIcon, {}),
-        number: data.stats.users
-      }
-    )
-  ] });
-}
-function StatLayout({ label, icon, number }) {
-  return /* @__PURE__ */ jsxs("div", { className: "flex items-center", children: [
-    cloneElement(icon, { size: "xl" }),
-    /* @__PURE__ */ jsxs("div", { className: "border-l border-l-2 pl-24 ml-24", children: [
-      /* @__PURE__ */ jsx("div", { className: "whitespace-nowrap uppercase text-[15px]", children: label }),
-      /* @__PURE__ */ jsx("div", { className: "text-3xl font-medium mt-6", children: /* @__PURE__ */ jsx(FormattedNumber, { value: number }) })
-    ] })
-  ] });
-}
-function Skeleton({
-  variant = "text",
-  animation = "wave",
-  size: size2,
-  className,
-  display = "block",
-  radius = "rounded",
-  style
-}) {
-  return /* @__PURE__ */ jsx(
-    "span",
-    {
-      style,
-      className: clsx(
-        "skeleton relative overflow-hidden bg-fg-base/4 bg-no-repeat will-change-transform",
-        radius,
-        skeletonSize({ variant, size: size2 }),
-        display,
-        variant === "text" && "origin-[0_55%] scale-y-[0.6]",
-        variant === "avatar" && "flex-shrink-0",
-        variant === "icon" && "mx-8 flex-shrink-0",
-        animation === "wave" && "skeleton-wave",
-        animation === "pulsate" && "skeleton-pulsate",
-        className
-      ),
-      "aria-busy": true,
-      "aria-live": "polite"
-    }
-  );
-}
-function skeletonSize({ variant, size: size2 }) {
-  if (size2) {
-    return size2;
-  }
-  switch (variant) {
-    case "avatar":
-      return "h-40 w-40";
-    case "icon":
-      return "h-24 h-24";
-    case "rect":
-      return "h-full w-full";
-    default:
-      return "w-full";
-  }
-}
-const endpoint = "billing/products";
-function useProducts(loader) {
-  return useQuery({
-    queryKey: [endpoint],
-    queryFn: () => fetchProducts(),
-    initialData: () => {
-      var _a;
-      if (loader) {
-        return (_a = getBootstrapData().loaders) == null ? void 0 : _a[loader];
-      }
-    }
-  });
-}
-function fetchProducts() {
-  return apiClient.get(endpoint).then((response) => {
-    return { products: response.data.pagination.data };
-  });
-}
-function findBestPrice(token, prices) {
-  if (token === "monthly") {
-    const match2 = findMonthlyPrice(prices);
-    if (match2)
-      return match2;
-  }
-  if (token === "yearly") {
-    const match2 = findYearlyPrice(prices);
-    if (match2)
-      return match2;
-  }
-  return prices[0];
-}
-function findYearlyPrice(prices) {
-  return prices.find((price) => {
-    if (price.interval === "month" && price.interval_count >= 12) {
-      return price;
-    }
-    if (price.interval === "year" && price.interval_count >= 1) {
-      return price;
-    }
-  });
-}
-function findMonthlyPrice(prices) {
-  return prices.find((price) => {
-    if (price.interval === "day" && price.interval_count >= 30) {
-      return price;
-    }
-    if (price.interval === "month" && price.interval_count >= 1) {
-      return price;
-    }
-  });
-}
-const FormattedCurrency = memo(
-  ({ value, currency }) => {
-    const formatter = useNumberFormatter({
-      style: "currency",
-      currency,
-      currencyDisplay: "narrowSymbol"
-    });
-    if (isNaN(value)) {
-      value = 0;
-    }
-    return /* @__PURE__ */ jsx(Fragment, { children: formatter.format(value) });
-  }
-);
-function FormattedPrice({
-  price,
-  variant = "slash",
-  className,
-  priceClassName,
-  periodClassName
-}) {
-  if (!price)
-    return null;
-  const translatedInterval = /* @__PURE__ */ jsx(Trans, { message: price.interval });
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex gap-6 items-center", className), children: [
-    /* @__PURE__ */ jsx("div", { className: priceClassName, children: /* @__PURE__ */ jsx(
-      FormattedCurrency,
-      {
-        value: price.amount / (price.interval_count ?? 1),
-        currency: price.currency
-      }
-    ) }),
-    variant === "slash" ? /* @__PURE__ */ jsxs("div", { className: periodClassName, children: [
-      " / ",
-      translatedInterval
-    ] }) : /* @__PURE__ */ jsxs("div", { className: periodClassName, children: [
-      /* @__PURE__ */ jsx(Trans, { message: "per" }),
-      " ",
-      /* @__PURE__ */ jsx("br", {}),
-      " ",
-      translatedInterval
-    ] })
-  ] });
-}
-function ProductFeatureList({ product }) {
-  if (!product.feature_list.length)
-    return null;
-  return /* @__PURE__ */ jsxs("div", { className: "mt-32 border-t pt-24", children: [
-    /* @__PURE__ */ jsx("div", { className: "mb-10 text-sm font-semibold", children: /* @__PURE__ */ jsx(Trans, { message: "What's included" }) }),
-    product.feature_list.map((feature) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-10 py-6 text-sm", children: [
-      /* @__PURE__ */ jsx(CheckIcon, { className: "text-primary", size: "sm" }),
-      /* @__PURE__ */ jsx(Trans, { message: feature })
-    ] }, feature))
-  ] });
-}
-function PricingTable({
-  selectedCycle,
-  className,
-  productLoader
-}) {
-  const query = useProducts(productLoader);
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col items-stretch gap-24 overflow-x-auto overflow-y-visible pb-20 md:flex-row md:justify-center",
-        className
-      ),
-      children: /* @__PURE__ */ jsx(AnimatePresence, { initial: false, mode: "wait", children: query.data ? /* @__PURE__ */ jsx(
-        PlanList,
-        {
-          plans: query.data.products,
-          selectedPeriod: selectedCycle
-        },
-        "plan-list"
-      ) : /* @__PURE__ */ jsx(SkeletonLoader, {}, "skeleton-loader") })
-    }
-  );
-}
-function PlanList({ plans, selectedPeriod }) {
-  const { isLoggedIn, isSubscribed } = useAuth();
-  const filteredPlans = plans.filter((plan) => !plan.hidden);
-  return /* @__PURE__ */ jsx(Fragment, { children: filteredPlans.map((plan, index) => {
-    const isFirst = index === 0;
-    const isLast = index === filteredPlans.length - 1;
-    const price = findBestPrice(selectedPeriod, plan.prices);
-    let upgradeRoute;
-    if (!isLoggedIn) {
-      upgradeRoute = `/register?redirectFrom=pricing`;
-    }
-    if (isSubscribed) {
-      upgradeRoute = `/change-plan/${plan.id}/${price == null ? void 0 : price.id}/confirm`;
-    }
-    if (isLoggedIn && !plan.free) {
-      upgradeRoute = `/checkout/${plan.id}/${price == null ? void 0 : price.id}`;
-    }
-    return /* @__PURE__ */ jsxs(
-      m.div,
-      {
-        ...opacityAnimation,
-        className: clsx(
-          "w-full rounded-panel border bg px-28 py-28 shadow-lg md:min-w-240 md:max-w-350",
-          isFirst && "ml-auto",
-          isLast && "mr-auto"
-        ),
-        children: [
-          /* @__PURE__ */ jsxs("div", { className: "mb-32", children: [
-            /* @__PURE__ */ jsx(
-              Chip,
-              {
-                radius: "rounded",
-                size: "sm",
-                className: clsx(
-                  "mb-20 w-min",
-                  !plan.recommended && "invisible"
-                ),
-                children: /* @__PURE__ */ jsx(Trans, { message: "Most popular" })
-              }
-            ),
-            /* @__PURE__ */ jsx("div", { className: "mb-12 text-xl font-semibold", children: /* @__PURE__ */ jsx(Trans, { message: plan.name }) }),
-            /* @__PURE__ */ jsx("div", { className: "text-sm text-muted", children: /* @__PURE__ */ jsx(Trans, { message: plan.description }) })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            price ? /* @__PURE__ */ jsx(
-              FormattedPrice,
-              {
-                priceClassName: "font-bold text-4xl",
-                periodClassName: "text-muted text-xs",
-                variant: "separateLine",
-                price
-              }
-            ) : /* @__PURE__ */ jsx("div", { className: "text-4xl font-bold", children: /* @__PURE__ */ jsx(Trans, { message: "Free" }) }),
-            /* @__PURE__ */ jsx("div", { className: "mt-60", children: /* @__PURE__ */ jsx(
-              Button,
-              {
-                variant: plan.recommended ? "flat" : "outline",
-                color: "primary",
-                className: "w-full",
-                size: "md",
-                elementType: upgradeRoute ? Link : void 0,
-                disabled: !upgradeRoute,
-                onClick: () => {
-                  if (isLoggedIn || !price || !plan)
-                    return;
-                  setInLocalStorage("be.onboarding.selected", {
-                    productId: plan.id,
-                    priceId: price.id
-                  });
-                },
-                to: upgradeRoute,
-                children: plan.free ? /* @__PURE__ */ jsx(Trans, { message: "Get started" }) : /* @__PURE__ */ jsx(Trans, { message: "Upgrade" })
-              }
-            ) }),
-            /* @__PURE__ */ jsx(ProductFeatureList, { product: plan })
-          ] })
-        ]
-      },
-      plan.id
-    );
-  }) });
-}
-function SkeletonLoader() {
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-1"),
-    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-2"),
-    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-3")
-  ] });
-}
-function PlanSkeleton() {
-  return /* @__PURE__ */ jsxs(
-    m.div,
-    {
-      ...opacityAnimation,
-      className: "w-full rounded-lg border px-28 py-90 shadow-lg md:max-w-350",
-      children: [
-        /* @__PURE__ */ jsx(Skeleton, { className: "my-10" }),
-        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40" }),
-        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40 h-30" }),
-        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40 h-40" }),
-        /* @__PURE__ */ jsx(Skeleton, { className: "mb-20" }),
-        /* @__PURE__ */ jsx(Skeleton, {}),
-        /* @__PURE__ */ jsx(Skeleton, {})
-      ]
-    }
-  );
-}
-const Radio = forwardRef((props, ref) => {
-  const { children, autoFocus, size: size2, invalid, isFirst, ...domProps } = props;
-  const inputRef = useObjectRef(ref);
-  useAutoFocus({ autoFocus }, inputRef);
-  const sizeClassNames2 = getSizeClassNames(size2);
-  return /* @__PURE__ */ jsxs(
-    "label",
-    {
-      className: clsx(
-        "inline-flex gap-8 select-none items-center whitespace-nowrap align-middle",
-        sizeClassNames2.label,
-        props.disabled && "text-disabled pointer-events-none",
-        props.invalid && "text-danger"
-      ),
-      children: [
-        /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "radio",
-            className: clsx(
-              "focus-visible:ring outline-none",
-              "rounded-full transition-button border-2 appearance-none",
-              "border-text-muted disabled:border-disabled-fg checked:border-primary checked:hover:border-primary-dark",
-              "before:bg-primary disabled:before:bg-disabled-fg before:hover:bg-primary-dark",
-              "before:h-full before:w-full before:block before:rounded-full before:scale-10 before:opacity-0 before:transition before:duration-200",
-              "checked:before:scale-[.65] checked:before:opacity-100",
-              sizeClassNames2.circle
-            ),
-            ref: inputRef,
-            ...domProps
-          }
-        ),
-        children && /* @__PURE__ */ jsx("span", { children })
-      ]
-    }
-  );
-});
-function FormRadio(props) {
-  const {
-    field: { onChange, onBlur, value, ref },
-    fieldState: { invalid }
-  } = useController({
-    name: props.name
-  });
-  const formProps = {
-    onChange,
-    onBlur,
-    checked: props.value === value,
-    invalid: props.invalid || invalid
+function UsernameCheckerForm() {
+  useTrans();
+  const navigate = useNavigate$1();
+  useSettings();
+  const [username, setUsername] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!username.trim())
+      return;
+    setIsChecking(true);
+    setTimeout(() => {
+      setIsChecking(false);
+      navigate(`/register?username=${encodeURIComponent(username.trim())}`);
+    }, 300);
   };
-  return /* @__PURE__ */ jsx(Radio, { ref, ...mergeProps(formProps, props) });
-}
-function getSizeClassNames(size2) {
-  switch (size2) {
-    case "xs":
-      return { circle: "h-12 w-12", label: "text-xs" };
-    case "sm":
-      return { circle: "h-16 w-16", label: "text-sm" };
-    case "lg":
-      return { circle: "h-24 w-24", label: "text-lg" };
-    default:
-      return { circle: "h-20 w-20", label: "text-base" };
-  }
-}
-const RadioGroup = forwardRef(
-  (props, ref) => {
-    const style = getInputFieldClassNames(props);
-    const {
-      label,
-      children,
-      size: size2,
-      className,
-      orientation = "horizontal",
-      disabled,
-      required,
-      invalid,
-      errorMessage,
-      description
-    } = props;
-    const labelProps = {};
-    const id2 = useId();
-    const name = props.name || id2;
-    return /* @__PURE__ */ jsxs(
-      "fieldset",
-      {
-        "aria-describedby": description ? `${id2}-description` : void 0,
-        ref,
-        className: clsx("text-left", className),
-        children: [
-          label && /* @__PURE__ */ jsx("legend", { className: style.label, ...labelProps, children: label }),
-          /* @__PURE__ */ jsx(
-            "div",
-            {
-              className: clsx(
-                "flex",
-                label ? "mt-6" : "mt-0",
-                orientation === "vertical" ? "flex-col gap-10" : "flex-row gap-16"
-              ),
-              children: Children.map(children, (child) => {
-                if (isValidElement(child)) {
-                  return cloneElement(child, {
-                    name,
-                    size: size2,
-                    invalid: child.props.invalid || invalid || void 0,
-                    disabled: child.props.disabled || disabled,
-                    required: child.props.required || required
-                  });
-                }
-              })
-            }
-          ),
-          description && !errorMessage && /* @__PURE__ */ jsx("div", { className: style.description, id: `${id2}-description`, children: description }),
-          errorMessage && /* @__PURE__ */ jsx("div", { className: style.error, children: errorMessage })
-        ]
-      }
-    );
-  }
-);
-function FormRadioGroup({ children, ...props }) {
-  const {
-    fieldState: { error }
-  } = useController({
-    name: props.name
-  });
-  return /* @__PURE__ */ jsx(RadioGroup, { errorMessage: error == null ? void 0 : error.message, ...props, children });
-}
-const UpsellLabel = memo(({ products }) => {
-  const upsellPercentage = calcHighestUpsellPercentage(products);
-  if (upsellPercentage <= 0) {
-    return null;
-  }
-  return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("span", { className: "font-medium text-positive-darker", children: [
-    " ",
-    "(",
-    /* @__PURE__ */ jsx(
-      Trans,
-      {
-        message: "Save up to :percentage%",
-        values: { percentage: upsellPercentage }
-      }
-    ),
-    ")"
-  ] }) });
-});
-function calcHighestUpsellPercentage(products) {
-  if (!(products == null ? void 0 : products.length))
-    return 0;
-  const decreases = products.map((product) => {
-    if (product.hidden)
-      return 0;
-    const monthly = findBestPrice("monthly", product.prices);
-    const yearly = findBestPrice("yearly", product.prices);
-    if (!monthly || !yearly)
-      return 0;
-    const monthlyAmount = monthly.amount * 12;
-    const yearlyAmount = yearly.amount;
-    const savingsPercentage = Math.round(
-      (monthlyAmount - yearlyAmount) / monthlyAmount * 100
-    );
-    if (savingsPercentage > 0 && savingsPercentage <= 200) {
-      return savingsPercentage;
-    }
-    return 0;
-  });
-  return Math.max(Math.max(...decreases), 0);
-}
-function BillingCycleRadio({
-  selectedCycle,
-  onChange,
-  products,
-  ...radioGroupProps
-}) {
-  return /* @__PURE__ */ jsxs(RadioGroup, { ...radioGroupProps, children: [
-    /* @__PURE__ */ jsxs(
-      Radio,
-      {
-        value: "yearly",
-        checked: selectedCycle === "yearly",
-        onChange: (e) => {
-          onChange(e.target.value);
-        },
-        children: [
-          /* @__PURE__ */ jsx(Trans, { message: "Annual" }),
-          /* @__PURE__ */ jsx(UpsellLabel, { products })
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsx(
-      Radio,
-      {
-        value: "monthly",
-        checked: selectedCycle === "monthly",
-        onChange: (e) => {
-          onChange(e.target.value);
-        },
-        children: /* @__PURE__ */ jsx(Trans, { message: "Monthly" })
-      }
-    )
+  const domain = "linksforb.io";
+  const prefix = `${domain}/`;
+  const prefixWidth = prefix.length * 8 + 32;
+  return /* @__PURE__ */ jsxs("form", { onSubmit: handleSubmit, className: "w-full max-w-500", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-12 sm:flex-row", children: [
+      /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxs("div", { className: "relative", children: [
+        /* @__PURE__ */ jsx("span", { className: "absolute left-16 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-muted", children: prefix }),
+        /* @__PURE__ */ jsx(
+          TextField,
+          {
+            background: "bg-white",
+            inputRadius: "rounded-l-lg sm:rounded-l-lg",
+            size: "lg",
+            placeholder: "yourname",
+            value: username,
+            onChange: (e) => setUsername(e.target.value),
+            style: { paddingLeft: `${prefixWidth}px` }
+          }
+        )
+      ] }) }),
+      /* @__PURE__ */ jsx(
+        Button,
+        {
+          type: "submit",
+          variant: "raised",
+          color: "primary",
+          size: "lg",
+          radius: "rounded-r-lg sm:rounded-r-lg",
+          className: "min-w-120 sm:min-w-140",
+          disabled: isChecking || !username.trim(),
+          children: isChecking ? /* @__PURE__ */ jsx(Trans, { message: "Checking..." }) : /* @__PURE__ */ jsx(Trans, { message: "Claim" })
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx("p", { className: "mt-12 text-sm text-muted", children: /* @__PURE__ */ jsx(Trans, { message: "Claim your username and get started in seconds" }) })
   ] });
 }
 function LandingPage() {
-  var _a;
   const settings = useSettings();
   const homepage = settings.homepage;
-  const showPricing = settings.links.homepage_pricing && settings.billing.enable;
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(DefaultMetaTags, {}),
-    /* @__PURE__ */ jsxs(Fragment, { children: [
-      /* @__PURE__ */ jsx(HeroHeader, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(AdHost, { slot: "landing", className: "mx-14 -mt-30 mb-14 md:mb-70" }),
-      /* @__PURE__ */ jsx(PrimaryFeatures, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx("div", { className: "mt-100 h-1 bg-divider" }),
-      /* @__PURE__ */ jsx(SecondaryFeatures, { content: homepage.appearance }),
-      ((_a = settings.links) == null ? void 0 : _a.homepage_stats) && /* @__PURE__ */ jsx(LandingPageStats, {}),
-      /* @__PURE__ */ jsx(BottomCta, { content: homepage.appearance }),
-      showPricing && /* @__PURE__ */ jsx(PricingSection, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(Footer, { className: "landing-container" })
+    /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-paper", children: [
+      /* @__PURE__ */ jsx(HeroSection, { content: homepage.appearance }),
+      /* @__PURE__ */ jsx(FeaturesSection, { content: homepage.appearance }),
+      /* @__PURE__ */ jsx(SecondaryFeaturesSection, { content: homepage.appearance }),
+      /* @__PURE__ */ jsx(BottomCtaSection, { content: homepage.appearance }),
+      /* @__PURE__ */ jsx(CustomFooter, {})
     ] })
   ] });
 }
-function HeroHeader({ content: content2 }) {
-  const { hasPermission } = useAuth();
-  const {
-    links: { homepage_creation }
-  } = useSettings();
-  const {
-    headerTitle,
-    headerSubtitle,
-    headerImage,
-    headerImageOpacity,
-    actions,
-    headerOverlayColor1,
-    headerOverlayColor2
-  } = content2;
-  let overlayBackground = void 0;
-  if (headerOverlayColor1 && headerOverlayColor2) {
-    overlayBackground = `linear-gradient(45deg, ${headerOverlayColor1} 0%, ${headerOverlayColor2} 100%)`;
-  } else if (headerOverlayColor1) {
-    overlayBackground = headerOverlayColor1;
-  } else if (headerOverlayColor2) {
-    overlayBackground = headerOverlayColor2;
-  }
-  return /* @__PURE__ */ jsxs("header", { className: "relative isolate mb-14 overflow-hidden md:mb-60", children: [
+function HeroSection({ content: content2 }) {
+  const { headerTitle, headerSubtitle, actions } = content2;
+  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden bg-paper", children: [
     /* @__PURE__ */ jsx(
-      "img",
+      Navbar,
       {
-        "data-testid": "headerImage",
-        src: headerImage,
-        style: {
-          opacity: headerImageOpacity
-        },
-        alt: "",
-        width: "2347",
-        height: "1244",
-        decoding: "async",
-        loading: "lazy",
-        className: "absolute left-1/2 top-1/2 z-20 max-w-none -translate-x-1/2 -translate-y-1/2"
+        color: "transparent",
+        className: "absolute top-0 left-0 right-0 z-50",
+        menuPosition: "homepage-navbar",
+        primaryButtonColor: "primary"
       }
     ),
-    /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: "absolute z-10 h-full w-full bg-[rgb(37,99,235)]",
-        style: { background: overlayBackground }
-      }
-    ),
-    /* @__PURE__ */ jsxs("div", { className: "relative z-30 flex h-full flex-col", children: [
-      /* @__PURE__ */ jsx(
-        Navbar,
-        {
-          color: "transparent",
-          className: "flex-shrink-0",
-          menuPosition: "homepage-navbar",
-          primaryButtonColor: "paper"
-        }
-      ),
-      /* @__PURE__ */ jsxs("div", { className: "mx-auto flex max-w-850 flex-auto flex-col items-center justify-center px-14 py-50 text-center text-white lg:py-90", children: [
+    /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 pt-100 pb-60 md:px-24 md:pt-120 md:pb-80 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "grid gap-40 md:grid-cols-2 md:items-center md:gap-60 lg:gap-80", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center md:text-left", children: [
         headerTitle && /* @__PURE__ */ jsx(
           "h1",
           {
-            className: "text-3xl font-normal md:text-5xl",
+            className: "mb-16 text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl",
             "data-testid": "headerTitle",
             children: /* @__PURE__ */ jsx(Trans, { message: headerTitle })
           }
         ),
         headerSubtitle && /* @__PURE__ */ jsx(
-          "div",
+          "p",
           {
-            className: "max-auto mt-24 max-w-640 text-lg tracking-tight md:text-xl",
+            className: "mb-32 text-lg leading-relaxed text-muted md:text-xl",
             "data-testid": "headerSubtitle",
             children: /* @__PURE__ */ jsx(Trans, { message: headerSubtitle })
           }
         ),
-        homepage_creation && hasPermission("links.create") && /* @__PURE__ */ jsx(LandingPageNewLinkForm, { content: content2 }),
-        /* @__PURE__ */ jsxs("div", { className: "flex min-h-50 gap-20 pb-30 pt-70 empty:min-h-0 md:pb-50 md:pt-90", children: [
+        /* @__PURE__ */ jsx(UsernameCheckerForm, {}),
+        /* @__PURE__ */ jsxs("div", { className: "mt-24 flex flex-col gap-12 sm:flex-row sm:justify-center md:justify-start", children: [
           /* @__PURE__ */ jsx(
             CtaButton,
             {
@@ -8380,7 +7663,7 @@ function HeroHeader({ content: content2 }) {
               variant: "raised",
               color: "primary",
               size: "lg",
-              radius: "rounded-full",
+              radius: "rounded",
               "data-testid": "cta1",
               className: "min-w-180"
             }
@@ -8389,17 +7672,34 @@ function HeroHeader({ content: content2 }) {
             CtaButton,
             {
               item: actions.cta2,
-              variant: "text",
-              color: "paper",
+              variant: "outline",
+              color: "primary",
               size: "lg",
-              radius: "rounded-full",
+              radius: "rounded",
               "data-testid": "cta2"
             }
           )
         ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "absolute bottom-0 z-20 h-[6vw] w-full translate-y-1/2 -skew-y-3 transform bg" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-500", children: /* @__PURE__ */ jsx("div", { className: "relative rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-40 md:p-60", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-24 rounded-xl bg-paper p-32 shadow-lg", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-16", children: [
+          /* @__PURE__ */ jsx("div", { className: "flex h-48 w-48 items-center justify-center rounded-full bg-primary/10", children: /* @__PURE__ */ jsx(InsertLinkIcon, { className: "text-primary", size: "lg" }) }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("div", { className: "h-12 w-120 rounded bg-divider" }),
+            /* @__PURE__ */ jsx("div", { className: "mt-8 h-8 w-80 rounded bg-divider" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "space-y-12", children: [
+          /* @__PURE__ */ jsx("div", { className: "h-8 w-full rounded bg-divider" }),
+          /* @__PURE__ */ jsx("div", { className: "h-8 w-3/4 rounded bg-divider" })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex gap-12", children: [
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" }),
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" }),
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" })
+        ] })
+      ] }) }) }) })
+    ] }) })
   ] });
 }
 function CtaButton({ item, ...buttonProps }) {
@@ -8418,190 +7718,154 @@ function CtaButton({ item, ...buttonProps }) {
     }
   );
 }
-function PrimaryFeatures({ content: content2 }) {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: "landing-container z-20 items-stretch gap-26 md:flex",
-      id: "primary-features",
-      children: content2.primaryFeatures.map((feature, index) => /* @__PURE__ */ jsxs(
-        "div",
-        {
-          className: "mb-14 flex-1 rounded-2xl px-24 py-36 text-center shadow-[0_10px_30px_rgba(0,0,0,0.08)] dark:bg-alt md:mb-0",
-          "data-testid": `primary-root-${index}`,
-          children: [
-            /* @__PURE__ */ jsx(
-              MixedImage,
-              {
-                className: "mx-auto mb-30 h-128",
-                "data-testid": `primary-image-${index}`,
-                src: feature.image
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "h2",
-              {
-                className: "my-16 text-lg font-medium",
-                "data-testid": `primary-title-${index}`,
-                children: /* @__PURE__ */ jsx(Trans, { message: feature.title })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "div",
-              {
-                className: "text-md text-[0.938rem]",
-                "data-testid": `primary-subtitle-${index}`,
-                children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
-              }
-            )
-          ]
-        },
-        index
-      ))
-    }
-  );
+function FeaturesSection({ content: content2 }) {
+  const iconMap2 = [InsertLinkIcon, BarChartIcon, LanguageIcon];
+  return /* @__PURE__ */ jsx("section", { className: "bg-alt py-60 md:py-80", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsx("div", { className: "grid gap-24 md:grid-cols-3 md:gap-32", children: content2.primaryFeatures.map((feature, index) => {
+    const Icon = iconMap2[index] || InsertLinkIcon;
+    return /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: "rounded-xl bg-paper p-32 text-center transition-all hover:shadow-lg",
+        "data-testid": `primary-root-${index}`,
+        children: [
+          /* @__PURE__ */ jsx("div", { className: "mb-20 flex justify-center", children: /* @__PURE__ */ jsx("div", { className: "flex h-64 w-64 items-center justify-center rounded-full bg-primary/10", children: /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "xl" }) }) }),
+          /* @__PURE__ */ jsx(
+            "h2",
+            {
+              className: "mb-12 text-xl font-semibold",
+              "data-testid": `primary-title-${index}`,
+              children: /* @__PURE__ */ jsx(Trans, { message: feature.title })
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "p",
+            {
+              className: "text-base leading-relaxed text-muted",
+              "data-testid": `primary-subtitle-${index}`,
+              children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
+            }
+          )
+        ]
+      },
+      index
+    );
+  }) }) }) });
 }
-function SecondaryFeatures({ content: content2 }) {
-  return /* @__PURE__ */ jsx("div", { className: "relative overflow-hidden pt-100", children: /* @__PURE__ */ jsx("div", { className: "landing-container relative", id: "features", children: content2.secondaryFeatures.map((feature, index) => {
+function SecondaryFeaturesSection({ content: content2 }) {
+  const iconMap2 = [LinkIcon, BarChartIcon, DashboardIcon];
+  return /* @__PURE__ */ jsx("section", { className: "bg-paper py-60 md:py-100", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: content2.secondaryFeatures.map((feature, index) => {
+    const Icon = iconMap2[index] || LinkIcon;
     const isEven = index % 2 === 0;
     return /* @__PURE__ */ jsxs(
       "div",
       {
         "data-testid": `secondary-root-${index}`,
         className: clsx(
-          "relative z-20 mb-14 py-16 md:mb-80 md:flex",
-          isEven && "flex-row-reverse"
+          "mb-60 flex flex-col gap-32 md:mb-100 md:flex-row md:items-center md:gap-60",
+          isEven ? "md:flex-row-reverse" : "",
+          index < content2.secondaryFeatures.length - 1 && "border-b border-divider pb-60 md:pb-100"
         ),
         children: [
-          /* @__PURE__ */ jsx(
-            "img",
-            {
-              src: feature.image,
-              className: "mr-auto w-580 max-w-full rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.08)]",
-              "data-testid": `secondary-image-${index}`,
-              alt: ""
-            }
-          ),
-          /* @__PURE__ */ jsxs("div", { className: "ml-30 mr-auto max-w-350 pt-30", children: [
-            /* @__PURE__ */ jsx(
-              "small",
-              {
-                className: "mb-16 text-xs font-medium uppercase tracking-widest text-muted",
-                "data-testid": `secondary-subtitle-${index}`,
-                children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
-              }
-            ),
+          /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+            /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-12 rounded-full bg-primary/10 px-16 py-8", children: [
+              /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "sm" }),
+              /* @__PURE__ */ jsx(
+                "span",
+                {
+                  className: "text-xs font-medium uppercase tracking-wider text-primary",
+                  "data-testid": `secondary-subtitle-${index}`,
+                  children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
+                }
+              )
+            ] }),
             /* @__PURE__ */ jsx(
               "h3",
               {
-                className: "py-16 text-3xl",
+                className: "mt-16 mb-12 text-3xl font-bold md:text-4xl",
                 "data-testid": `secondary-title-${index}`,
                 children: /* @__PURE__ */ jsx(Trans, { message: feature.title })
               }
             ),
-            /* @__PURE__ */ jsx("div", { className: "h-2 w-50 bg-black/90 dark:bg-divider" }),
             /* @__PURE__ */ jsx(
-              "div",
+              "p",
               {
-                className: "my-20 text-[0.938rem]",
+                className: "text-lg leading-relaxed text-muted",
                 "data-testid": `secondary-description-${index}`,
                 children: /* @__PURE__ */ jsx(Trans, { message: feature.description })
               }
             )
-          ] })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsx("div", { className: "flex h-200 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 md:h-300", children: /* @__PURE__ */ jsx("div", { className: "flex h-120 w-120 items-center justify-center rounded-full bg-primary/20", children: /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "xl" }) }) }) })
         ]
       },
       index
     );
   }) }) });
 }
-function PricingSection({ content: content2 }) {
-  var _a;
-  const query = useProducts("landingPage");
-  const [selectedCycle, setSelectedCycle] = useState("yearly");
-  return /* @__PURE__ */ jsx("div", { className: "py-80 sm:py-128", id: "pricing", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-1280 px-24 lg:px-32", children: [
-    /* @__PURE__ */ jsxs("div", { className: "md:text-center", children: [
-      /* @__PURE__ */ jsx(
-        "h2",
-        {
-          className: "font-display text-3xl tracking-tight sm:text-4xl",
-          "data-testid": "pricingTitle",
-          children: /* @__PURE__ */ jsx(Trans, { message: content2.pricingTitle })
-        }
-      ),
-      /* @__PURE__ */ jsx("p", { className: "mt-16 text-lg text-muted", "data-testid": "pricingSubtitle", children: /* @__PURE__ */ jsx(Trans, { message: content2.pricingSubtitle }) })
-    ] }),
+function BottomCtaSection({ content: content2 }) {
+  return /* @__PURE__ */ jsx("section", { className: "bg-gradient-to-br from-primary to-primary/80 py-60 text-white md:py-80", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 text-center md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-600", children: [
     /* @__PURE__ */ jsx(
-      BillingCycleRadio,
+      "h2",
       {
-        products: (_a = query.data) == null ? void 0 : _a.products,
-        selectedCycle,
-        onChange: setSelectedCycle,
-        className: "my-50 flex justify-center",
-        size: "lg"
+        className: "mb-16 text-3xl font-bold md:text-4xl lg:text-5xl",
+        "data-testid": "footerTitle",
+        children: /* @__PURE__ */ jsx(Trans, { message: content2.footerTitle })
+      }
+    ),
+    content2.footerSubtitle && /* @__PURE__ */ jsx(
+      "p",
+      {
+        className: "mb-32 text-lg leading-relaxed text-white/90 md:text-xl",
+        "data-testid": "footerSubtitle",
+        children: /* @__PURE__ */ jsx(Trans, { message: content2.footerSubtitle })
       }
     ),
     /* @__PURE__ */ jsx(
-      PricingTable,
+      CtaButton,
       {
-        selectedCycle,
-        productLoader: "landingPage"
+        item: content2.actions.cta3,
+        size: "lg",
+        radius: "rounded",
+        variant: "raised",
+        color: "paper",
+        className: "min-w-200",
+        "data-testid": "cta3"
       }
     )
-  ] }) });
+  ] }) }) });
 }
-function BottomCta({ content: content2 }) {
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: "relative overflow-hidden bg-[rgb(37,99,235)] py-90 text-white md:py-128",
-      "data-testid": "footerImage",
-      children: [
-        /* @__PURE__ */ jsx(
-          "img",
-          {
-            src: content2.footerImage,
-            alt: "",
-            width: "2347",
-            height: "1244",
-            decoding: "async",
-            loading: "lazy",
-            className: "absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
-          }
-        ),
-        /* @__PURE__ */ jsx("div", { className: "relative mx-auto max-w-1280 px-24 text-center sm:px-16 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-512 text-center", children: [
-          /* @__PURE__ */ jsx(
-            "h2",
-            {
-              className: " font-display text-3xl tracking-tight sm:text-4xl",
-              "data-testid": "footerTitle",
-              children: /* @__PURE__ */ jsx(Trans, { message: content2.footerTitle })
-            }
-          ),
-          content2.footerSubtitle && /* @__PURE__ */ jsx(
-            "p",
-            {
-              className: "mt-16 text-lg tracking-tight",
-              "data-testid": "footerSubtitle",
-              children: /* @__PURE__ */ jsx(Trans, { message: content2.footerSubtitle })
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            CtaButton,
-            {
-              item: content2.actions.cta3,
-              size: "lg",
-              radius: "rounded-full",
-              variant: "outline",
-              color: "paper",
-              className: "mt-40 block",
-              "data-testid": "cta3"
-            }
-          )
-        ] }) })
-      ]
-    }
-  );
+function CustomFooter() {
+  var _a;
+  const year = (/* @__PURE__ */ new Date()).getFullYear();
+  const { branding, menus } = useSettings();
+  const primaryMenu = menus.find((m2) => {
+    var _a2;
+    return (_a2 = m2.positions) == null ? void 0 : _a2.includes("footer");
+  });
+  return /* @__PURE__ */ jsx("footer", { className: "bg-gray-900 py-40 text-white md:py-60", children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: [
+    primaryMenu && /* @__PURE__ */ jsx("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: (_a = primaryMenu.items) == null ? void 0 : _a.map((item, index) => /* @__PURE__ */ jsx(
+      Link,
+      {
+        to: item.action || "#",
+        className: "text-sm text-white/70 transition-colors hover:text-white",
+        children: /* @__PURE__ */ jsx(Trans, { message: item.label })
+      },
+      index
+    )) }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between", children: [
+      /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
+        Trans,
+        {
+          message: "Copyright © :year :name",
+          values: { year, name: branding.site_name }
+        }
+      ) }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-8", children: [
+        /* @__PURE__ */ jsx(FavoriteIcon, { className: "text-red-500", size: "sm" }),
+        /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(Trans, { message: "Built With Love By Jay Logan" }) })
+      ] })
+    ] })
+  ] }) });
 }
 function AuthRoute({ children, permission, requireLogin = true }) {
   const { isLoggedIn, hasPermission, isSubscribed } = useAuth();
@@ -11557,6 +10821,51 @@ function useConfirmTwoFactor(form) {
 function confirm(payload) {
   return apiClient.post("auth/user/confirmed-two-factor-authentication", payload).then((response) => response.data);
 }
+function Skeleton({
+  variant = "text",
+  animation = "wave",
+  size: size2,
+  className,
+  display = "block",
+  radius = "rounded",
+  style
+}) {
+  return /* @__PURE__ */ jsx(
+    "span",
+    {
+      style,
+      className: clsx(
+        "skeleton relative overflow-hidden bg-fg-base/4 bg-no-repeat will-change-transform",
+        radius,
+        skeletonSize({ variant, size: size2 }),
+        display,
+        variant === "text" && "origin-[0_55%] scale-y-[0.6]",
+        variant === "avatar" && "flex-shrink-0",
+        variant === "icon" && "mx-8 flex-shrink-0",
+        animation === "wave" && "skeleton-wave",
+        animation === "pulsate" && "skeleton-pulsate",
+        className
+      ),
+      "aria-busy": true,
+      "aria-live": "polite"
+    }
+  );
+}
+function skeletonSize({ variant, size: size2 }) {
+  if (size2) {
+    return size2;
+  }
+  switch (variant) {
+    case "avatar":
+      return "h-40 w-40";
+    case "icon":
+      return "h-24 h-24";
+    case "rect":
+      return "h-full w-full";
+    default:
+      return "w-full";
+  }
+}
 function useDisableTwoFactor() {
   return useMutation({
     mutationFn: disable,
@@ -12139,10 +11448,446 @@ const AuthRoutes = /* @__PURE__ */ jsxs(Fragment, { children: [
     }
   )
 ] });
+const endpoint = "billing/products";
+function useProducts(loader) {
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: () => fetchProducts(),
+    initialData: () => {
+      var _a;
+      if (loader) {
+        return (_a = getBootstrapData().loaders) == null ? void 0 : _a[loader];
+      }
+    }
+  });
+}
+function fetchProducts() {
+  return apiClient.get(endpoint).then((response) => {
+    return { products: response.data.pagination.data };
+  });
+}
 const ForumIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M15 4v7H5.17L4 12.17V4h11m1-2H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm5 4h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1z" }),
   "ForumOutlined"
 );
+const Radio = forwardRef((props, ref) => {
+  const { children, autoFocus, size: size2, invalid, isFirst, ...domProps } = props;
+  const inputRef = useObjectRef(ref);
+  useAutoFocus({ autoFocus }, inputRef);
+  const sizeClassNames2 = getSizeClassNames(size2);
+  return /* @__PURE__ */ jsxs(
+    "label",
+    {
+      className: clsx(
+        "inline-flex gap-8 select-none items-center whitespace-nowrap align-middle",
+        sizeClassNames2.label,
+        props.disabled && "text-disabled pointer-events-none",
+        props.invalid && "text-danger"
+      ),
+      children: [
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "radio",
+            className: clsx(
+              "focus-visible:ring outline-none",
+              "rounded-full transition-button border-2 appearance-none",
+              "border-text-muted disabled:border-disabled-fg checked:border-primary checked:hover:border-primary-dark",
+              "before:bg-primary disabled:before:bg-disabled-fg before:hover:bg-primary-dark",
+              "before:h-full before:w-full before:block before:rounded-full before:scale-10 before:opacity-0 before:transition before:duration-200",
+              "checked:before:scale-[.65] checked:before:opacity-100",
+              sizeClassNames2.circle
+            ),
+            ref: inputRef,
+            ...domProps
+          }
+        ),
+        children && /* @__PURE__ */ jsx("span", { children })
+      ]
+    }
+  );
+});
+function FormRadio(props) {
+  const {
+    field: { onChange, onBlur, value, ref },
+    fieldState: { invalid }
+  } = useController({
+    name: props.name
+  });
+  const formProps = {
+    onChange,
+    onBlur,
+    checked: props.value === value,
+    invalid: props.invalid || invalid
+  };
+  return /* @__PURE__ */ jsx(Radio, { ref, ...mergeProps(formProps, props) });
+}
+function getSizeClassNames(size2) {
+  switch (size2) {
+    case "xs":
+      return { circle: "h-12 w-12", label: "text-xs" };
+    case "sm":
+      return { circle: "h-16 w-16", label: "text-sm" };
+    case "lg":
+      return { circle: "h-24 w-24", label: "text-lg" };
+    default:
+      return { circle: "h-20 w-20", label: "text-base" };
+  }
+}
+const RadioGroup = forwardRef(
+  (props, ref) => {
+    const style = getInputFieldClassNames(props);
+    const {
+      label,
+      children,
+      size: size2,
+      className,
+      orientation = "horizontal",
+      disabled,
+      required,
+      invalid,
+      errorMessage,
+      description
+    } = props;
+    const labelProps = {};
+    const id2 = useId();
+    const name = props.name || id2;
+    return /* @__PURE__ */ jsxs(
+      "fieldset",
+      {
+        "aria-describedby": description ? `${id2}-description` : void 0,
+        ref,
+        className: clsx("text-left", className),
+        children: [
+          label && /* @__PURE__ */ jsx("legend", { className: style.label, ...labelProps, children: label }),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: clsx(
+                "flex",
+                label ? "mt-6" : "mt-0",
+                orientation === "vertical" ? "flex-col gap-10" : "flex-row gap-16"
+              ),
+              children: Children.map(children, (child) => {
+                if (isValidElement(child)) {
+                  return cloneElement(child, {
+                    name,
+                    size: size2,
+                    invalid: child.props.invalid || invalid || void 0,
+                    disabled: child.props.disabled || disabled,
+                    required: child.props.required || required
+                  });
+                }
+              })
+            }
+          ),
+          description && !errorMessage && /* @__PURE__ */ jsx("div", { className: style.description, id: `${id2}-description`, children: description }),
+          errorMessage && /* @__PURE__ */ jsx("div", { className: style.error, children: errorMessage })
+        ]
+      }
+    );
+  }
+);
+function FormRadioGroup({ children, ...props }) {
+  const {
+    fieldState: { error }
+  } = useController({
+    name: props.name
+  });
+  return /* @__PURE__ */ jsx(RadioGroup, { errorMessage: error == null ? void 0 : error.message, ...props, children });
+}
+function findBestPrice(token, prices) {
+  if (token === "monthly") {
+    const match2 = findMonthlyPrice(prices);
+    if (match2)
+      return match2;
+  }
+  if (token === "yearly") {
+    const match2 = findYearlyPrice(prices);
+    if (match2)
+      return match2;
+  }
+  return prices[0];
+}
+function findYearlyPrice(prices) {
+  return prices.find((price) => {
+    if (price.interval === "month" && price.interval_count >= 12) {
+      return price;
+    }
+    if (price.interval === "year" && price.interval_count >= 1) {
+      return price;
+    }
+  });
+}
+function findMonthlyPrice(prices) {
+  return prices.find((price) => {
+    if (price.interval === "day" && price.interval_count >= 30) {
+      return price;
+    }
+    if (price.interval === "month" && price.interval_count >= 1) {
+      return price;
+    }
+  });
+}
+const UpsellLabel = memo(({ products }) => {
+  const upsellPercentage = calcHighestUpsellPercentage(products);
+  if (upsellPercentage <= 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("span", { className: "font-medium text-positive-darker", children: [
+    " ",
+    "(",
+    /* @__PURE__ */ jsx(
+      Trans,
+      {
+        message: "Save up to :percentage%",
+        values: { percentage: upsellPercentage }
+      }
+    ),
+    ")"
+  ] }) });
+});
+function calcHighestUpsellPercentage(products) {
+  if (!(products == null ? void 0 : products.length))
+    return 0;
+  const decreases = products.map((product) => {
+    if (product.hidden)
+      return 0;
+    const monthly = findBestPrice("monthly", product.prices);
+    const yearly = findBestPrice("yearly", product.prices);
+    if (!monthly || !yearly)
+      return 0;
+    const monthlyAmount = monthly.amount * 12;
+    const yearlyAmount = yearly.amount;
+    const savingsPercentage = Math.round(
+      (monthlyAmount - yearlyAmount) / monthlyAmount * 100
+    );
+    if (savingsPercentage > 0 && savingsPercentage <= 200) {
+      return savingsPercentage;
+    }
+    return 0;
+  });
+  return Math.max(Math.max(...decreases), 0);
+}
+function BillingCycleRadio({
+  selectedCycle,
+  onChange,
+  products,
+  ...radioGroupProps
+}) {
+  return /* @__PURE__ */ jsxs(RadioGroup, { ...radioGroupProps, children: [
+    /* @__PURE__ */ jsxs(
+      Radio,
+      {
+        value: "yearly",
+        checked: selectedCycle === "yearly",
+        onChange: (e) => {
+          onChange(e.target.value);
+        },
+        children: [
+          /* @__PURE__ */ jsx(Trans, { message: "Annual" }),
+          /* @__PURE__ */ jsx(UpsellLabel, { products })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      Radio,
+      {
+        value: "monthly",
+        checked: selectedCycle === "monthly",
+        onChange: (e) => {
+          onChange(e.target.value);
+        },
+        children: /* @__PURE__ */ jsx(Trans, { message: "Monthly" })
+      }
+    )
+  ] });
+}
+const FormattedCurrency = memo(
+  ({ value, currency }) => {
+    const formatter = useNumberFormatter({
+      style: "currency",
+      currency,
+      currencyDisplay: "narrowSymbol"
+    });
+    if (isNaN(value)) {
+      value = 0;
+    }
+    return /* @__PURE__ */ jsx(Fragment, { children: formatter.format(value) });
+  }
+);
+function FormattedPrice({
+  price,
+  variant = "slash",
+  className,
+  priceClassName,
+  periodClassName
+}) {
+  if (!price)
+    return null;
+  const translatedInterval = /* @__PURE__ */ jsx(Trans, { message: price.interval });
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex gap-6 items-center", className), children: [
+    /* @__PURE__ */ jsx("div", { className: priceClassName, children: /* @__PURE__ */ jsx(
+      FormattedCurrency,
+      {
+        value: price.amount / (price.interval_count ?? 1),
+        currency: price.currency
+      }
+    ) }),
+    variant === "slash" ? /* @__PURE__ */ jsxs("div", { className: periodClassName, children: [
+      " / ",
+      translatedInterval
+    ] }) : /* @__PURE__ */ jsxs("div", { className: periodClassName, children: [
+      /* @__PURE__ */ jsx(Trans, { message: "per" }),
+      " ",
+      /* @__PURE__ */ jsx("br", {}),
+      " ",
+      translatedInterval
+    ] })
+  ] });
+}
+function ProductFeatureList({ product }) {
+  if (!product.feature_list.length)
+    return null;
+  return /* @__PURE__ */ jsxs("div", { className: "mt-32 border-t pt-24", children: [
+    /* @__PURE__ */ jsx("div", { className: "mb-10 text-sm font-semibold", children: /* @__PURE__ */ jsx(Trans, { message: "What's included" }) }),
+    product.feature_list.map((feature) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-10 py-6 text-sm", children: [
+      /* @__PURE__ */ jsx(CheckIcon, { className: "text-primary", size: "sm" }),
+      /* @__PURE__ */ jsx(Trans, { message: feature })
+    ] }, feature))
+  ] });
+}
+function PricingTable({
+  selectedCycle,
+  className,
+  productLoader
+}) {
+  const query = useProducts(productLoader);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "flex flex-col items-stretch gap-24 overflow-x-auto overflow-y-visible pb-20 md:flex-row md:justify-center",
+        className
+      ),
+      children: /* @__PURE__ */ jsx(AnimatePresence, { initial: false, mode: "wait", children: query.data ? /* @__PURE__ */ jsx(
+        PlanList,
+        {
+          plans: query.data.products,
+          selectedPeriod: selectedCycle
+        },
+        "plan-list"
+      ) : /* @__PURE__ */ jsx(SkeletonLoader, {}, "skeleton-loader") })
+    }
+  );
+}
+function PlanList({ plans, selectedPeriod }) {
+  const { isLoggedIn, isSubscribed } = useAuth();
+  const filteredPlans = plans.filter((plan) => !plan.hidden);
+  return /* @__PURE__ */ jsx(Fragment, { children: filteredPlans.map((plan, index) => {
+    const isFirst = index === 0;
+    const isLast = index === filteredPlans.length - 1;
+    const price = findBestPrice(selectedPeriod, plan.prices);
+    let upgradeRoute;
+    if (!isLoggedIn) {
+      upgradeRoute = `/register?redirectFrom=pricing`;
+    }
+    if (isSubscribed) {
+      upgradeRoute = `/change-plan/${plan.id}/${price == null ? void 0 : price.id}/confirm`;
+    }
+    if (isLoggedIn && !plan.free) {
+      upgradeRoute = `/checkout/${plan.id}/${price == null ? void 0 : price.id}`;
+    }
+    return /* @__PURE__ */ jsxs(
+      m.div,
+      {
+        ...opacityAnimation,
+        className: clsx(
+          "w-full rounded-panel border bg px-28 py-28 shadow-lg md:min-w-240 md:max-w-350",
+          isFirst && "ml-auto",
+          isLast && "mr-auto"
+        ),
+        children: [
+          /* @__PURE__ */ jsxs("div", { className: "mb-32", children: [
+            /* @__PURE__ */ jsx(
+              Chip,
+              {
+                radius: "rounded",
+                size: "sm",
+                className: clsx(
+                  "mb-20 w-min",
+                  !plan.recommended && "invisible"
+                ),
+                children: /* @__PURE__ */ jsx(Trans, { message: "Most popular" })
+              }
+            ),
+            /* @__PURE__ */ jsx("div", { className: "mb-12 text-xl font-semibold", children: /* @__PURE__ */ jsx(Trans, { message: plan.name }) }),
+            /* @__PURE__ */ jsx("div", { className: "text-sm text-muted", children: /* @__PURE__ */ jsx(Trans, { message: plan.description }) })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            price ? /* @__PURE__ */ jsx(
+              FormattedPrice,
+              {
+                priceClassName: "font-bold text-4xl",
+                periodClassName: "text-muted text-xs",
+                variant: "separateLine",
+                price
+              }
+            ) : /* @__PURE__ */ jsx("div", { className: "text-4xl font-bold", children: /* @__PURE__ */ jsx(Trans, { message: "Free" }) }),
+            /* @__PURE__ */ jsx("div", { className: "mt-60", children: /* @__PURE__ */ jsx(
+              Button,
+              {
+                variant: plan.recommended ? "flat" : "outline",
+                color: "primary",
+                className: "w-full",
+                size: "md",
+                elementType: upgradeRoute ? Link : void 0,
+                disabled: !upgradeRoute,
+                onClick: () => {
+                  if (isLoggedIn || !price || !plan)
+                    return;
+                  setInLocalStorage("be.onboarding.selected", {
+                    productId: plan.id,
+                    priceId: price.id
+                  });
+                },
+                to: upgradeRoute,
+                children: plan.free ? /* @__PURE__ */ jsx(Trans, { message: "Get started" }) : /* @__PURE__ */ jsx(Trans, { message: "Upgrade" })
+              }
+            ) }),
+            /* @__PURE__ */ jsx(ProductFeatureList, { product: plan })
+          ] })
+        ]
+      },
+      plan.id
+    );
+  }) });
+}
+function SkeletonLoader() {
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-1"),
+    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-2"),
+    /* @__PURE__ */ jsx(PlanSkeleton, {}, "skeleton-3")
+  ] });
+}
+function PlanSkeleton() {
+  return /* @__PURE__ */ jsxs(
+    m.div,
+    {
+      ...opacityAnimation,
+      className: "w-full rounded-lg border px-28 py-90 shadow-lg md:max-w-350",
+      children: [
+        /* @__PURE__ */ jsx(Skeleton, { className: "my-10" }),
+        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40" }),
+        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40 h-30" }),
+        /* @__PURE__ */ jsx(Skeleton, { className: "mb-40 h-40" }),
+        /* @__PURE__ */ jsx(Skeleton, { className: "mb-20" }),
+        /* @__PURE__ */ jsx(Skeleton, {}),
+        /* @__PURE__ */ jsx(Skeleton, {})
+      ]
+    }
+  );
+}
 function PricingPage() {
   var _a;
   const query = useProducts("pricingPage");
@@ -12191,9 +11936,9 @@ function ContactSection() {
   ] });
 }
 const BillingPageRoutes = React.lazy(
-  () => import("./assets/billing-page-routes-cf9e147c.mjs")
+  () => import("./assets/billing-page-routes-ed346a6b.mjs")
 );
-const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-c0db39ad.mjs"));
+const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-e90af49a.mjs"));
 const BillingRoutes = /* @__PURE__ */ jsxs(Fragment, { children: [
   /* @__PURE__ */ jsx(Route, { path: "/pricing", element: /* @__PURE__ */ jsx(PricingPage, {}) }),
   /* @__PURE__ */ jsx(
@@ -12692,6 +12437,90 @@ function ShareLinkButton({
       )
     ] })
   ] });
+}
+function AdHost({ slot, className }) {
+  var _a;
+  const settings = useSettings();
+  const { isSubscribed } = useAuth();
+  const adCode2 = useMemo(() => {
+    return dot.pick(`ads.${slot}`, settings);
+  }, [slot, settings]);
+  if (((_a = settings.ads) == null ? void 0 : _a.disable) || isSubscribed || !adCode2)
+    return null;
+  return /* @__PURE__ */ jsx(InvariantAd, { className, slot, adCode: adCode2 });
+}
+const InvariantAd = memo(
+  ({ slot, adCode: adCode2, className }) => {
+    const ref = useRef(null);
+    const id2 = useId();
+    useEffect(() => {
+      if (ref.current) {
+        loadAdScripts(adCode2, ref.current).then(() => {
+          executeAdJavascript(adCode2, id2);
+        });
+      }
+      return () => {
+        delete window["google_ad_modifications"];
+      };
+    }, [adCode2, id2]);
+    useEffect(() => {
+      if (ref.current) {
+        const scrollParent = getScrollParent(ref.current);
+        if (scrollParent) {
+          const observer = new MutationObserver(function() {
+            scrollParent.style.height = "";
+            scrollParent.style.minHeight = "";
+          });
+          observer.observe(scrollParent, {
+            attributes: true,
+            attributeFilter: ["style"]
+          });
+          return () => observer.disconnect();
+        }
+      }
+    }, []);
+    return /* @__PURE__ */ jsx(
+      "div",
+      {
+        ref,
+        id: id2,
+        className: clsx(
+          "ad-host flex max-h-[600px] min-h-90 w-full max-w-full items-center justify-center overflow-hidden",
+          `${slot.replace(/\./g, "-")}-host`,
+          className
+        ),
+        dangerouslySetInnerHTML: { __html: getAdHtml(adCode2) }
+      }
+    );
+  },
+  () => {
+    return false;
+  }
+);
+function getAdHtml(adCode2) {
+  return adCode2 == null ? void 0 : adCode2.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").trim();
+}
+function loadAdScripts(adCode2, parentEl) {
+  const promises = [];
+  const pattern2 = /<script.*?src=['"](.*?)['"]/g;
+  let match2;
+  while (match2 = pattern2.exec(adCode2)) {
+    if (match2[1]) {
+      promises.push(lazyLoader.loadAsset(match2[1], { type: "js", parentEl }));
+    }
+  }
+  return Promise.all(promises);
+}
+function executeAdJavascript(adCode, id) {
+  const pattern = /<script\b[^>]*>([\s\S]*?)<\/script>/g;
+  let content;
+  while (content = pattern.exec(adCode)) {
+    if (content[1]) {
+      const r = `var d = document.createElement('div'); d.innerHTML = $1; document.getElementById('${id}').appendChild(d.firstChild);`;
+      const toEval = content[1].replace(/document.write\((.+?)\);/, r);
+      eval(toEval);
+    }
+  }
 }
 function buildLongUrlWithUtm(link2) {
   const url = new URL(link2.long_url);
@@ -14350,12 +14179,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-8a0a2533.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-4ebfe052.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
-  () => import("./assets/swagger-api-docs-page-016d81b4.mjs")
+  () => import("./assets/swagger-api-docs-page-6736196b.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-2fef812b.mjs").then((n) => n.aY)
+  () => import("./assets/dashboard-routes-a9890fe4.mjs").then((n) => n.aY)
 );
 function AppRoutes() {
   var _a;
@@ -14557,7 +14386,7 @@ export {
   FileUploadProvider as Z,
   useAppearanceEditorMode as _,
   apiClient as a,
-  errorStatusIs as a$,
+  UploadedFile as a$,
   IllustratedMessage as a0,
   SvgImage as a1,
   useNavigate as a2,
@@ -14568,33 +14397,33 @@ export {
   getBootstrapData as a7,
   useIsMobileMediaQuery as a8,
   SelectForwardRef as a9,
-  FormattedNumber as aA,
-  useCustomPage as aB,
-  PageMetaTags as aC,
-  PageStatus as aD,
-  FormattedRelativeTime as aE,
-  closeDialog as aF,
-  AuthRoute as aG,
-  NotFoundPage as aH,
-  Navbar as aI,
-  Footer as aJ,
-  getFromLocalStorage as aK,
-  Underlay as aL,
-  useUserTimezone as aM,
-  useSelectedLocale as aN,
-  useDateFormatter as aO,
-  shallowEqual as aP,
-  useAutoFocus as aQ,
-  useIsDarkMode as aR,
-  Checkbox as aS,
-  hasNextPage as aT,
-  ArrowDropDownIcon as aU,
-  AvatarPlaceholderIcon as aV,
-  useListbox as aW,
-  Listbox as aX,
-  Popover as aY,
-  KeyboardArrowDownIcon as aZ,
-  useListboxKeyboardNavigation as a_,
+  useCustomPage as aA,
+  PageMetaTags as aB,
+  PageStatus as aC,
+  FormattedRelativeTime as aD,
+  closeDialog as aE,
+  AuthRoute as aF,
+  NotFoundPage as aG,
+  Navbar as aH,
+  Footer as aI,
+  getFromLocalStorage as aJ,
+  Underlay as aK,
+  useUserTimezone as aL,
+  useSelectedLocale as aM,
+  useDateFormatter as aN,
+  shallowEqual as aO,
+  useAutoFocus as aP,
+  useIsDarkMode as aQ,
+  Checkbox as aR,
+  hasNextPage as aS,
+  ArrowDropDownIcon as aT,
+  AvatarPlaceholderIcon as aU,
+  useListbox as aV,
+  Listbox as aW,
+  Popover as aX,
+  KeyboardArrowDownIcon as aY,
+  useListboxKeyboardNavigation as aZ,
+  errorStatusIs as a_,
   ProgressBar as aa,
   LinkIcon as ab,
   ExternalLink as ac,
@@ -14622,99 +14451,100 @@ export {
   useProducts as ay,
   FormattedPrice as az,
   useLocalStorage as b,
-  MouseIcon as b$,
-  UploadedFile as b0,
-  WorkspaceQueryKeys as b1,
-  useActiveWorkspaceId as b2,
-  useAuth as b3,
-  PersonalWorkspace as b4,
-  ExitToAppIcon as b5,
-  UnfoldMoreIcon as b6,
-  useUserWorkspaces as b7,
-  useActiveWorkspace as b8,
-  ProgressBarBase as b9,
-  Disk as bA,
-  UnfoldLessIcon as bB,
-  BillingCycleRadio as bC,
-  findBestPrice as bD,
-  FormattedCurrency as bE,
-  removeFromLocalStorage as bF,
-  LocaleSwitcher as bG,
-  ProductFeatureList as bH,
-  useCallbackRef as bI,
-  AccountCircleIcon as bJ,
-  AddAPhotoIcon as bK,
-  ApiIcon as bL,
-  CheckBoxOutlineBlankIcon as bM,
-  CheckCircleIcon as bN,
-  ComputerIcon as bO,
-  DangerousIcon as bP,
-  DarkModeIcon as bQ,
+  LightbulbIcon as b$,
+  WorkspaceQueryKeys as b0,
+  useActiveWorkspaceId as b1,
+  useAuth as b2,
+  PersonalWorkspace as b3,
+  ExitToAppIcon as b4,
+  UnfoldMoreIcon as b5,
+  useUserWorkspaces as b6,
+  useActiveWorkspace as b7,
+  ProgressBarBase as b8,
+  AdHost as b9,
+  UnfoldLessIcon as bA,
+  BillingCycleRadio as bB,
+  findBestPrice as bC,
+  FormattedCurrency as bD,
+  removeFromLocalStorage as bE,
+  LocaleSwitcher as bF,
+  ProductFeatureList as bG,
+  useCallbackRef as bH,
+  AccountCircleIcon as bI,
+  AddAPhotoIcon as bJ,
+  ApiIcon as bK,
+  CheckBoxOutlineBlankIcon as bL,
+  CheckCircleIcon as bM,
+  ComputerIcon as bN,
+  DangerousIcon as bO,
+  DarkModeIcon as bP,
+  DashboardIcon as bQ,
   DevicesIcon as bR,
   EmailIcon as bS,
   ErrorOutlineIcon as bT,
-  FileDownloadDoneIcon as bU,
-  ForumIcon as bV,
-  GroupAddIcon as bW,
-  LanguageIcon as bX,
-  LightModeIcon as bY,
-  LightbulbIcon as bZ,
-  MenuIcon as b_,
-  AdHost as ba,
-  useThemeSelector as bb,
-  lazyLoader as bc,
-  prefetchValueLists as bd,
-  LockIcon as be,
-  SettingsIcon as bf,
-  urlIsValid as bg,
-  removeEmptyValuesFromObject as bh,
-  useRecaptcha as bi,
-  LinkClipboardButton as bj,
-  ShareLinkButton as bk,
-  shareLink as bl,
-  WarningIcon as bm,
-  FloatingLinkOverlay as bn,
-  ImageIcon as bo,
-  SocialsList as bp,
-  parse as bq,
-  WidgetRenderers as br,
-  BiolinkLayout as bs,
-  RadioGroup as bt,
-  Radio as bu,
-  cssPropsFromBgConfig as bv,
-  useCollator as bw,
-  loadFonts as bx,
-  notifySvg as by,
-  useActiveUpload as bz,
+  FavoriteIcon as bU,
+  FileDownloadDoneIcon as bV,
+  ForumIcon as bW,
+  GroupAddIcon as bX,
+  InsertLinkIcon as bY,
+  LanguageIcon as bZ,
+  LightModeIcon as b_,
+  useThemeSelector as ba,
+  lazyLoader as bb,
+  prefetchValueLists as bc,
+  LockIcon as bd,
+  SettingsIcon as be,
+  removeEmptyValuesFromObject as bf,
+  useRecaptcha as bg,
+  LinkClipboardButton as bh,
+  BarChartIcon as bi,
+  ShareLinkButton as bj,
+  shareLink as bk,
+  WarningIcon as bl,
+  FloatingLinkOverlay as bm,
+  ImageIcon as bn,
+  SocialsList as bo,
+  parse as bp,
+  WidgetRenderers as bq,
+  BiolinkLayout as br,
+  RadioGroup as bs,
+  Radio as bt,
+  cssPropsFromBgConfig as bu,
+  useCollator as bv,
+  loadFonts as bw,
+  notifySvg as bx,
+  useActiveUpload as by,
+  Disk as bz,
   createSvgIcon as c,
-  NotificationsIcon as c0,
-  PaymentsIcon as c1,
-  PeopleIcon as c2,
-  PersonIcon as c3,
-  PhonelinkLockIcon as c4,
-  QrCode2Icon as c5,
-  ShareIcon as c6,
-  SmartphoneIcon as c7,
-  TabletIcon as c8,
-  elementToTree as c9,
-  AmazonIcon as ca,
-  AppleIcon as cb,
-  BandcampIcon as cc,
-  EnvatoIcon as cd,
-  FacebookIcon as ce,
-  InstagramIcon as cf,
-  LinkedinIcon as cg,
-  PatreonIcon as ch,
-  PinterestIcon as ci,
-  SnapchatIcon as cj,
-  SoundcloudIcon as ck,
-  SpotifyIcon as cl,
-  TelegramIcon as cm,
-  TiktokIcon as cn,
-  TwitchIcon as co,
-  TwitterIcon as cp,
-  WhatsappIcon as cq,
-  YoutubeIcon as cr,
+  MenuIcon as c0,
+  NotificationsIcon as c1,
+  PaymentsIcon as c2,
+  PeopleIcon as c3,
+  PersonIcon as c4,
+  PhonelinkLockIcon as c5,
+  QrCode2Icon as c6,
+  ShareIcon as c7,
+  SmartphoneIcon as c8,
+  TabletIcon as c9,
+  elementToTree as ca,
+  AmazonIcon as cb,
+  AppleIcon as cc,
+  BandcampIcon as cd,
+  EnvatoIcon as ce,
+  FacebookIcon as cf,
+  InstagramIcon as cg,
+  LinkedinIcon as ch,
+  PatreonIcon as ci,
+  PinterestIcon as cj,
+  SnapchatIcon as ck,
+  SoundcloudIcon as cl,
+  SpotifyIcon as cm,
+  TelegramIcon as cn,
+  TiktokIcon as co,
+  TwitchIcon as cp,
+  TwitterIcon as cq,
+  WhatsappIcon as cr,
+  YoutubeIcon as cs,
   useTrans as d,
   useDialogContext as e,
   DialogHeader as f,

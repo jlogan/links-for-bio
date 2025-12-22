@@ -2,23 +2,21 @@ import clsx from 'clsx';
 import {LandingPageContent} from './landing-page-content';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {Button, ButtonProps} from '@common/ui/buttons/button';
-import {MixedImage} from '@common/ui/images/mixed-image';
 import {Footer} from '@common/ui/footer/footer';
 import {Trans} from '@common/i18n/trans';
-import {AdHost} from '@common/admin/ads/ad-host';
 import {Link} from 'react-router-dom';
 import {createSvgIconFromTree} from '@common/icons/create-svg-icon';
+import {InsertLinkIcon} from '@common/icons/material/InsertLink';
+import {BarChartIcon} from '@common/icons/material/BarChart';
+import {LanguageIcon} from '@common/icons/material/Language';
+import {LinkIcon} from '@common/icons/material/Link';
+import {DashboardIcon} from '@common/icons/material/Dashboard';
+import {FavoriteIcon} from '@common/icons/material/Favorite';
 import {MenuItemConfig} from '@common/core/settings/settings';
-import {Fragment, useState} from 'react';
+import {Fragment} from 'react';
 import {DefaultMetaTags} from '@common/seo/default-meta-tags';
 import {useSettings} from '@common/core/settings/use-settings';
-import {LandingPageNewLinkForm} from '@app/landing/landing-page-new-link-form';
-import {useAuth} from '@common/auth/use-auth';
-import {LandingPageStats} from '@app/landing/landing-page-stats';
-import {PricingTable} from '@common/billing/pricing-table/pricing-table';
-import {BillingCycleRadio} from '@common/billing/pricing-table/billing-cycle-radio';
-import {UpsellBillingCycle} from '@common/billing/pricing-table/find-best-price';
-import {useProducts} from '@common/billing/pricing-table/use-products';
+import {UsernameCheckerForm} from '@app/landing/username-checker-form';
 
 interface ContentProps {
   content: LandingPageContent;
@@ -27,121 +25,102 @@ export function LandingPage() {
   const settings = useSettings();
   const homepage = settings.homepage as {appearance: LandingPageContent};
 
-  const showPricing =
-    settings.links.homepage_pricing && settings.billing.enable;
-
   return (
     <Fragment>
       <DefaultMetaTags />
-      <Fragment>
-        <HeroHeader content={homepage.appearance} />
-        <AdHost slot="landing" className="mx-14 -mt-30 mb-14 md:mb-70" />
-        <PrimaryFeatures content={homepage.appearance} />
-        <div className="mt-100 h-1 bg-divider" />
-        <SecondaryFeatures content={homepage.appearance} />
-        {settings.links?.homepage_stats && <LandingPageStats />}
-        <BottomCta content={homepage.appearance} />
-        {showPricing && <PricingSection content={homepage.appearance} />}
-        <Footer className="landing-container" />
-      </Fragment>
+      <div className="min-h-screen bg-paper">
+        <HeroSection content={homepage.appearance} />
+        <FeaturesSection content={homepage.appearance} />
+        <SecondaryFeaturesSection content={homepage.appearance} />
+        <BottomCtaSection content={homepage.appearance} />
+        <CustomFooter />
+      </div>
     </Fragment>
   );
 }
 
-function HeroHeader({content}: ContentProps) {
-  const {hasPermission} = useAuth();
-  const {
-    links: {homepage_creation},
-  } = useSettings();
-
-  const {
-    headerTitle,
-    headerSubtitle,
-    headerImage,
-    headerImageOpacity,
-    actions,
-    headerOverlayColor1,
-    headerOverlayColor2,
-  } = content;
-  let overlayBackground = undefined;
-
-  if (headerOverlayColor1 && headerOverlayColor2) {
-    overlayBackground = `linear-gradient(45deg, ${headerOverlayColor1} 0%, ${headerOverlayColor2} 100%)`;
-  } else if (headerOverlayColor1) {
-    overlayBackground = headerOverlayColor1;
-  } else if (headerOverlayColor2) {
-    overlayBackground = headerOverlayColor2;
-  }
+function HeroSection({content}: ContentProps) {
+  const {headerTitle, headerSubtitle, actions} = content;
 
   return (
-    <header className="relative isolate mb-14 overflow-hidden md:mb-60">
-      <img
-        data-testid="headerImage"
-        src={headerImage}
-        style={{
-          opacity: headerImageOpacity,
-        }}
-        alt=""
-        width="2347"
-        height="1244"
-        decoding="async"
-        loading="lazy"
-        className="absolute left-1/2 top-1/2 z-20 max-w-none -translate-x-1/2 -translate-y-1/2"
+    <section className="relative overflow-hidden bg-paper">
+      <Navbar
+        color="transparent"
+        className="absolute top-0 left-0 right-0 z-50"
+        menuPosition="homepage-navbar"
+        primaryButtonColor="primary"
       />
-      <div
-        className="absolute z-10 h-full w-full bg-[rgb(37,99,235)]"
-        style={{background: overlayBackground}}
-      />
-      <div className="relative z-30 flex h-full flex-col">
-        <Navbar
-          color="transparent"
-          className="flex-shrink-0"
-          menuPosition="homepage-navbar"
-          primaryButtonColor="paper"
-        />
-        <div className="mx-auto flex max-w-850 flex-auto flex-col items-center justify-center px-14 py-50 text-center text-white lg:py-90">
-          {headerTitle && (
-            <h1
-              className="text-3xl font-normal md:text-5xl"
-              data-testid="headerTitle"
-            >
-              <Trans message={headerTitle} />
-            </h1>
-          )}
-          {headerSubtitle && (
-            <div
-              className="max-auto mt-24 max-w-640 text-lg tracking-tight md:text-xl"
-              data-testid="headerSubtitle"
-            >
-              <Trans message={headerSubtitle} />
+      <div className="container mx-auto px-16 pt-100 pb-60 md:px-24 md:pt-120 md:pb-80 lg:px-32">
+        <div className="grid gap-40 md:grid-cols-2 md:items-center md:gap-60 lg:gap-80">
+          {/* Left side - Text content */}
+          <div className="text-center md:text-left">
+            {headerTitle && (
+              <h1
+                className="mb-16 text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl"
+                data-testid="headerTitle"
+              >
+                <Trans message={headerTitle} />
+              </h1>
+            )}
+            {headerSubtitle && (
+              <p
+                className="mb-32 text-lg leading-relaxed text-muted md:text-xl"
+                data-testid="headerSubtitle"
+              >
+                <Trans message={headerSubtitle} />
+              </p>
+            )}
+            <UsernameCheckerForm />
+            <div className="mt-24 flex flex-col gap-12 sm:flex-row sm:justify-center md:justify-start">
+              <CtaButton
+                item={actions.cta1}
+                variant="raised"
+                color="primary"
+                size="lg"
+                radius="rounded"
+                data-testid="cta1"
+                className="min-w-180"
+              />
+              <CtaButton
+                item={actions.cta2}
+                variant="outline"
+                color="primary"
+                size="lg"
+                radius="rounded"
+                data-testid="cta2"
+              />
             </div>
-          )}
-          {homepage_creation && hasPermission('links.create') && (
-            <LandingPageNewLinkForm content={content} />
-          )}
-          <div className="flex min-h-50 gap-20 pb-30 pt-70 empty:min-h-0 md:pb-50 md:pt-90">
-            <CtaButton
-              item={actions.cta1}
-              variant="raised"
-              color="primary"
-              size="lg"
-              radius="rounded-full"
-              data-testid="cta1"
-              className="min-w-180"
-            />
-            <CtaButton
-              item={actions.cta2}
-              variant="text"
-              color="paper"
-              size="lg"
-              radius="rounded-full"
-              data-testid="cta2"
-            />
+          </div>
+          {/* Right side - Visual element */}
+          <div className="flex items-center justify-center">
+            <div className="relative w-full max-w-500">
+              <div className="relative rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-40 md:p-60">
+                <div className="flex flex-col gap-24 rounded-xl bg-paper p-32 shadow-lg">
+                  <div className="flex items-center gap-16">
+                    <div className="flex h-48 w-48 items-center justify-center rounded-full bg-primary/10">
+                      <InsertLinkIcon className="text-primary" size="lg" />
+                    </div>
+                    <div>
+                      <div className="h-12 w-120 rounded bg-divider"></div>
+                      <div className="mt-8 h-8 w-80 rounded bg-divider"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-12">
+                    <div className="h-8 w-full rounded bg-divider"></div>
+                    <div className="h-8 w-3/4 rounded bg-divider"></div>
+                  </div>
+                  <div className="flex gap-12">
+                    <div className="h-32 flex-1 rounded bg-primary/10"></div>
+                    <div className="h-32 flex-1 rounded bg-primary/10"></div>
+                    <div className="h-32 flex-1 rounded bg-primary/10"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="absolute bottom-0 z-20 h-[6vw] w-full translate-y-1/2 -skew-y-3 transform bg"></div>
-    </header>
+    </section>
   );
 }
 
@@ -164,154 +143,119 @@ function CtaButton({item, ...buttonProps}: CtaButtonProps) {
   );
 }
 
-function PrimaryFeatures({content}: ContentProps) {
+function FeaturesSection({content}: ContentProps) {
+  const iconMap = [InsertLinkIcon, BarChartIcon, LanguageIcon];
+  
   return (
-    <div
-      className="landing-container z-20 items-stretch gap-26 md:flex"
-      id="primary-features"
-    >
-      {content.primaryFeatures.map((feature, index) => (
-        <div
-          key={index}
-          className="mb-14 flex-1 rounded-2xl px-24 py-36 text-center shadow-[0_10px_30px_rgba(0,0,0,0.08)] dark:bg-alt md:mb-0"
-          data-testid={`primary-root-${index}`}
-        >
-          <MixedImage
-            className="mx-auto mb-30 h-128"
-            data-testid={`primary-image-${index}`}
-            src={feature.image}
-          />
-          <h2
-            className="my-16 text-lg font-medium"
-            data-testid={`primary-title-${index}`}
-          >
-            <Trans message={feature.title} />
-          </h2>
-          <div
-            className="text-md text-[0.938rem]"
-            data-testid={`primary-subtitle-${index}`}
-          >
-            <Trans message={feature.subtitle} />
-          </div>
+    <section className="bg-alt py-60 md:py-80">
+      <div className="container mx-auto px-16 md:px-24 lg:px-32">
+        <div className="grid gap-24 md:grid-cols-3 md:gap-32">
+          {content.primaryFeatures.map((feature, index) => {
+            const Icon = iconMap[index] || InsertLinkIcon;
+            return (
+              <div
+                key={index}
+                className="rounded-xl bg-paper p-32 text-center transition-all hover:shadow-lg"
+                data-testid={`primary-root-${index}`}
+              >
+                <div className="mb-20 flex justify-center">
+                  <div className="flex h-64 w-64 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="text-primary" size="xl" />
+                  </div>
+                </div>
+                <h2
+                  className="mb-12 text-xl font-semibold"
+                  data-testid={`primary-title-${index}`}
+                >
+                  <Trans message={feature.title} />
+                </h2>
+                <p
+                  className="text-base leading-relaxed text-muted"
+                  data-testid={`primary-subtitle-${index}`}
+                >
+                  <Trans message={feature.subtitle} />
+                </p>
+              </div>
+            );
+          })}
         </div>
-      ))}
-    </div>
+      </div>
+    </section>
   );
 }
 
-function SecondaryFeatures({content}: ContentProps) {
+function SecondaryFeaturesSection({content}: ContentProps) {
+  const iconMap = [LinkIcon, BarChartIcon, DashboardIcon];
+  
   return (
-    <div className="relative overflow-hidden pt-100">
-      <div className="landing-container relative" id="features">
+    <section className="bg-paper py-60 md:py-100">
+      <div className="container mx-auto px-16 md:px-24 lg:px-32">
         {content.secondaryFeatures.map((feature, index) => {
+          const Icon = iconMap[index] || LinkIcon;
           const isEven = index % 2 === 0;
+          
           return (
             <div
               key={index}
               data-testid={`secondary-root-${index}`}
               className={clsx(
-                'relative z-20 mb-14 py-16 md:mb-80 md:flex',
-                isEven && 'flex-row-reverse'
+                'mb-60 flex flex-col gap-32 md:mb-100 md:flex-row md:items-center md:gap-60',
+                isEven ? 'md:flex-row-reverse' : '',
+                index < content.secondaryFeatures.length - 1 && 'border-b border-divider pb-60 md:pb-100'
               )}
             >
-              <img
-                src={feature.image}
-                className="mr-auto w-580 max-w-full rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
-                data-testid={`secondary-image-${index}`}
-                alt=""
-              />
-              <div className="ml-30 mr-auto max-w-350 pt-30">
-                <small
-                  className="mb-16 text-xs font-medium uppercase tracking-widest text-muted"
-                  data-testid={`secondary-subtitle-${index}`}
-                >
-                  <Trans message={feature.subtitle} />
-                </small>
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-12 rounded-full bg-primary/10 px-16 py-8">
+                  <Icon className="text-primary" size="sm" />
+                  <span
+                    className="text-xs font-medium uppercase tracking-wider text-primary"
+                    data-testid={`secondary-subtitle-${index}`}
+                  >
+                    <Trans message={feature.subtitle} />
+                  </span>
+                </div>
                 <h3
-                  className="py-16 text-3xl"
+                  className="mt-16 mb-12 text-3xl font-bold md:text-4xl"
                   data-testid={`secondary-title-${index}`}
                 >
                   <Trans message={feature.title} />
                 </h3>
-                <div className="h-2 w-50 bg-black/90 dark:bg-divider" />
-                <div
-                  className="my-20 text-[0.938rem]"
+                <p
+                  className="text-lg leading-relaxed text-muted"
                   data-testid={`secondary-description-${index}`}
                 >
                   <Trans message={feature.description} />
+                </p>
+              </div>
+              <div className="flex-1">
+                <div className="flex h-200 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 md:h-300">
+                  <div className="flex h-120 w-120 items-center justify-center rounded-full bg-primary/20">
+                    <Icon className="text-primary" size="xl" />
+                  </div>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
 
-interface PricingSectionProps {
-  content: LandingPageContent;
-}
-function PricingSection({content}: PricingSectionProps) {
-  const query = useProducts('landingPage');
-  const [selectedCycle, setSelectedCycle] =
-    useState<UpsellBillingCycle>('yearly');
+function BottomCtaSection({content}: ContentProps) {
   return (
-    <div className="py-80 sm:py-128" id="pricing">
-      <div className="mx-auto max-w-1280 px-24 lg:px-32">
-        <div className="md:text-center">
+    <section className="bg-gradient-to-br from-primary to-primary/80 py-60 text-white md:py-80">
+      <div className="container mx-auto px-16 text-center md:px-24 lg:px-32">
+        <div className="mx-auto max-w-600">
           <h2
-            className="font-display text-3xl tracking-tight sm:text-4xl"
-            data-testid="pricingTitle"
-          >
-            <Trans message={content.pricingTitle} />
-          </h2>
-          <p className="mt-16 text-lg text-muted" data-testid="pricingSubtitle">
-            <Trans message={content.pricingSubtitle} />
-          </p>
-        </div>
-        <BillingCycleRadio
-          products={query.data?.products}
-          selectedCycle={selectedCycle}
-          onChange={setSelectedCycle}
-          className="my-50 flex justify-center"
-          size="lg"
-        />
-        <PricingTable
-          selectedCycle={selectedCycle}
-          productLoader="landingPage"
-        />
-      </div>
-    </div>
-  );
-}
-
-function BottomCta({content}: ContentProps) {
-  return (
-    <div
-      className="relative overflow-hidden bg-[rgb(37,99,235)] py-90 text-white md:py-128"
-      data-testid="footerImage"
-    >
-      <img
-        src={content.footerImage}
-        alt=""
-        width="2347"
-        height="1244"
-        decoding="async"
-        loading="lazy"
-        className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
-      />
-      <div className="relative mx-auto max-w-1280 px-24 text-center sm:px-16 lg:px-32">
-        <div className="mx-auto max-w-512 text-center">
-          <h2
-            className=" font-display text-3xl tracking-tight sm:text-4xl"
+            className="mb-16 text-3xl font-bold md:text-4xl lg:text-5xl"
             data-testid="footerTitle"
           >
             <Trans message={content.footerTitle} />
           </h2>
           {content.footerSubtitle && (
             <p
-              className="mt-16 text-lg tracking-tight"
+              className="mb-32 text-lg leading-relaxed text-white/90 md:text-xl"
               data-testid="footerSubtitle"
             >
               <Trans message={content.footerSubtitle} />
@@ -320,14 +264,54 @@ function BottomCta({content}: ContentProps) {
           <CtaButton
             item={content.actions.cta3}
             size="lg"
-            radius="rounded-full"
-            variant="outline"
+            radius="rounded"
+            variant="raised"
             color="paper"
-            className="mt-40 block"
+            className="min-w-200"
             data-testid="cta3"
           />
         </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function CustomFooter() {
+  const year = new Date().getFullYear();
+  const {branding, menus} = useSettings();
+  const primaryMenu = menus.find(m => m.positions?.includes('footer'));
+
+  return (
+    <footer className="bg-gray-900 py-40 text-white md:py-60">
+      <div className="container mx-auto px-16 md:px-24 lg:px-32">
+        {primaryMenu && (
+          <div className="mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32">
+            {primaryMenu.items?.map((item, index) => (
+              <Link
+                key={index}
+                to={item.action || '#'}
+                className="text-sm text-white/70 transition-colors hover:text-white"
+              >
+                <Trans message={item.label} />
+              </Link>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between">
+          <div>
+            <Trans
+              message="Copyright © :year :name"
+              values={{year, name: branding.site_name}}
+            />
+          </div>
+          <div className="flex items-center gap-8">
+            <FavoriteIcon className="text-red-500" size="sm" />
+            <span>
+              <Trans message="Built With Love By Jay Logan" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }

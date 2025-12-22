@@ -10,8 +10,6 @@ export interface LandingPageContent {
   footerTitle: string;
   footerSubtitle: string;
   footerImage: string;
-  pricingTitle: string;
-  pricingSubtitle: string;
   actions: {
     inputText: string;
     inputButton: string;

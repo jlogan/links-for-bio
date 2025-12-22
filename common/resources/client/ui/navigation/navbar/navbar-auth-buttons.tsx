@@ -38,24 +38,24 @@ function DesktopButtons({primaryButtonColor}: DesktopButtonsProps) {
   const {registration} = useSettings();
   return (
     <div className="text-sm max-md:hidden">
+      <Button
+        elementType={Link}
+        to="/login"
+        variant="text"
+        className="mr-10"
+      >
+        <Trans message="Login" />
+      </Button>
       {!registration.disable && (
         <Button
           elementType={Link}
           to="/register"
-          variant="text"
-          className="mr-10"
+          variant="raised"
+          color={primaryButtonColor}
         >
-          <Trans message="Register" />
+          <Trans message="Sign up" />
         </Button>
       )}
-      <Button
-        elementType={Link}
-        to="/login"
-        variant="raised"
-        color={primaryButtonColor}
-      >
-        <Trans message="Login" />
-      </Button>
     </div>
   );
 }
@@ -74,7 +74,7 @@ function MobileButtons() {
         </Item>
         {!registration.disable && (
           <Item value="register" onSelected={() => navigate('/register')}>
-            <Trans message="Register" />
+            <Trans message="Sign up" />
           </Item>
         )}
       </Menu>

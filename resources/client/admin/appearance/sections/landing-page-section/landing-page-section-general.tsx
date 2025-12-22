@@ -37,7 +37,6 @@ export function LandingPageSectionGeneral() {
         </AppearanceButton>
       </div>
       <FooterSection />
-      <PricingSection />
     </Fragment>
   );
 }
@@ -141,36 +140,6 @@ function FooterSection() {
         diskPrefix="homepage"
       />
     </Fragment>
-  );
-}
-
-function PricingSection() {
-  return (
-    <div className="mt-24 border-t pt-24">
-      <FormTextField
-        label={<Trans message="Pricing title" />}
-        className="mb-20"
-        name="settings.homepage.appearance.pricingTitle"
-        onFocus={() => {
-          appearanceState().preview.setHighlight(
-            '[data-testid="pricingTitle"]',
-          );
-        }}
-      />
-      <FormTextField
-        label={<Trans message="Pricing subtitle" />}
-        className="mb-20"
-        name="settings.homepage.appearance.pricingSubtitle"
-        onFocus={() => {
-          appearanceState().preview.setHighlight(
-            '[data-testid="pricingSubtitle"]',
-          );
-        }}
-      />
-      <FormSwitch className="mb-24" name="settings.links.homepage_pricing">
-        <Trans message="Show pricing table" />
-      </FormSwitch>
-    </div>
   );
 }
 
