@@ -18,13 +18,14 @@ class UsernameCheckController extends BaseController
 
         $username = strtolower(trim($request->get('username')));
 
-        // Check if username exists in links (alias)
-        $linkExists = Link::where('alias', $username)->exists();
-        
-        // Check if username exists in link groups/biolinks (alias)
-        $linkGroupExists = \App\Models\LinkGroup::where('alias', $username)->exists();
+        // Check if username exists in link_groups table (hash column)
+        // Query directly to avoid global scopes that might filter results
+        $exists = \Illuminate\Support\Facades\DB::table('link_groups')
+            ->where('hash', $username)
+            ->whereNull('deleted_at')
+            ->exists();
 
-        $available = !$linkExists && !$linkGroupExists;
+        $available = !$exists;
 
         return $this->success([
             'available' => $available,

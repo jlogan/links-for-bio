@@ -6,13 +6,13 @@ import {apiClient} from '@common/http/query-client';
 import {useDebounce} from 'use-debounce';
 import {CheckCircleIcon} from '@common/icons/material/CheckCircle';
 import {ErrorIcon} from '@common/icons/material/Error';
-import {FavoriteIcon} from '@common/icons/material/Favorite';
 import {InsertLinkIcon} from '@common/icons/material/InsertLink';
 import {BarChartIcon} from '@common/icons/material/BarChart';
 import {LanguageIcon} from '@common/icons/material/Language';
 import {LinkIcon} from '@common/icons/material/Link';
 import {DashboardIcon} from '@common/icons/material/Dashboard';
 import {SpeedIcon} from '@common/icons/material/Speed';
+import {DefaultMetaTags} from '@common/seo/default-meta-tags';
 
 interface UsernameCheckResponse {
   available: boolean;
@@ -21,14 +21,17 @@ interface UsernameCheckResponse {
 
 export function CustomLandingPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <HeroSection />
-      <FeaturesSection />
-      <SecondaryFeaturesSection />
-      <BottomCtaSection />
-      <Footer />
-    </div>
+    <Fragment>
+      <DefaultMetaTags />
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <HeroSection />
+        <FeaturesSection />
+        <SecondaryFeaturesSection />
+        <BottomCtaSection />
+        <Footer />
+      </div>
+    </Fragment>
   );
 }
 
@@ -38,13 +41,11 @@ function Navbar() {
       <div className="container mx-auto px-16 md:px-24 lg:px-32">
         <div className="flex h-64 items-center justify-between">
           <div className="flex items-center gap-12">
-            <div className="flex h-32 w-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#00D4AA]">
-              <InsertLinkIcon className="text-white" size="lg" />
-            </div>
-            <span className="text-xl font-bold">
-              <span className="text-[#FF6B35]">LinksFor</span>
-              <span className="text-[#00D4AA]">Bio</span>
-            </span>
+            <img 
+              src="/images/logo.png" 
+              alt="LinksForBio" 
+              className="h-40 w-auto"
+            />
           </div>
           <div className="flex items-center gap-12">
             <Link 
@@ -56,10 +57,9 @@ function Navbar() {
             <Button
               elementType={Link}
               to="/register"
-              variant="raised"
-              color="primary"
+              variant="outline"
               size="sm"
-              className="bg-[#FF6B35] hover:bg-[#FF8555] text-white"
+              className="border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white hover:border-[#FF6B35] transition-colors duration-200"
             >
               Sign up
             </Button>
@@ -85,11 +85,12 @@ function HeroSection() {
 
     setIsChecking(true);
     apiClient
-      .get<UsernameCheckResponse>(`v1/username/check?username=${encodeURIComponent(debouncedUsername)}`)
+      .get<UsernameCheckResponse>(`username/check?username=${encodeURIComponent(debouncedUsername)}`)
       .then(response => {
-        setIsAvailable(response.data.available);
+        setIsAvailable(response.data?.available ?? false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Username check error:', error);
         setIsAvailable(false);
       })
       .finally(() => {
@@ -116,9 +117,8 @@ function HeroSection() {
             <h1 className="mb-20 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
               <span className="text-gray-900">Centralize your</span>
               <br />
-              <span className="bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] bg-clip-text text-transparent">
-                online presence
-              </span>
+              <span className="text-gray-900">online </span>
+              <span className="text-gray-900">presence</span>
             </h1>
             <p className="mb-40 text-lg leading-relaxed text-gray-600 md:text-xl">
               Gather your socials, music, videos, and more on a beautiful link-in-bio page. 
@@ -127,20 +127,21 @@ function HeroSection() {
             
             {/* Username Checker Form */}
             <form onSubmit={handleClaim} className="mb-32">
-              <div className="flex flex-col gap-12 sm:flex-row">
+              <div className="flex flex-col gap-8 sm:flex-row sm:items-stretch">
                 <div className="flex-1 relative">
-                  <span className="absolute left-16 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-gray-500">
+                  <span className="absolute left-12 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-gray-500">
                     linksforb.io/
                   </span>
                   <TextField
                     background="bg-white"
-                    inputRadius="rounded-l-lg"
+                    inputRadius="rounded-none"
                     size="lg"
                     placeholder="yourname"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
-                    style={{paddingLeft: '140px'}}
+                    style={{paddingLeft: '110px'}}
                     className="border-2 focus:border-[#FF6B35]"
+                    inputClassName="rounded-none"
                   />
                   {username && (
                     <div className="absolute right-12 top-1/2 -translate-y-1/2">
@@ -158,8 +159,8 @@ function HeroSection() {
                   type="submit"
                   variant="raised"
                   size="lg"
-                  radius="rounded-r-lg"
-                  className="min-w-140 bg-[#FF6B35] hover:bg-[#FF8555] text-white disabled:opacity-50"
+                  radius="rounded-none"
+                  className="min-w-140 bg-[#FF6B35] hover:bg-[#FF8555] text-white disabled:opacity-50 self-stretch"
                   disabled={!isAvailable || isChecking || !username.trim()}
                 >
                   Claim
@@ -175,15 +176,6 @@ function HeroSection() {
                 </p>
               )}
             </form>
-
-            <div className="flex items-center gap-16 text-sm text-gray-600">
-              <div className="flex items-center gap-4">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">★</span>
-                ))}
-              </div>
-              <span>loved by 10,000+ users</span>
-            </div>
           </div>
 
           {/* Right side - Visual element */}
@@ -312,7 +304,7 @@ function SecondaryFeaturesSection() {
               } ${index < features.length - 1 ? 'border-b border-gray-100 pb-60 md:pb-100' : ''}`}
             >
               <div className="flex-1">
-                <div className="inline-flex items-center gap-12 rounded-full bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] px-16 py-8 mb-16">
+                <div className="inline-flex items-center gap-12 rounded-full bg-[#FF6B35] px-16 py-8 mb-16">
                   <Icon className="text-white" size="sm" />
                   <span className="text-xs font-bold uppercase tracking-wider text-white">
                     {feature.subtitle}
@@ -342,8 +334,7 @@ function SecondaryFeaturesSection() {
 
 function BottomCtaSection() {
   return (
-    <section className="relative py-60 text-white md:py-80 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35] via-[#FF8555] to-[#00D4AA]" />
+    <section className="relative py-60 text-white md:py-80 overflow-hidden bg-[#FF6B35]">
       <div className="container mx-auto px-16 text-center md:px-24 lg:px-32 relative z-10">
         <div className="mx-auto max-w-600">
           <h2 className="mb-16 text-3xl font-bold md:text-4xl lg:text-5xl">
@@ -358,7 +349,7 @@ function BottomCtaSection() {
             size="lg"
             radius="rounded"
             variant="raised"
-            className="min-w-200 bg-white text-[#FF6B35] hover:bg-gray-100 font-semibold"
+            className="min-w-200 bg-white text-[#FF6B35] hover:bg-gray-50 hover:shadow-xl font-semibold transition-all duration-200"
           >
             Sign up for free
           </Button>
@@ -372,29 +363,53 @@ function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 py-40 text-white md:py-60">
-      <div className="container mx-auto px-16 md:px-24 lg:px-32">
+    <footer className="py-40 md:py-60" style={{backgroundColor: '#111827', color: '#ffffff'}}>
+      <div className="container mx-auto px-16 md:px-24 lg:px-32" style={{color: '#ffffff'}}>
         <div className="mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32">
-          <Link to="/api-docs" className="text-sm text-white/70 hover:text-white transition-colors">
+          <Link 
+            to="/api-docs" 
+            className="text-sm transition-colors"
+            style={{color: '#ffffff'}}
+          >
             Developers
           </Link>
-          <Link to="/pages/privacy-policy" className="text-sm text-white/70 hover:text-white transition-colors">
+          <Link 
+            to="/pages/privacy-policy" 
+            className="text-sm transition-colors"
+            style={{color: '#ffffff'}}
+          >
             Privacy Policy
           </Link>
-          <Link to="/pages/terms-of-service" className="text-sm text-white/70 hover:text-white transition-colors">
+          <Link 
+            to="/pages/terms-of-service" 
+            className="text-sm transition-colors"
+            style={{color: '#ffffff'}}
+          >
             Terms of Service
           </Link>
-          <Link to="/contact" className="text-sm text-white/70 hover:text-white transition-colors">
+          <Link 
+            to="/contact" 
+            className="text-sm transition-colors"
+            style={{color: '#ffffff'}}
+          >
             Contact Us
           </Link>
         </div>
-        <div className="flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between">
-          <div>
+        <div className="flex flex-col items-center gap-16 text-center text-sm md:flex-row md:justify-between" style={{color: '#ffffff'}}>
+          <div style={{color: '#ffffff'}}>
             Copyright © {year} LinksForBio
           </div>
-          <div className="flex items-center gap-8">
-            <FavoriteIcon className="text-red-500" size="sm" />
-            <span>Built With Love By Jay Logan</span>
+          <div style={{color: '#ffffff'}}>
+            Built By{' '}
+            <a 
+              href="https://jaylogan.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity"
+              style={{color: '#ffffff', textDecoration: 'none'}}
+            >
+              Jay Logan
+            </a>
           </div>
         </div>
       </div>

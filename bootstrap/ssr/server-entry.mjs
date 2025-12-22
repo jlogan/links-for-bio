@@ -7538,10 +7538,6 @@ function DynamicHomepage({ homepageResolver }) {
   }
   return (homepageResolver == null ? void 0 : homepageResolver(homepage == null ? void 0 : homepage.type)) || null;
 }
-const FavoriteIcon = createSvgIcon(
-  /* @__PURE__ */ jsx("path", { d: "m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" }),
-  "FavoriteOutlined"
-);
 const InsertLinkIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" }),
   "InsertLinkOutlined"
@@ -7559,24 +7555,28 @@ const DashboardIcon = createSvgIcon(
   "DashboardOutlined"
 );
 function CustomLandingPage() {
-  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white", children: [
-    /* @__PURE__ */ jsx(Navbar, {}),
-    /* @__PURE__ */ jsx(HeroSection, {}),
-    /* @__PURE__ */ jsx(FeaturesSection, {}),
-    /* @__PURE__ */ jsx(SecondaryFeaturesSection, {}),
-    /* @__PURE__ */ jsx(BottomCtaSection, {}),
-    /* @__PURE__ */ jsx(Footer, {})
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(DefaultMetaTags, {}),
+    /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white", children: [
+      /* @__PURE__ */ jsx(Navbar, {}),
+      /* @__PURE__ */ jsx(HeroSection, {}),
+      /* @__PURE__ */ jsx(FeaturesSection, {}),
+      /* @__PURE__ */ jsx(SecondaryFeaturesSection, {}),
+      /* @__PURE__ */ jsx(BottomCtaSection, {}),
+      /* @__PURE__ */ jsx(Footer, {})
+    ] })
   ] });
 }
 function Navbar() {
   return /* @__PURE__ */ jsx("nav", { className: "fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "flex h-64 items-center justify-between", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-12", children: [
-      /* @__PURE__ */ jsx("div", { className: "flex h-32 w-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#00D4AA]", children: /* @__PURE__ */ jsx(InsertLinkIcon, { className: "text-white", size: "lg" }) }),
-      /* @__PURE__ */ jsxs("span", { className: "text-xl font-bold", children: [
-        /* @__PURE__ */ jsx("span", { className: "text-[#FF6B35]", children: "LinksFor" }),
-        /* @__PURE__ */ jsx("span", { className: "text-[#00D4AA]", children: "Bio" })
-      ] })
-    ] }),
+    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-12", children: /* @__PURE__ */ jsx(
+      "img",
+      {
+        src: "/images/logo.png",
+        alt: "LinksForBio",
+        className: "h-40 w-auto"
+      }
+    ) }),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-12", children: [
       /* @__PURE__ */ jsx(
         Link,
@@ -7591,10 +7591,9 @@ function Navbar() {
         {
           elementType: Link,
           to: "/register",
-          variant: "raised",
-          color: "primary",
+          variant: "outline",
           size: "sm",
-          className: "bg-[#FF6B35] hover:bg-[#FF8555] text-white",
+          className: "border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white hover:border-[#FF6B35] transition-colors duration-200",
           children: "Sign up"
         }
       )
@@ -7613,9 +7612,11 @@ function HeroSection() {
       return;
     }
     setIsChecking(true);
-    apiClient.get(`v1/username/check?username=${encodeURIComponent(debouncedUsername)}`).then((response) => {
-      setIsAvailable(response.data.available);
-    }).catch(() => {
+    apiClient.get(`username/check?username=${encodeURIComponent(debouncedUsername)}`).then((response) => {
+      var _a;
+      setIsAvailable(((_a = response.data) == null ? void 0 : _a.available) ?? false);
+    }).catch((error) => {
+      console.error("Username check error:", error);
       setIsAvailable(false);
     }).finally(() => {
       setIsChecking(false);
@@ -7634,24 +7635,26 @@ function HeroSection() {
         /* @__PURE__ */ jsxs("h1", { className: "mb-20 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl", children: [
           /* @__PURE__ */ jsx("span", { className: "text-gray-900", children: "Centralize your" }),
           /* @__PURE__ */ jsx("br", {}),
-          /* @__PURE__ */ jsx("span", { className: "bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] bg-clip-text text-transparent", children: "online presence" })
+          /* @__PURE__ */ jsx("span", { className: "text-gray-900", children: "online " }),
+          /* @__PURE__ */ jsx("span", { className: "text-gray-900", children: "presence" })
         ] }),
         /* @__PURE__ */ jsx("p", { className: "mb-40 text-lg leading-relaxed text-gray-600 md:text-xl", children: "Gather your socials, music, videos, and more on a beautiful link-in-bio page. Claim your name today!" }),
         /* @__PURE__ */ jsxs("form", { onSubmit: handleClaim, className: "mb-32", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-12 sm:flex-row", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-8 sm:flex-row sm:items-stretch", children: [
             /* @__PURE__ */ jsxs("div", { className: "flex-1 relative", children: [
-              /* @__PURE__ */ jsx("span", { className: "absolute left-16 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-gray-500", children: "linksforb.io/" }),
+              /* @__PURE__ */ jsx("span", { className: "absolute left-12 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-gray-500", children: "linksforb.io/" }),
               /* @__PURE__ */ jsx(
                 TextField,
                 {
                   background: "bg-white",
-                  inputRadius: "rounded-l-lg",
+                  inputRadius: "rounded-none",
                   size: "lg",
                   placeholder: "yourname",
                   value: username,
                   onChange: (e) => setUsername(e.target.value),
-                  style: { paddingLeft: "140px" },
-                  className: "border-2 focus:border-[#FF6B35]"
+                  style: { paddingLeft: "110px" },
+                  className: "border-2 focus:border-[#FF6B35]",
+                  inputClassName: "rounded-none"
                 }
               ),
               username && /* @__PURE__ */ jsx("div", { className: "absolute right-12 top-1/2 -translate-y-1/2", children: isChecking ? /* @__PURE__ */ jsx("div", { className: "h-20 w-20 animate-spin rounded-full border-2 border-[#FF6B35] border-t-transparent" }) : isAvailable === true ? /* @__PURE__ */ jsx(CheckCircleIcon, { className: "text-[#00D4AA]", size: "md" }) : isAvailable === false ? /* @__PURE__ */ jsx(ErrorIcon, { className: "text-[#FF6B35]", size: "md" }) : null })
@@ -7662,18 +7665,14 @@ function HeroSection() {
                 type: "submit",
                 variant: "raised",
                 size: "lg",
-                radius: "rounded-r-lg",
-                className: "min-w-140 bg-[#FF6B35] hover:bg-[#FF8555] text-white disabled:opacity-50",
+                radius: "rounded-none",
+                className: "min-w-140 bg-[#FF6B35] hover:bg-[#FF8555] text-white disabled:opacity-50 self-stretch",
                 disabled: !isAvailable || isChecking || !username.trim(),
                 children: "Claim"
               }
             )
           ] }),
           username && !isChecking && /* @__PURE__ */ jsx("p", { className: `mt-12 text-sm ${isAvailable ? "text-[#00D4AA]" : isAvailable === false ? "text-[#FF6B35]" : "text-gray-500"}`, children: isAvailable === true ? "✓ Username is available!" : isAvailable === false ? "✗ Username is taken" : "Checking availability..." })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-16 text-sm text-gray-600", children: [
-          /* @__PURE__ */ jsx("div", { className: "flex items-center gap-4", children: [...Array(5)].map((_, i) => /* @__PURE__ */ jsx("span", { className: "text-yellow-400", children: "★" }, i)) }),
-          /* @__PURE__ */ jsx("span", { children: "loved by 10,000+ users" })
         ] })
       ] }),
       /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-500", children: /* @__PURE__ */ jsx("div", { className: "relative rounded-3xl bg-gradient-to-br from-[#FFE5D9] to-[#E0F7FA] p-40 md:p-60 shadow-2xl", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-24 rounded-2xl bg-white p-32 shadow-lg", children: [
@@ -7767,7 +7766,7 @@ function SecondaryFeaturesSection() {
         className: `mb-60 flex flex-col gap-32 md:mb-100 md:flex-row md:items-center md:gap-60 ${isEven ? "md:flex-row-reverse" : ""} ${index < features.length - 1 ? "border-b border-gray-100 pb-60 md:pb-100" : ""}`,
         children: [
           /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-            /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-12 rounded-full bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] px-16 py-8 mb-16", children: [
+            /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-12 rounded-full bg-[#FF6B35] px-16 py-8 mb-16", children: [
               /* @__PURE__ */ jsx(Icon, { className: "text-white", size: "sm" }),
               /* @__PURE__ */ jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-white", children: feature.subtitle })
             ] }),
@@ -7782,44 +7781,84 @@ function SecondaryFeaturesSection() {
   }) }) });
 }
 function BottomCtaSection() {
-  return /* @__PURE__ */ jsxs("section", { className: "relative py-60 text-white md:py-80 overflow-hidden", children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-[#FF6B35] via-[#FF8555] to-[#00D4AA]" }),
-    /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 text-center md:px-24 lg:px-32 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-600", children: [
-      /* @__PURE__ */ jsx("h2", { className: "mb-16 text-3xl font-bold md:text-4xl lg:text-5xl", children: "Join the Beta" }),
-      /* @__PURE__ */ jsx("p", { className: "mb-32 text-lg leading-relaxed text-white/90 md:text-xl", children: "A simple link shortener built as a personal project. Free to use, no credit card required." }),
-      /* @__PURE__ */ jsx(
-        Button,
-        {
-          elementType: Link,
-          to: "/register",
-          size: "lg",
-          radius: "rounded",
-          variant: "raised",
-          className: "min-w-200 bg-white text-[#FF6B35] hover:bg-gray-100 font-semibold",
-          children: "Sign up for free"
-        }
-      )
-    ] }) })
-  ] });
+  return /* @__PURE__ */ jsx("section", { className: "relative py-60 text-white md:py-80 overflow-hidden bg-[#FF6B35]", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 text-center md:px-24 lg:px-32 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-600", children: [
+    /* @__PURE__ */ jsx("h2", { className: "mb-16 text-3xl font-bold md:text-4xl lg:text-5xl", children: "Join the Beta" }),
+    /* @__PURE__ */ jsx("p", { className: "mb-32 text-lg leading-relaxed text-white/90 md:text-xl", children: "A simple link shortener built as a personal project. Free to use, no credit card required." }),
+    /* @__PURE__ */ jsx(
+      Button,
+      {
+        elementType: Link,
+        to: "/register",
+        size: "lg",
+        radius: "rounded",
+        variant: "raised",
+        className: "min-w-200 bg-white text-[#FF6B35] hover:bg-gray-50 hover:shadow-xl font-semibold transition-all duration-200",
+        children: "Sign up for free"
+      }
+    )
+  ] }) }) });
 }
 function Footer() {
   const year = (/* @__PURE__ */ new Date()).getFullYear();
-  return /* @__PURE__ */ jsx("footer", { className: "bg-gray-900 py-40 text-white md:py-60", children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: [
+  return /* @__PURE__ */ jsx("footer", { className: "py-40 md:py-60", style: { backgroundColor: "#111827", color: "#ffffff" }, children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", style: { color: "#ffffff" }, children: [
     /* @__PURE__ */ jsxs("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: [
-      /* @__PURE__ */ jsx(Link, { to: "/api-docs", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Developers" }),
-      /* @__PURE__ */ jsx(Link, { to: "/pages/privacy-policy", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Privacy Policy" }),
-      /* @__PURE__ */ jsx(Link, { to: "/pages/terms-of-service", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Terms of Service" }),
-      /* @__PURE__ */ jsx(Link, { to: "/contact", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Contact Us" })
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/api-docs",
+          className: "text-sm transition-colors",
+          style: { color: "#ffffff" },
+          children: "Developers"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/pages/privacy-policy",
+          className: "text-sm transition-colors",
+          style: { color: "#ffffff" },
+          children: "Privacy Policy"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/pages/terms-of-service",
+          className: "text-sm transition-colors",
+          style: { color: "#ffffff" },
+          children: "Terms of Service"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/contact",
+          className: "text-sm transition-colors",
+          style: { color: "#ffffff" },
+          children: "Contact Us"
+        }
+      )
     ] }),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between", children: [
-      /* @__PURE__ */ jsxs("div", { children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm md:flex-row md:justify-between", style: { color: "#ffffff" }, children: [
+      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
         "Copyright © ",
         year,
         " LinksForBio"
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-8", children: [
-        /* @__PURE__ */ jsx(FavoriteIcon, { className: "text-red-500", size: "sm" }),
-        /* @__PURE__ */ jsx("span", { children: "Built With Love By Jay Logan" })
+      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
+        "Built By",
+        " ",
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: "https://jaylogan.com",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "hover:opacity-80 transition-opacity",
+            style: { color: "#ffffff", textDecoration: "none" },
+            children: "Jay Logan"
+          }
+        )
       ] })
     ] })
   ] }) });
@@ -14136,7 +14175,7 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-234dcc37.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-71204395.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
   () => import("./assets/swagger-api-docs-page-52e6c9a9.mjs")
 );
@@ -14408,7 +14447,7 @@ export {
   useProducts as ay,
   FormattedPrice as az,
   useLocalStorage as b,
-  LightbulbIcon as b$,
+  MenuIcon as b$,
   WorkspaceQueryKeys as b0,
   useActiveWorkspaceId as b1,
   useAuth as b2,
@@ -14439,13 +14478,13 @@ export {
   DevicesIcon as bR,
   EmailIcon as bS,
   ErrorOutlineIcon as bT,
-  FavoriteIcon as bU,
-  FileDownloadDoneIcon as bV,
-  ForumIcon as bW,
-  GroupAddIcon as bX,
-  InsertLinkIcon as bY,
-  LanguageIcon as bZ,
-  LightModeIcon as b_,
+  FileDownloadDoneIcon as bU,
+  ForumIcon as bV,
+  GroupAddIcon as bW,
+  InsertLinkIcon as bX,
+  LanguageIcon as bY,
+  LightModeIcon as bZ,
+  LightbulbIcon as b_,
   useThemeSelector as ba,
   lazyLoader as bb,
   prefetchValueLists as bc,
@@ -14473,35 +14512,34 @@ export {
   useActiveUpload as by,
   Disk as bz,
   createSvgIcon as c,
-  MenuIcon as c0,
-  NotificationsIcon as c1,
-  PaymentsIcon as c2,
-  PeopleIcon as c3,
-  PersonIcon as c4,
-  PhonelinkLockIcon as c5,
-  QrCode2Icon as c6,
-  ShareIcon as c7,
-  SmartphoneIcon as c8,
-  TabletIcon as c9,
-  elementToTree as ca,
-  AmazonIcon as cb,
-  AppleIcon as cc,
-  BandcampIcon as cd,
-  EnvatoIcon as ce,
-  FacebookIcon as cf,
-  InstagramIcon as cg,
-  LinkedinIcon as ch,
-  PatreonIcon as ci,
-  PinterestIcon as cj,
-  SnapchatIcon as ck,
-  SoundcloudIcon as cl,
-  SpotifyIcon as cm,
-  TelegramIcon as cn,
-  TiktokIcon as co,
-  TwitchIcon as cp,
-  TwitterIcon as cq,
-  WhatsappIcon as cr,
-  YoutubeIcon as cs,
+  NotificationsIcon as c0,
+  PaymentsIcon as c1,
+  PeopleIcon as c2,
+  PersonIcon as c3,
+  PhonelinkLockIcon as c4,
+  QrCode2Icon as c5,
+  ShareIcon as c6,
+  SmartphoneIcon as c7,
+  TabletIcon as c8,
+  elementToTree as c9,
+  AmazonIcon as ca,
+  AppleIcon as cb,
+  BandcampIcon as cc,
+  EnvatoIcon as cd,
+  FacebookIcon as ce,
+  InstagramIcon as cf,
+  LinkedinIcon as cg,
+  PatreonIcon as ch,
+  PinterestIcon as ci,
+  SnapchatIcon as cj,
+  SoundcloudIcon as ck,
+  SpotifyIcon as cl,
+  TelegramIcon as cm,
+  TiktokIcon as cn,
+  TwitchIcon as co,
+  TwitterIcon as cp,
+  WhatsappIcon as cq,
+  YoutubeIcon as cr,
   useTrans as d,
   useDialogContext as e,
   DialogHeader as f,
