@@ -8,7 +8,7 @@ import {AppearanceListener} from '@common/admin/appearance/commands/appearance-l
 import {CookieNotice} from '@common/ui/cookie-notice/cookie-notice';
 import {DynamicHomepage} from '@common/ui/dynamic-homepage';
 import {GuestRoute} from '@common/auth/guards/guest-route';
-import {LandingPage} from '@app/landing/landing-page';
+import {CustomLandingPage} from '@app/landing/custom-landing-page';
 import React, {Fragment} from 'react';
 import {FullPageLoader} from '@common/ui/progress/full-page-loader';
 import {ActiveWorkspaceProvider} from '@common/workspace/active-workspace-id-context';
@@ -74,7 +74,7 @@ export function AppRoutes() {
             <DynamicHomepage
               homepageResolver={() => (
                 <GuestRoute>
-                  <LandingPage />
+                  <CustomLandingPage />
                 </GuestRoute>
               )}
             />

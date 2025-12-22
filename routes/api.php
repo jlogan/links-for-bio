@@ -29,8 +29,11 @@ use App\Http\Controllers\LinkPagesController;
 use App\Http\Controllers\LinkPasswordController;
 use App\Http\Controllers\LinkUsageController;
 use App\Http\Controllers\TrackingPixelController;
+use App\Http\Controllers\UsernameCheckController;
 
 Route::group(['prefix' => 'v1'], function() {
+    // Username check (public endpoint)
+    Route::get('username/check', [UsernameCheckController::class, 'check']);
     Route::group(['middleware' => ['optionalAuth:sanctum', 'verified', 'verifyApiAccess']], function () {
         Route::get('reports/clicks', [ClicksReportController::class, 'show']);
 

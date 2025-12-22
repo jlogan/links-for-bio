@@ -31,6 +31,7 @@ import { FormProvider, useController, useForm } from "react-hook-form";
 import { useControlledState } from "@react-stately/utils";
 import { useIsSSR } from "@react-aria/ssr";
 import dot from "dot-object";
+import { useDebounce } from "use-debounce";
 import { enableMapSet, produce } from "immer";
 import axiosRetry from "axios-retry";
 import { Upload } from "tus-js-client";
@@ -6824,7 +6825,7 @@ function useLightThemeVariables() {
   const { data } = useBootstrapData();
   return (_a = data.themes.all.find((theme) => !theme.is_dark && theme.default_light)) == null ? void 0 : _a.values;
 }
-function Navbar(props) {
+function Navbar$1(props) {
   let {
     hideLogo,
     toggleButton,
@@ -7050,7 +7051,7 @@ const LightbulbIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" }),
   "LightbulbOutlined"
 );
-function Footer({ className, padding }) {
+function Footer$1({ className, padding }) {
   const year = (/* @__PURE__ */ new Date()).getFullYear();
   const { branding } = useSettings();
   return /* @__PURE__ */ jsxs(
@@ -7289,14 +7290,14 @@ function CustomPageLayout({ slug }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col min-h-screen bg", children: [
     /* @__PURE__ */ jsx(PageMetaTags, { query }),
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         menuPosition: "custom-page-navbar",
         className: "flex-shrink-0 sticky top-0"
       }
     ),
     /* @__PURE__ */ jsx("div", { className: "flex-auto", children: query.data ? /* @__PURE__ */ jsx(CustomPageBody, { page: query.data.page }) : /* @__PURE__ */ jsx(PageStatus, { query, loaderClassName: "mt-80" }) }),
-    /* @__PURE__ */ jsx(Footer, { className: "mx-14 md:mx-40" })
+    /* @__PURE__ */ jsx(Footer$1, { className: "mx-14 md:mx-40" })
   ] });
 }
 function useLogin(form) {
@@ -7537,6 +7538,10 @@ function DynamicHomepage({ homepageResolver }) {
   }
   return (homepageResolver == null ? void 0 : homepageResolver(homepage == null ? void 0 : homepage.type)) || null;
 }
+const FavoriteIcon = createSvgIcon(
+  /* @__PURE__ */ jsx("path", { d: "m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" }),
+  "FavoriteOutlined"
+);
 const InsertLinkIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" }),
   "InsertLinkOutlined"
@@ -7553,316 +7558,268 @@ const DashboardIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z" }),
   "DashboardOutlined"
 );
-const FavoriteIcon = createSvgIcon(
-  /* @__PURE__ */ jsx("path", { d: "m12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" }),
-  "FavoriteOutlined"
-);
-function UsernameCheckerForm() {
-  useTrans();
-  const navigate = useNavigate$1();
-  useSettings();
-  const [username, setUsername] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!username.trim())
-      return;
-    setIsChecking(true);
-    setTimeout(() => {
-      setIsChecking(false);
-      navigate(`/register?username=${encodeURIComponent(username.trim())}`);
-    }, 300);
-  };
-  const domain = "linksforb.io";
-  const prefix = `${domain}/`;
-  const prefixWidth = prefix.length * 8 + 32;
-  return /* @__PURE__ */ jsxs("form", { onSubmit: handleSubmit, className: "w-full max-w-500", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-12 sm:flex-row", children: [
-      /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-        /* @__PURE__ */ jsx("span", { className: "absolute left-16 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-muted", children: prefix }),
-        /* @__PURE__ */ jsx(
-          TextField,
-          {
-            background: "bg-white",
-            inputRadius: "rounded-l-lg sm:rounded-l-lg",
-            size: "lg",
-            placeholder: "yourname",
-            value: username,
-            onChange: (e) => setUsername(e.target.value),
-            style: { paddingLeft: `${prefixWidth}px` }
-          }
-        )
-      ] }) }),
+function CustomLandingPage() {
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white", children: [
+    /* @__PURE__ */ jsx(Navbar, {}),
+    /* @__PURE__ */ jsx(HeroSection, {}),
+    /* @__PURE__ */ jsx(FeaturesSection, {}),
+    /* @__PURE__ */ jsx(SecondaryFeaturesSection, {}),
+    /* @__PURE__ */ jsx(BottomCtaSection, {}),
+    /* @__PURE__ */ jsx(Footer, {})
+  ] });
+}
+function Navbar() {
+  return /* @__PURE__ */ jsx("nav", { className: "fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "flex h-64 items-center justify-between", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-12", children: [
+      /* @__PURE__ */ jsx("div", { className: "flex h-32 w-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#00D4AA]", children: /* @__PURE__ */ jsx(InsertLinkIcon, { className: "text-white", size: "lg" }) }),
+      /* @__PURE__ */ jsxs("span", { className: "text-xl font-bold", children: [
+        /* @__PURE__ */ jsx("span", { className: "text-[#FF6B35]", children: "LinksFor" }),
+        /* @__PURE__ */ jsx("span", { className: "text-[#00D4AA]", children: "Bio" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-12", children: [
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/login",
+          className: "px-16 py-8 text-sm font-medium text-gray-700 hover:text-[#FF6B35] transition-colors",
+          children: "Login"
+        }
+      ),
       /* @__PURE__ */ jsx(
         Button,
         {
-          type: "submit",
+          elementType: Link,
+          to: "/register",
           variant: "raised",
           color: "primary",
-          size: "lg",
-          radius: "rounded-r-lg sm:rounded-r-lg",
-          className: "min-w-120 sm:min-w-140",
-          disabled: isChecking || !username.trim(),
-          children: isChecking ? /* @__PURE__ */ jsx(Trans, { message: "Checking..." }) : /* @__PURE__ */ jsx(Trans, { message: "Claim" })
+          size: "sm",
+          className: "bg-[#FF6B35] hover:bg-[#FF8555] text-white",
+          children: "Sign up"
         }
       )
-    ] }),
-    /* @__PURE__ */ jsx("p", { className: "mt-12 text-sm text-muted", children: /* @__PURE__ */ jsx(Trans, { message: "Claim your username and get started in seconds" }) })
-  ] });
-}
-function LandingPage() {
-  const settings = useSettings();
-  const homepage = settings.homepage;
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(DefaultMetaTags, {}),
-    /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-paper", children: [
-      /* @__PURE__ */ jsx(HeroSection, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(FeaturesSection, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(SecondaryFeaturesSection, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(BottomCtaSection, { content: homepage.appearance }),
-      /* @__PURE__ */ jsx(CustomFooter, {})
     ] })
-  ] });
+  ] }) }) });
 }
-function HeroSection({ content: content2 }) {
-  const { headerTitle, headerSubtitle, actions } = content2;
-  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden bg-paper", children: [
-    /* @__PURE__ */ jsx(
-      Navbar,
-      {
-        color: "transparent",
-        className: "absolute top-0 left-0 right-0 z-50",
-        menuPosition: "homepage-navbar",
-        primaryButtonColor: "primary"
-      }
-    ),
-    /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 pt-100 pb-60 md:px-24 md:pt-120 md:pb-80 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "grid gap-40 md:grid-cols-2 md:items-center md:gap-60 lg:gap-80", children: [
+function HeroSection() {
+  const [username, setUsername] = useState("");
+  const [debouncedUsername] = useDebounce(username, 300);
+  const [isAvailable, setIsAvailable] = useState(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const navigate = useNavigate$1();
+  useEffect(() => {
+    if (!debouncedUsername.trim()) {
+      setIsAvailable(null);
+      return;
+    }
+    setIsChecking(true);
+    apiClient.get(`v1/username/check?username=${encodeURIComponent(debouncedUsername)}`).then((response) => {
+      setIsAvailable(response.data.available);
+    }).catch(() => {
+      setIsAvailable(false);
+    }).finally(() => {
+      setIsChecking(false);
+    });
+  }, [debouncedUsername]);
+  const handleClaim = (e) => {
+    e.preventDefault();
+    if (isAvailable && username.trim()) {
+      navigate(`/register?username=${encodeURIComponent(username.trim())}`);
+    }
+  };
+  return /* @__PURE__ */ jsxs("section", { className: "relative pt-120 pb-80 md:pt-140 md:pb-100 overflow-hidden", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-[#FFE5D9] via-white to-[#E0F7FA] opacity-50" }),
+    /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "grid gap-40 md:grid-cols-2 md:items-center md:gap-60 lg:gap-80 max-w-1200 mx-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "text-center md:text-left", children: [
-        headerTitle && /* @__PURE__ */ jsx(
-          "h1",
-          {
-            className: "mb-16 text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl",
-            "data-testid": "headerTitle",
-            children: /* @__PURE__ */ jsx(Trans, { message: headerTitle })
-          }
-        ),
-        headerSubtitle && /* @__PURE__ */ jsx(
-          "p",
-          {
-            className: "mb-32 text-lg leading-relaxed text-muted md:text-xl",
-            "data-testid": "headerSubtitle",
-            children: /* @__PURE__ */ jsx(Trans, { message: headerSubtitle })
-          }
-        ),
-        /* @__PURE__ */ jsx(UsernameCheckerForm, {}),
-        /* @__PURE__ */ jsxs("div", { className: "mt-24 flex flex-col gap-12 sm:flex-row sm:justify-center md:justify-start", children: [
-          /* @__PURE__ */ jsx(
-            CtaButton,
-            {
-              item: actions.cta1,
-              variant: "raised",
-              color: "primary",
-              size: "lg",
-              radius: "rounded",
-              "data-testid": "cta1",
-              className: "min-w-180"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            CtaButton,
-            {
-              item: actions.cta2,
-              variant: "outline",
-              color: "primary",
-              size: "lg",
-              radius: "rounded",
-              "data-testid": "cta2"
-            }
-          )
+        /* @__PURE__ */ jsxs("h1", { className: "mb-20 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl", children: [
+          /* @__PURE__ */ jsx("span", { className: "text-gray-900", children: "Centralize your" }),
+          /* @__PURE__ */ jsx("br", {}),
+          /* @__PURE__ */ jsx("span", { className: "bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] bg-clip-text text-transparent", children: "online presence" })
+        ] }),
+        /* @__PURE__ */ jsx("p", { className: "mb-40 text-lg leading-relaxed text-gray-600 md:text-xl", children: "Gather your socials, music, videos, and more on a beautiful link-in-bio page. Claim your name today!" }),
+        /* @__PURE__ */ jsxs("form", { onSubmit: handleClaim, className: "mb-32", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-12 sm:flex-row", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex-1 relative", children: [
+              /* @__PURE__ */ jsx("span", { className: "absolute left-16 top-1/2 z-10 -translate-y-1/2 text-sm font-medium text-gray-500", children: "linksforb.io/" }),
+              /* @__PURE__ */ jsx(
+                TextField,
+                {
+                  background: "bg-white",
+                  inputRadius: "rounded-l-lg",
+                  size: "lg",
+                  placeholder: "yourname",
+                  value: username,
+                  onChange: (e) => setUsername(e.target.value),
+                  style: { paddingLeft: "140px" },
+                  className: "border-2 focus:border-[#FF6B35]"
+                }
+              ),
+              username && /* @__PURE__ */ jsx("div", { className: "absolute right-12 top-1/2 -translate-y-1/2", children: isChecking ? /* @__PURE__ */ jsx("div", { className: "h-20 w-20 animate-spin rounded-full border-2 border-[#FF6B35] border-t-transparent" }) : isAvailable === true ? /* @__PURE__ */ jsx(CheckCircleIcon, { className: "text-[#00D4AA]", size: "md" }) : isAvailable === false ? /* @__PURE__ */ jsx(ErrorIcon, { className: "text-[#FF6B35]", size: "md" }) : null })
+            ] }),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                type: "submit",
+                variant: "raised",
+                size: "lg",
+                radius: "rounded-r-lg",
+                className: "min-w-140 bg-[#FF6B35] hover:bg-[#FF8555] text-white disabled:opacity-50",
+                disabled: !isAvailable || isChecking || !username.trim(),
+                children: "Claim"
+              }
+            )
+          ] }),
+          username && !isChecking && /* @__PURE__ */ jsx("p", { className: `mt-12 text-sm ${isAvailable ? "text-[#00D4AA]" : isAvailable === false ? "text-[#FF6B35]" : "text-gray-500"}`, children: isAvailable === true ? "✓ Username is available!" : isAvailable === false ? "✗ Username is taken" : "Checking availability..." })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-16 text-sm text-gray-600", children: [
+          /* @__PURE__ */ jsx("div", { className: "flex items-center gap-4", children: [...Array(5)].map((_, i) => /* @__PURE__ */ jsx("span", { className: "text-yellow-400", children: "★" }, i)) }),
+          /* @__PURE__ */ jsx("span", { children: "loved by 10,000+ users" })
         ] })
       ] }),
-      /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-500", children: /* @__PURE__ */ jsx("div", { className: "relative rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-40 md:p-60", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-24 rounded-xl bg-paper p-32 shadow-lg", children: [
+      /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-500", children: /* @__PURE__ */ jsx("div", { className: "relative rounded-3xl bg-gradient-to-br from-[#FFE5D9] to-[#E0F7FA] p-40 md:p-60 shadow-2xl", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-24 rounded-2xl bg-white p-32 shadow-lg", children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-16", children: [
-          /* @__PURE__ */ jsx("div", { className: "flex h-48 w-48 items-center justify-center rounded-full bg-primary/10", children: /* @__PURE__ */ jsx(InsertLinkIcon, { className: "text-primary", size: "lg" }) }),
+          /* @__PURE__ */ jsx("div", { className: "flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B35] to-[#FF8555]", children: /* @__PURE__ */ jsx(InsertLinkIcon, { className: "text-white", size: "lg" }) }),
           /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("div", { className: "h-12 w-120 rounded bg-divider" }),
-            /* @__PURE__ */ jsx("div", { className: "mt-8 h-8 w-80 rounded bg-divider" })
+            /* @__PURE__ */ jsx("div", { className: "h-12 w-120 rounded bg-gray-200" }),
+            /* @__PURE__ */ jsx("div", { className: "mt-8 h-8 w-80 rounded bg-gray-200" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "space-y-12", children: [
-          /* @__PURE__ */ jsx("div", { className: "h-8 w-full rounded bg-divider" }),
-          /* @__PURE__ */ jsx("div", { className: "h-8 w-3/4 rounded bg-divider" })
+          /* @__PURE__ */ jsx("div", { className: "h-8 w-full rounded bg-gradient-to-r from-[#FF6B35] to-[#FF8555] opacity-20" }),
+          /* @__PURE__ */ jsx("div", { className: "h-8 w-3/4 rounded bg-gradient-to-r from-[#00D4AA] to-[#4DD4C4] opacity-20" })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex gap-12", children: [
-          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" }),
-          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" }),
-          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-primary/10" })
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-gradient-to-br from-[#FF6B35] to-[#FF8555] opacity-30" }),
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-gradient-to-br from-[#00D4AA] to-[#4DD4C4] opacity-30" }),
+          /* @__PURE__ */ jsx("div", { className: "h-32 flex-1 rounded bg-gradient-to-br from-[#FFE5D9] to-[#FF8555] opacity-30" })
         ] })
       ] }) }) }) })
     ] }) })
   ] });
 }
-function CtaButton({ item, ...buttonProps }) {
-  if (!(item == null ? void 0 : item.label) || !(item == null ? void 0 : item.action))
-    return null;
-  const Icon = item.icon ? createSvgIconFromTree(item.icon) : void 0;
-  return /* @__PURE__ */ jsx(
-    Button,
+function FeaturesSection() {
+  const features = [
     {
-      elementType: item.type === "route" ? Link : "a",
-      href: item.action,
-      to: item.action,
-      startIcon: Icon ? /* @__PURE__ */ jsx(Icon, {}) : void 0,
-      ...buttonProps,
-      children: /* @__PURE__ */ jsx(Trans, { message: item.label })
+      icon: InsertLinkIcon,
+      title: "Shorten Links",
+      description: "Create short, memorable links that are easy to share and track.",
+      color: "from-[#FF6B35] to-[#FF8555]"
+    },
+    {
+      icon: BarChartIcon,
+      title: "Track Analytics",
+      description: "See how many clicks your links get and where they come from.",
+      color: "from-[#00D4AA] to-[#4DD4C4]"
+    },
+    {
+      icon: LanguageIcon,
+      title: "Custom Domains",
+      description: "Use your own domain name for a more professional look.",
+      color: "from-[#FFE5D9] to-[#FF8555]"
     }
-  );
-}
-function FeaturesSection({ content: content2 }) {
-  const iconMap2 = [InsertLinkIcon, BarChartIcon, LanguageIcon];
-  return /* @__PURE__ */ jsx("section", { className: "bg-alt py-60 md:py-80", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsx("div", { className: "grid gap-24 md:grid-cols-3 md:gap-32", children: content2.primaryFeatures.map((feature, index) => {
-    const Icon = iconMap2[index] || InsertLinkIcon;
+  ];
+  return /* @__PURE__ */ jsx("section", { className: "py-60 md:py-80 bg-gradient-to-b from-white to-[#FFE5D9]/20", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsx("div", { className: "grid gap-24 md:grid-cols-3 md:gap-32", children: features.map((feature, index) => {
+    const Icon = feature.icon;
     return /* @__PURE__ */ jsxs(
       "div",
       {
-        className: "rounded-xl bg-paper p-32 text-center transition-all hover:shadow-lg",
-        "data-testid": `primary-root-${index}`,
+        className: "group rounded-2xl bg-white p-32 text-center transition-all hover:shadow-xl hover:-translate-y-4",
         children: [
-          /* @__PURE__ */ jsx("div", { className: "mb-20 flex justify-center", children: /* @__PURE__ */ jsx("div", { className: "flex h-64 w-64 items-center justify-center rounded-full bg-primary/10", children: /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "xl" }) }) }),
-          /* @__PURE__ */ jsx(
-            "h2",
-            {
-              className: "mb-12 text-xl font-semibold",
-              "data-testid": `primary-title-${index}`,
-              children: /* @__PURE__ */ jsx(Trans, { message: feature.title })
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "p",
-            {
-              className: "text-base leading-relaxed text-muted",
-              "data-testid": `primary-subtitle-${index}`,
-              children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
-            }
-          )
+          /* @__PURE__ */ jsx("div", { className: "mb-20 flex justify-center", children: /* @__PURE__ */ jsx("div", { className: `flex h-64 w-64 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.color} shadow-lg group-hover:scale-110 transition-transform`, children: /* @__PURE__ */ jsx(Icon, { className: "text-white", size: "xl" }) }) }),
+          /* @__PURE__ */ jsx("h2", { className: "mb-12 text-xl font-bold text-gray-900", children: feature.title }),
+          /* @__PURE__ */ jsx("p", { className: "text-base leading-relaxed text-gray-600", children: feature.description })
         ]
       },
       index
     );
   }) }) }) });
 }
-function SecondaryFeaturesSection({ content: content2 }) {
-  const iconMap2 = [LinkIcon, BarChartIcon, DashboardIcon];
-  return /* @__PURE__ */ jsx("section", { className: "bg-paper py-60 md:py-100", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: content2.secondaryFeatures.map((feature, index) => {
-    const Icon = iconMap2[index] || LinkIcon;
+function SecondaryFeaturesSection() {
+  const features = [
+    {
+      icon: LinkIcon,
+      title: "Link in Bio Pages",
+      subtitle: "Bio Links",
+      description: "Create beautiful link-in-bio pages to share all your important links in one place.",
+      color: "from-[#FF6B35] to-[#FF8555]"
+    },
+    {
+      icon: BarChartIcon,
+      title: "Simple Analytics",
+      subtitle: "Track Performance",
+      description: "See where your clicks come from with basic analytics including location, device, and referrer information.",
+      color: "from-[#00D4AA] to-[#4DD4C4]"
+    },
+    {
+      icon: DashboardIcon,
+      title: "Easy Management",
+      subtitle: "Clean Dashboard",
+      description: "Manage all your links, groups, and settings from a simple, easy-to-use dashboard.",
+      color: "from-[#FFE5D9] to-[#FF8555]"
+    }
+  ];
+  return /* @__PURE__ */ jsx("section", { className: "py-60 md:py-100 bg-white", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: features.map((feature, index) => {
+    const Icon = feature.icon;
     const isEven = index % 2 === 0;
     return /* @__PURE__ */ jsxs(
       "div",
       {
-        "data-testid": `secondary-root-${index}`,
-        className: clsx(
-          "mb-60 flex flex-col gap-32 md:mb-100 md:flex-row md:items-center md:gap-60",
-          isEven ? "md:flex-row-reverse" : "",
-          index < content2.secondaryFeatures.length - 1 && "border-b border-divider pb-60 md:pb-100"
-        ),
+        className: `mb-60 flex flex-col gap-32 md:mb-100 md:flex-row md:items-center md:gap-60 ${isEven ? "md:flex-row-reverse" : ""} ${index < features.length - 1 ? "border-b border-gray-100 pb-60 md:pb-100" : ""}`,
         children: [
           /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-            /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-12 rounded-full bg-primary/10 px-16 py-8", children: [
-              /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "sm" }),
-              /* @__PURE__ */ jsx(
-                "span",
-                {
-                  className: "text-xs font-medium uppercase tracking-wider text-primary",
-                  "data-testid": `secondary-subtitle-${index}`,
-                  children: /* @__PURE__ */ jsx(Trans, { message: feature.subtitle })
-                }
-              )
+            /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-12 rounded-full bg-gradient-to-r from-[#FF6B35] to-[#00D4AA] px-16 py-8 mb-16", children: [
+              /* @__PURE__ */ jsx(Icon, { className: "text-white", size: "sm" }),
+              /* @__PURE__ */ jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-white", children: feature.subtitle })
             ] }),
-            /* @__PURE__ */ jsx(
-              "h3",
-              {
-                className: "mt-16 mb-12 text-3xl font-bold md:text-4xl",
-                "data-testid": `secondary-title-${index}`,
-                children: /* @__PURE__ */ jsx(Trans, { message: feature.title })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "p",
-              {
-                className: "text-lg leading-relaxed text-muted",
-                "data-testid": `secondary-description-${index}`,
-                children: /* @__PURE__ */ jsx(Trans, { message: feature.description })
-              }
-            )
+            /* @__PURE__ */ jsx("h3", { className: "mb-12 text-3xl font-bold text-gray-900 md:text-4xl", children: feature.title }),
+            /* @__PURE__ */ jsx("p", { className: "text-lg leading-relaxed text-gray-600", children: feature.description })
           ] }),
-          /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsx("div", { className: "flex h-200 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 md:h-300", children: /* @__PURE__ */ jsx("div", { className: "flex h-120 w-120 items-center justify-center rounded-full bg-primary/20", children: /* @__PURE__ */ jsx(Icon, { className: "text-primary", size: "xl" }) }) }) })
+          /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsx("div", { className: `flex h-200 items-center justify-center rounded-3xl bg-gradient-to-br ${feature.color} shadow-2xl md:h-300`, children: /* @__PURE__ */ jsx("div", { className: "flex h-120 w-120 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm", children: /* @__PURE__ */ jsx(Icon, { className: "text-white", size: "xl" }) }) }) })
         ]
       },
       index
     );
   }) }) });
 }
-function BottomCtaSection({ content: content2 }) {
-  return /* @__PURE__ */ jsx("section", { className: "bg-gradient-to-br from-primary to-primary/80 py-60 text-white md:py-80", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 text-center md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-600", children: [
-    /* @__PURE__ */ jsx(
-      "h2",
-      {
-        className: "mb-16 text-3xl font-bold md:text-4xl lg:text-5xl",
-        "data-testid": "footerTitle",
-        children: /* @__PURE__ */ jsx(Trans, { message: content2.footerTitle })
-      }
-    ),
-    content2.footerSubtitle && /* @__PURE__ */ jsx(
-      "p",
-      {
-        className: "mb-32 text-lg leading-relaxed text-white/90 md:text-xl",
-        "data-testid": "footerSubtitle",
-        children: /* @__PURE__ */ jsx(Trans, { message: content2.footerSubtitle })
-      }
-    ),
-    /* @__PURE__ */ jsx(
-      CtaButton,
-      {
-        item: content2.actions.cta3,
-        size: "lg",
-        radius: "rounded",
-        variant: "raised",
-        color: "paper",
-        className: "min-w-200",
-        "data-testid": "cta3"
-      }
-    )
-  ] }) }) });
-}
-function CustomFooter() {
-  var _a;
-  const year = (/* @__PURE__ */ new Date()).getFullYear();
-  const { branding, menus } = useSettings();
-  const primaryMenu = menus.find((m2) => {
-    var _a2;
-    return (_a2 = m2.positions) == null ? void 0 : _a2.includes("footer");
-  });
-  return /* @__PURE__ */ jsx("footer", { className: "bg-gray-900 py-40 text-white md:py-60", children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: [
-    primaryMenu && /* @__PURE__ */ jsx("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: (_a = primaryMenu.items) == null ? void 0 : _a.map((item, index) => /* @__PURE__ */ jsx(
-      Link,
-      {
-        to: item.action || "#",
-        className: "text-sm text-white/70 transition-colors hover:text-white",
-        children: /* @__PURE__ */ jsx(Trans, { message: item.label })
-      },
-      index
-    )) }),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between", children: [
-      /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
-        Trans,
+function BottomCtaSection() {
+  return /* @__PURE__ */ jsxs("section", { className: "relative py-60 text-white md:py-80 overflow-hidden", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-[#FF6B35] via-[#FF8555] to-[#00D4AA]" }),
+    /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 text-center md:px-24 lg:px-32 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-600", children: [
+      /* @__PURE__ */ jsx("h2", { className: "mb-16 text-3xl font-bold md:text-4xl lg:text-5xl", children: "Join the Beta" }),
+      /* @__PURE__ */ jsx("p", { className: "mb-32 text-lg leading-relaxed text-white/90 md:text-xl", children: "A simple link shortener built as a personal project. Free to use, no credit card required." }),
+      /* @__PURE__ */ jsx(
+        Button,
         {
-          message: "Copyright © :year :name",
-          values: { year, name: branding.site_name }
+          elementType: Link,
+          to: "/register",
+          size: "lg",
+          radius: "rounded",
+          variant: "raised",
+          className: "min-w-200 bg-white text-[#FF6B35] hover:bg-gray-100 font-semibold",
+          children: "Sign up for free"
         }
-      ) }),
+      )
+    ] }) })
+  ] });
+}
+function Footer() {
+  const year = (/* @__PURE__ */ new Date()).getFullYear();
+  return /* @__PURE__ */ jsx("footer", { className: "bg-gray-900 py-40 text-white md:py-60", children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: [
+    /* @__PURE__ */ jsxs("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: [
+      /* @__PURE__ */ jsx(Link, { to: "/api-docs", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Developers" }),
+      /* @__PURE__ */ jsx(Link, { to: "/pages/privacy-policy", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Privacy Policy" }),
+      /* @__PURE__ */ jsx(Link, { to: "/pages/terms-of-service", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Terms of Service" }),
+      /* @__PURE__ */ jsx(Link, { to: "/contact", className: "text-sm text-white/70 hover:text-white transition-colors", children: "Contact Us" })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm text-white/70 md:flex-row md:justify-between", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        "Copyright © ",
+        year,
+        " LinksForBio"
+      ] }),
       /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-8", children: [
         /* @__PURE__ */ jsx(FavoriteIcon, { className: "text-red-500", size: "sm" }),
-        /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(Trans, { message: "Built With Love By Jay Logan" }) })
+        /* @__PURE__ */ jsx("span", { children: "Built With Love By Jay Logan" })
       ] })
     ] })
   ] }) });
@@ -11210,7 +11167,7 @@ function AccountSettingsPage() {
   });
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-alt", children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Account Settings" }) }),
-    /* @__PURE__ */ jsx(Navbar, { menuPosition: "account-settings-page" }),
+    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "account-settings-page" }),
     /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-24 py-24", children: [
       /* @__PURE__ */ jsx("h1", { className: "text-3xl", children: /* @__PURE__ */ jsx(Trans, { message: "Account settings" }) }),
       /* @__PURE__ */ jsx("div", { className: "mb-40 text-base text-muted", children: /* @__PURE__ */ jsx(Trans, { message: "View and update your account details, profile and more." }) }),
@@ -11895,7 +11852,7 @@ function PricingPage() {
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Pricing" }) }),
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         color: "bg",
         darkModeColor: "transparent",
@@ -11924,7 +11881,7 @@ function PricingPage() {
       ),
       /* @__PURE__ */ jsx(ContactSection, {})
     ] }),
-    /* @__PURE__ */ jsx(Footer, { className: "container mx-auto flex-shrink-0 px-24" })
+    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto flex-shrink-0 px-24" })
   ] });
 }
 function ContactSection() {
@@ -11936,9 +11893,9 @@ function ContactSection() {
   ] });
 }
 const BillingPageRoutes = React.lazy(
-  () => import("./assets/billing-page-routes-ed346a6b.mjs")
+  () => import("./assets/billing-page-routes-861e349f.mjs")
 );
-const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-e90af49a.mjs"));
+const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-acee1873.mjs"));
 const BillingRoutes = /* @__PURE__ */ jsxs(Fragment, { children: [
   /* @__PURE__ */ jsx(Route, { path: "/pricing", element: /* @__PURE__ */ jsx(PricingPage, {}) }),
   /* @__PURE__ */ jsx(
@@ -11984,7 +11941,7 @@ function NotificationsPage() {
   );
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Notifications" }) }),
-    /* @__PURE__ */ jsx(Navbar, { menuPosition: "notifications-page" }),
+    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "notifications-page" }),
     /* @__PURE__ */ jsxs("div", { className: "container mx-auto min-h-[1000px] p-16 md:p-24", children: [
       /* @__PURE__ */ jsxs("div", { className: "mb-30 flex items-center gap-24", children: [
         /* @__PURE__ */ jsx("h1", { className: "text-3xl", children: /* @__PURE__ */ jsx(Trans, { message: "Notifications" }) }),
@@ -12002,7 +11959,7 @@ function NotificationsPage() {
       ] }),
       /* @__PURE__ */ jsx(PageContent, {})
     ] }),
-    /* @__PURE__ */ jsx(Footer, { className: "container mx-auto mt-48 p-16 md:p-24" })
+    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto mt-48 p-16 md:p-24" })
   ] });
 }
 function PageContent() {
@@ -12073,7 +12030,7 @@ function NotificationSettingsPage() {
     return /* @__PURE__ */ jsx(Navigate, { to: "/", replace: true });
   }
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-alt", children: [
-    /* @__PURE__ */ jsx(Navbar, { menuPosition: "notifications-page" }),
+    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "notifications-page" }),
     !isFetched || !data || !selection ? /* @__PURE__ */ jsx("div", { className: "container mx-auto my-100 flex justify-center", children: /* @__PURE__ */ jsx(
       ProgressCircle,
       {
@@ -12255,7 +12212,7 @@ function ContactUsPage() {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col bg-alt min-h-screen", children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Contact us" }) }),
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         className: "flex-shrink-0 sticky top-0",
         menuPosition: "contact-us-page"
@@ -12319,7 +12276,7 @@ function ContactUsPage() {
         }
       )
     ] }) }),
-    /* @__PURE__ */ jsx(Footer, { className: "container mx-auto px-24 flex-shrink-0" })
+    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto px-24 flex-shrink-0" })
   ] });
 }
 const ShareIcon = createSvgIcon(
@@ -12585,12 +12542,12 @@ function LinkPageRenderer({ link: link2 }) {
     !hideNavbar && /* @__PURE__ */ jsx(LinkPageNavbar, { link: link2 }),
     /* @__PURE__ */ jsx(AdHost, { slot: "link_page", className: "mt-70 mb-20pa" }),
     /* @__PURE__ */ jsx("div", { className: "flex-auto", children: /* @__PURE__ */ jsx(CustomPageBody, { page }) }),
-    !hideFooter && /* @__PURE__ */ jsx(Footer, { className: "mx-14 md:mx-40" })
+    !hideFooter && /* @__PURE__ */ jsx(Footer$1, { className: "mx-14 md:mx-40" })
   ] });
 }
 function LinkPageNavbar({ link: link2 }) {
   return /* @__PURE__ */ jsx(
-    Navbar,
+    Navbar$1,
     {
       menuPosition: "link-page-navbar",
       className: "flex-shrink-0 sticky top-0",
@@ -12704,7 +12661,7 @@ function LinkOverlayRenderer({ link: link2 }) {
 function LinkIframeRenderer({ link: link2 }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col h-screen relative", children: [
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         menuPosition: "link-page-navbar",
         className: "flex-shrink-0 sticky top-0",
@@ -12719,7 +12676,7 @@ function LinkSplashRenderer({ link: link2 }) {
   const { base_url } = useSettings();
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col w-full h-screen bg-alt", children: [
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         menuPosition: "link-page-navbar",
         rightChildren: /* @__PURE__ */ jsx(ShareLinkButton, { link: link2 })
@@ -12754,7 +12711,7 @@ function LinkSplashRenderer({ link: link2 }) {
       ] }),
       /* @__PURE__ */ jsx(AdHost, { slot: "splash_bottom", className: "mt-60 mb-20 flex-shrink-0" })
     ] }),
-    /* @__PURE__ */ jsx(Footer, { className: "px-24" })
+    /* @__PURE__ */ jsx(Footer$1, { className: "px-24" })
   ] });
 }
 function removeProtocol(url) {
@@ -13044,7 +13001,7 @@ function LinkGroupRenderer({ linkGroup }) {
   }
   return /* @__PURE__ */ jsxs("div", { className: "bg-alt flex flex-col min-h-screen", children: [
     /* @__PURE__ */ jsx(
-      Navbar,
+      Navbar$1,
       {
         menuPosition: "link-page-navbar",
         className: "sticky top-0 flex-shrink-0"
@@ -14179,12 +14136,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-4ebfe052.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-234dcc37.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
-  () => import("./assets/swagger-api-docs-page-6736196b.mjs")
+  () => import("./assets/swagger-api-docs-page-52e6c9a9.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-a9890fe4.mjs").then((n) => n.aY)
+  () => import("./assets/dashboard-routes-6f96372a.mjs").then((n) => n.aY)
 );
 function AppRoutes() {
   var _a;
@@ -14220,7 +14177,7 @@ function AppRoutes() {
           element: /* @__PURE__ */ jsx(
             DynamicHomepage,
             {
-              homepageResolver: () => /* @__PURE__ */ jsx(GuestRoute, { children: /* @__PURE__ */ jsx(LandingPage, {}) })
+              homepageResolver: () => /* @__PURE__ */ jsx(GuestRoute, { children: /* @__PURE__ */ jsx(CustomLandingPage, {}) })
             }
           )
         }
@@ -14404,8 +14361,8 @@ export {
   closeDialog as aE,
   AuthRoute as aF,
   NotFoundPage as aG,
-  Navbar as aH,
-  Footer as aI,
+  Navbar$1 as aH,
+  Footer$1 as aI,
   getFromLocalStorage as aJ,
   Underlay as aK,
   useUserTimezone as aL,
