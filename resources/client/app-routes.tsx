@@ -19,6 +19,9 @@ import {NotificationRoutes} from '@common/notifications/notification-routes';
 import {CustomContactPage} from '@app/landing/custom-contact-page';
 import {CustomPrivacyPolicyPage} from '@app/landing/custom-privacy-policy-page';
 import {CustomTermsOfServicePage} from '@app/landing/custom-terms-page';
+import {CustomRegisterPage} from '@app/landing/custom-register-page';
+import {CustomLoginPageWrapper} from '@app/landing/custom-login-page-wrapper';
+import {CustomForgotPasswordPage} from '@app/landing/custom-forgot-password-page';
 import {LinkeableRenderer} from '@app/short-links/linkeable-renderer';
 import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
@@ -101,7 +104,6 @@ export function AppRoutes() {
             </AuthRoute>
           }
         />
-        {AuthRoutes}
         {billing.enable && BillingRoutes}
         {notifications.integrated && NotificationRoutes}
         {api?.integrated && hasPermission('api.access') && (
@@ -117,6 +119,10 @@ export function AppRoutes() {
         <Route path="contact" element={<CustomContactPage />} />
         <Route path="privacy-policy" element={<CustomPrivacyPolicyPage />} />
         <Route path="terms-of-service" element={<CustomTermsOfServicePage />} />
+        <Route path="register" element={<GuestRoute><CustomRegisterPage /></GuestRoute>} />
+        <Route path="login" element={<GuestRoute><CustomLoginPageWrapper /></GuestRoute>} />
+        <Route path="forgot-password" element={<GuestRoute><CustomForgotPasswordPage /></GuestRoute>} />
+        {AuthRoutes}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <DialogStoreOutlet />

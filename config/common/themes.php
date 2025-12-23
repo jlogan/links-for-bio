@@ -1,13 +1,13 @@
 <?php
 
-// primary is blue from tailwind color palette
+// primary is orange from LinksForBio color palette
 
 return [
   'light' => [
     '--be-foreground-base' => '0 0 0',
-    '--be-primary-light' => '191 219 254', // 200
-    '--be-primary' => '59 130 246', // 500
-    '--be-primary-dark' => '37 99 235',
+    '--be-primary-light' => '255 133 85', // #FF8555 (hover state)
+    '--be-primary' => '255 107 53', // #FF6B35 (main orange)
+    '--be-primary-dark' => '230 60 20', // darker orange
     '--be-on-primary' => '255 255 255',
     '--be-background' => '255 255 255',
     '--be-background-alt' => '246 248 250',
@@ -24,10 +24,10 @@ return [
   ],
   'dark' => [
     '--be-foreground-base' => '255 255 255',
-    '--be-primary-light' => '239 246 255', // 50
-    '--be-primary' => '191 219 254', // 200
-    '--be-primary-dark' => '147 197 253', // 300
-    '--be-on-primary' => '56 30 114',
+    '--be-primary-light' => '255 133 85', // #FF8555 (hover state)
+    '--be-primary' => '255 107 53', // #FF6B35 (main orange)
+    '--be-primary-dark' => '230 60 20', // darker orange
+    '--be-on-primary' => '255 255 255',
     '--be-background' => '23 23 26',
     '--be-background-alt' => '34 34 38',
     '--be-background-chip' => '66 68 74',

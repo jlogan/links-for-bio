@@ -7416,7 +7416,7 @@ function LoginPage({ onTwoFactorChallenge }) {
   const searchParamsEmail = searchParams.get("email") || void 0;
   const { branding, registration, site, social } = useSettings();
   const siteConfig = useContext(SiteConfigContext);
-  const demoDefaults = site.demo && !searchParamsEmail ? getDemoFormDefaults(siteConfig) : {};
+  const demoDefaults = site.demo && !searchParamsEmail ? getDemoFormDefaults$1(siteConfig) : {};
   const form = useForm({
     defaultValues: { remember: true, email: searchParamsEmail, ...demoDefaults }
   });
@@ -7502,7 +7502,7 @@ function LoginPage({ onTwoFactorChallenge }) {
     )
   ] });
 }
-function getDemoFormDefaults(siteConfig) {
+function getDemoFormDefaults$1(siteConfig) {
   if (siteConfig.demo.loginPageDefaults === "randomAccount") {
     const number = Math.floor(Math.random() * 100) + 1;
     const paddedNumber = String(number).padStart(3, "0");
@@ -11923,9 +11923,9 @@ function ContactSection() {
   ] });
 }
 const BillingPageRoutes = React.lazy(
-  () => import("./assets/billing-page-routes-861e349f.mjs")
+  () => import("./assets/billing-page-routes-a09af6d2.mjs")
 );
-const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-acee1873.mjs"));
+const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-88568c16.mjs"));
 const BillingRoutes = /* @__PURE__ */ jsxs(Fragment, { children: [
   /* @__PURE__ */ jsx(Route, { path: "/pricing", element: /* @__PURE__ */ jsx(PricingPage, {}) }),
   /* @__PURE__ */ jsx(
@@ -12490,6 +12490,320 @@ function CustomTermsOfServicePage() {
           ] })
         ] })
       ] }) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
+  ] });
+}
+function CustomRegisterPage() {
+  const {
+    branding,
+    registration: { disable: disable2, policies }
+  } = useSettings();
+  const { auth } = useContext(SiteConfigContext);
+  const { verify, isVerifying } = useRecaptcha("register");
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const isWorkspaceRegister = pathname.includes("workspace");
+  const isBillingRegister = searchParams.get("redirectFrom") === "pricing";
+  const searchParamsEmail = searchParams.get("email") || void 0;
+  const username = searchParams.get("username") || void 0;
+  const form = useForm({
+    defaultValues: { email: searchParamsEmail }
+  });
+  const register2 = useRegister(form);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  if (disable2) {
+    return /* @__PURE__ */ jsx(Navigate, { to: "/login", replace: true });
+  }
+  let heading = "Create a new account";
+  if (isWorkspaceRegister) {
+    heading = `To join your team on ${branding == null ? void 0 : branding.site_name}, create an account`;
+  } else if (isBillingRegister) {
+    heading = "First, let's create your account";
+  }
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Sign up" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-500 mx-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-40", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-3xl md:text-4xl font-bold text-gray-900 mb-12", children: heading }),
+        /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-600", children: [
+          "Already have an account?",
+          " ",
+          /* @__PURE__ */ jsx(Link, { to: "/login", className: "text-[#FF6B35] hover:underline font-medium", children: "Sign in" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "bg-white rounded-2xl border-2 border-gray-100 p-32 md:p-48 shadow-lg", children: /* @__PURE__ */ jsxs(
+        Form,
+        {
+          form,
+          onSubmit: async (payload) => {
+            const isValid = await verify();
+            if (isValid) {
+              register2.mutate(payload);
+            }
+          },
+          children: [
+            username && /* @__PURE__ */ jsx("div", { className: "mb-24 p-16 bg-[#FFE5D9] rounded-lg border border-[#FF6B35]/20", children: /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-700", children: [
+              /* @__PURE__ */ jsx("span", { className: "font-medium", children: "Claiming:" }),
+              " ",
+              /* @__PURE__ */ jsxs("span", { className: "text-[#FF6B35] font-semibold", children: [
+                "linksforb.io/",
+                username
+              ] })
+            ] }) }),
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                className: "mb-24",
+                name: "email",
+                type: "email",
+                disabled: !!searchParamsEmail,
+                label: "Email",
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                className: "mb-24",
+                name: "password",
+                type: "password",
+                label: "Password",
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                className: "mb-24",
+                name: "password_confirmation",
+                type: "password",
+                label: "Confirm password",
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            (auth == null ? void 0 : auth.registerFields) ? /* @__PURE__ */ jsx(auth.registerFields, {}) : null,
+            policies && /* @__PURE__ */ jsx("div", { className: "mb-24", children: policies.map((policy) => /* @__PURE__ */ jsx(
+              FormCheckbox,
+              {
+                name: policy.id,
+                className: "mb-8 block",
+                required: true,
+                children: /* @__PURE__ */ jsx(
+                  Trans,
+                  {
+                    message: "I accept the :name",
+                    values: {
+                      name: /* @__PURE__ */ jsx(
+                        CustomMenuItem,
+                        {
+                          unstyled: true,
+                          className: () => "text-[#FF6B35] hover:underline",
+                          item: policy
+                        }
+                      )
+                    }
+                  }
+                )
+              },
+              policy.id
+            )) }),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                className: "w-full bg-[#FF6B35] hover:bg-[#FF8555] text-white font-semibold",
+                type: "submit",
+                variant: "raised",
+                size: "lg",
+                disabled: register2.isPending || isVerifying,
+                children: register2.isPending || isVerifying ? "Creating account..." : "Create account"
+              }
+            )
+          ]
+        }
+      ) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
+  ] });
+}
+function CustomLoginPage({ onTwoFactorChallenge }) {
+  const [searchParams] = useSearchParams();
+  const { pathname } = useLocation();
+  const isWorkspaceLogin = pathname.includes("workspace");
+  const searchParamsEmail = searchParams.get("email") || void 0;
+  const { branding, registration, site } = useSettings();
+  const siteConfig = useContext(SiteConfigContext);
+  const demoDefaults = site.demo && !searchParamsEmail ? getDemoFormDefaults(siteConfig) : {};
+  const form = useForm({
+    defaultValues: { remember: true, email: searchParamsEmail, ...demoDefaults }
+  });
+  const login2 = useLogin(form);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  const heading = isWorkspaceLogin ? `To join your team on ${branding == null ? void 0 : branding.site_name}, login to your account` : "Sign in to your account";
+  const isInvalid = !!Object.keys(form.formState.errors).length;
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Sign in" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-500 mx-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-40", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-3xl md:text-4xl font-bold text-gray-900 mb-12", children: heading }),
+        !registration.disable && /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-600", children: [
+          "Don't have an account?",
+          " ",
+          /* @__PURE__ */ jsx(Link, { to: "/register", className: "text-[#FF6B35] hover:underline font-medium", children: "Sign up" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "bg-white rounded-2xl border-2 border-gray-100 p-32 md:p-48 shadow-lg", children: /* @__PURE__ */ jsxs(
+        Form,
+        {
+          form,
+          onSubmit: (payload) => {
+            login2.mutate(payload, {
+              onSuccess: (response) => {
+                if (response.two_factor) {
+                  onTwoFactorChallenge();
+                }
+              }
+            });
+          },
+          children: [
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                className: "mb-24",
+                name: "email",
+                type: "email",
+                label: "Email",
+                disabled: !!searchParamsEmail,
+                invalid: isInvalid,
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                className: "mb-12",
+                name: "password",
+                type: "password",
+                label: "Password",
+                invalid: isInvalid,
+                labelSuffix: /* @__PURE__ */ jsx(Link, { to: "/forgot-password", className: "text-[#FF6B35] hover:underline text-sm", tabIndex: -1, children: "Forgot your password?" }),
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            /* @__PURE__ */ jsx(FormCheckbox, { name: "remember", className: "mb-24 block", children: "Stay signed in for a month" }),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                className: "w-full bg-[#FF6B35] hover:bg-[#FF8555] text-white font-semibold",
+                type: "submit",
+                variant: "raised",
+                size: "lg",
+                disabled: login2.isPending,
+                children: login2.isPending ? "Signing in..." : "Continue"
+              }
+            )
+          ]
+        }
+      ) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
+  ] });
+}
+function getDemoFormDefaults(siteConfig) {
+  if (siteConfig.demo.loginPageDefaults === "randomAccount") {
+    const number = Math.floor(Math.random() * 100) + 1;
+    const paddedNumber = String(number).padStart(3, "0");
+    return {
+      email: `admin@demo${paddedNumber}.com`,
+      password: "admin"
+    };
+  } else {
+    return {
+      email: siteConfig.demo.email ?? "admin@admin.com",
+      password: siteConfig.demo.password ?? "admin"
+    };
+  }
+}
+function CustomLoginPageWrapper() {
+  const [isTwoFactor, setIsTwoFactor] = useState(false);
+  if (isTwoFactor) {
+    return /* @__PURE__ */ jsx(TwoFactorChallengePage, {});
+  } else {
+    return /* @__PURE__ */ jsx(CustomLoginPage, { onTwoFactorChallenge: () => setIsTwoFactor(true) });
+  }
+}
+function CustomForgotPasswordPage() {
+  const { registration } = useSettings();
+  const [searchParams] = useSearchParams();
+  const searchParamsEmail = searchParams.get("email") || void 0;
+  const form = useForm({
+    defaultValues: { email: searchParamsEmail }
+  });
+  const sendEmail = useSendPasswordResetEmail(form);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Forgot Password" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-500 mx-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-40", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-3xl md:text-4xl font-bold text-gray-900 mb-12", children: "Forgot Password" }),
+        !registration.disable && /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-600", children: [
+          "Don't have an account?",
+          " ",
+          /* @__PURE__ */ jsx(Link, { to: "/register", className: "text-[#FF6B35] hover:underline font-medium", children: "Sign up" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "bg-white rounded-2xl border-2 border-gray-100 p-32 md:p-48 shadow-lg", children: /* @__PURE__ */ jsxs(
+        Form,
+        {
+          form,
+          onSubmit: (payload) => {
+            sendEmail.mutate(payload);
+          },
+          children: [
+            /* @__PURE__ */ jsx("div", { className: "mb-24 text-sm text-gray-600", children: "Enter your email address below and we will send you a link to reset or create your password." }),
+            /* @__PURE__ */ jsx(
+              FormTextField,
+              {
+                disabled: !!searchParamsEmail,
+                className: "mb-32",
+                name: "email",
+                type: "email",
+                autoComplete: "off",
+                autoCorrect: "off",
+                spellCheck: "false",
+                label: "Email",
+                required: true,
+                background: "bg-white"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                className: "w-full bg-[#FF6B35] hover:bg-[#FF8555] text-white font-semibold",
+                type: "submit",
+                variant: "raised",
+                size: "lg",
+                disabled: sendEmail.isPending,
+                children: sendEmail.isPending ? "Sending..." : "Continue"
+              }
+            )
+          ]
+        }
+      ) })
     ] }) }) }),
     /* @__PURE__ */ jsx(SharedFooter, {})
   ] });
@@ -14351,12 +14665,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-71204395.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-0714efd3.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
-  () => import("./assets/swagger-api-docs-page-52e6c9a9.mjs")
+  () => import("./assets/swagger-api-docs-page-06507a85.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-6f96372a.mjs").then((n) => n.aY)
+  () => import("./assets/dashboard-routes-a3874f63.mjs").then((n) => n.aZ)
 );
 function AppRoutes() {
   var _a;
@@ -14411,7 +14725,6 @@ function AppRoutes() {
           element: /* @__PURE__ */ jsx(AuthRoute, { permission: "admin.access", children: /* @__PURE__ */ jsx(React.Suspense, { fallback: /* @__PURE__ */ jsx(FullPageLoader, { screen: true }), children: /* @__PURE__ */ jsx(AdminRoutes, {}) }) })
         }
       ),
-      AuthRoutes,
       billing.enable && BillingRoutes,
       notifications.integrated && NotificationRoutes,
       (api == null ? void 0 : api.integrated) && hasPermission("api.access") && /* @__PURE__ */ jsx(
@@ -14424,6 +14737,10 @@ function AppRoutes() {
       /* @__PURE__ */ jsx(Route, { path: "contact", element: /* @__PURE__ */ jsx(CustomContactPage, {}) }),
       /* @__PURE__ */ jsx(Route, { path: "privacy-policy", element: /* @__PURE__ */ jsx(CustomPrivacyPolicyPage, {}) }),
       /* @__PURE__ */ jsx(Route, { path: "terms-of-service", element: /* @__PURE__ */ jsx(CustomTermsOfServicePage, {}) }),
+      /* @__PURE__ */ jsx(Route, { path: "register", element: /* @__PURE__ */ jsx(GuestRoute, { children: /* @__PURE__ */ jsx(CustomRegisterPage, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "login", element: /* @__PURE__ */ jsx(GuestRoute, { children: /* @__PURE__ */ jsx(CustomLoginPageWrapper, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "forgot-password", element: /* @__PURE__ */ jsx(GuestRoute, { children: /* @__PURE__ */ jsx(CustomForgotPasswordPage, {}) }) }),
+      AuthRoutes,
       /* @__PURE__ */ jsx(Route, { path: "*", element: /* @__PURE__ */ jsx(NotFoundPage, {}) })
     ] }),
     /* @__PURE__ */ jsx(DialogStoreOutlet, {})
@@ -14530,7 +14847,7 @@ async function takeScreenshot(request, response) {
 }
 console.log(`Starting SSR server on port ${port}...`);
 export {
-  ProgressCircle as $,
+  useAppearanceEditorMode as $,
   List as A,
   Button as B,
   CustomMenu as C,
@@ -14544,40 +14861,40 @@ export {
   createSvgIconFromTree as K,
   LoginIcon as L,
   FormSelect as M,
-  Item$1 as N,
-  Section as O,
-  getInputFieldClassNames as P,
-  useNumberFormatter as Q,
-  clamp as R,
+  Navbar as N,
+  Item$1 as O,
+  Section as P,
+  getInputFieldClassNames as Q,
+  useNumberFormatter as R,
   Skeleton as S,
   Trans as T,
-  createEventHandler as U,
-  ButtonBase as V,
-  KeyboardArrowLeftIcon as W,
-  MixedText as X,
-  StaticPageTitle as Y,
-  FileUploadProvider as Z,
-  useAppearanceEditorMode as _,
+  clamp as U,
+  createEventHandler as V,
+  ButtonBase as W,
+  KeyboardArrowLeftIcon as X,
+  MixedText as Y,
+  StaticPageTitle as Z,
+  FileUploadProvider as _,
   apiClient as a,
   UploadedFile as a$,
-  IllustratedMessage as a0,
-  SvgImage as a1,
-  useNavigate as a2,
-  useBootstrapData as a3,
-  FullPageLoader as a4,
-  LinkStyle as a5,
-  SiteConfigContext as a6,
-  getBootstrapData as a7,
-  useIsMobileMediaQuery as a8,
-  SelectForwardRef as a9,
-  useCustomPage as aA,
-  PageMetaTags as aB,
-  PageStatus as aC,
-  FormattedRelativeTime as aD,
-  closeDialog as aE,
-  AuthRoute as aF,
-  NotFoundPage as aG,
-  Navbar as aH,
+  ProgressCircle as a0,
+  IllustratedMessage as a1,
+  SvgImage as a2,
+  useNavigate as a3,
+  useBootstrapData as a4,
+  FullPageLoader as a5,
+  LinkStyle as a6,
+  SiteConfigContext as a7,
+  getBootstrapData as a8,
+  useIsMobileMediaQuery as a9,
+  FormattedPrice as aA,
+  useCustomPage as aB,
+  PageMetaTags as aC,
+  PageStatus as aD,
+  FormattedRelativeTime as aE,
+  closeDialog as aF,
+  AuthRoute as aG,
+  NotFoundPage as aH,
   Footer as aI,
   getFromLocalStorage as aJ,
   Underlay as aK,
@@ -14597,32 +14914,32 @@ export {
   KeyboardArrowDownIcon as aY,
   useListboxKeyboardNavigation as aZ,
   errorStatusIs as a_,
-  ProgressBar as aa,
-  LinkIcon as ab,
-  ExternalLink as ac,
-  MenuTrigger as ad,
-  Menu as ae,
-  RemoteFavicon as af,
-  removeProtocol as ag,
-  FormRadioGroup as ah,
-  FormRadio as ai,
-  DateFormatPresets as aj,
-  prettyBytes as ak,
-  useSocialLogin as al,
-  useField as am,
-  Field as an,
-  useResendVerificationEmail as ao,
-  useUser as ap,
-  useUploadAvatar as aq,
-  useRemoveAvatar as ar,
-  openDialog as as,
-  openUploadWindow as at,
-  UploadInputType as au,
-  SearchIcon as av,
-  isAbsoluteUrl as aw,
-  useMediaQuery as ax,
-  useProducts as ay,
-  FormattedPrice as az,
+  SelectForwardRef as aa,
+  ProgressBar as ab,
+  LinkIcon as ac,
+  ExternalLink as ad,
+  MenuTrigger as ae,
+  Menu as af,
+  RemoteFavicon as ag,
+  removeProtocol as ah,
+  FormRadioGroup as ai,
+  FormRadio as aj,
+  DateFormatPresets as ak,
+  prettyBytes as al,
+  useSocialLogin as am,
+  useField as an,
+  Field as ao,
+  useResendVerificationEmail as ap,
+  useUser as aq,
+  useUploadAvatar as ar,
+  useRemoveAvatar as as,
+  openDialog as at,
+  openUploadWindow as au,
+  UploadInputType as av,
+  SearchIcon as aw,
+  isAbsoluteUrl as ax,
+  useMediaQuery as ay,
+  useProducts as az,
   useLocalStorage as b,
   MenuIcon as b$,
   WorkspaceQueryKeys as b0,

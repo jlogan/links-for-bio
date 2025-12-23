@@ -2,7 +2,6 @@ import {DashboardLayout} from '@common/ui/layout/dashboard-layout';
 import {DashboardSidenav} from '@common/ui/layout/dashboard-sidenav';
 import {DashboardContent} from '@common/ui/layout/dashboard-content';
 import {Outlet} from 'react-router-dom';
-import {DashboardNavbar} from '@common/ui/layout/dashboard-navbar';
 import {BelinkDashboardSidenav} from './sidenav/belink-dashboard-sidenav';
 import {useContext} from 'react';
 import {DashboardLayoutContext} from '@common/ui/layout/dashboard-layout-context';
@@ -15,6 +14,7 @@ import {Footer} from '@common/ui/footer/footer';
 import {useSettings} from '@common/core/settings/use-settings';
 import {AdHost} from '@common/admin/ads/ad-host';
 import {useThemeSelector} from '@common/ui/themes/theme-selector-context';
+import {CustomDashboardNavbar} from './custom-dashboard-navbar';
 
 export function BelinkDashboardLayout() {
   const {
@@ -47,7 +47,7 @@ function BelinkNavbar(props: DashboardNavbarProps) {
   const buttonColor =
     selectedTheme.values?.['--be-navbar-color'] === 'bg' ? 'primary' : 'paper';
   return (
-    <DashboardNavbar
+    <CustomDashboardNavbar
       {...props}
       size="sm"
       menuPosition="dashboard-navbar"
@@ -65,6 +65,6 @@ function BelinkNavbar(props: DashboardNavbarProps) {
           }
         />
       )}
-    </DashboardNavbar>
+    </CustomDashboardNavbar>
   );
 }

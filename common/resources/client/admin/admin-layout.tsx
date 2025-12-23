@@ -3,7 +3,6 @@ import {AdminSidebar} from './admin-sidebar';
 import {DashboardLayout} from '../ui/layout/dashboard-layout';
 import {DashboardContent} from '../ui/layout/dashboard-content';
 import {DashboardSidenav} from '../ui/layout/dashboard-sidenav';
-import {DashboardNavbar} from '../ui/layout/dashboard-navbar';
 import {
   AdminSetupAlert,
   useAdminSetupAlerts,
@@ -14,11 +13,12 @@ import {
   setInLocalStorage,
   useLocalStorage,
 } from '@common/utils/hooks/local-storage';
+import {CustomAdminNavbar} from '@app/admin/custom-admin-navbar';
 
 export function AdminLayout() {
   return (
     <DashboardLayout name="admin" leftSidenavCanBeCompact>
-      <DashboardNavbar size="sm" menuPosition="admin-navbar" />
+      <CustomAdminNavbar size="sm" menuPosition="admin-navbar" />
       <DashboardSidenav position="left" size="sm">
         <AdminSidebar />
       </DashboardSidenav>
