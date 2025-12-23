@@ -155,34 +155,6 @@ interface BrandingProps {
   appearance?: BiolinkAppearance | null;
 }
 function Branding({appearance}: BrandingProps) {
-  const {branding, biolink} = useSettings();
-  let src = biolink?.branding_img;
-  const {trans} = useTrans();
-  let isDarkMode = useIsDarkMode();
-
-  if (appearance?.hideBranding) {
-    return null;
-  }
-
-  if (appearance?.bgConfig?.color) {
-    isDarkMode = getColorBrightness(appearance?.bgConfig?.color) > 100;
-  }
-
-  if (!src) {
-    src = isDarkMode ? branding.logo_light : branding.logo_dark;
-  }
-
-  return (
-    <div className="flex-shrink-0">
-      <Link to="/">
-        <img
-          className="mx-auto h-24 w-auto"
-          src={src}
-          alt={trans(
-            message(':site logo', {values: {site: branding.site_name}}),
-          )}
-        />
-      </Link>
-    </div>
-  );
+  // Branding logo removed - always return null
+  return null;
 }

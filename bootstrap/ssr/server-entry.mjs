@@ -39,7 +39,6 @@ import { getCookie as getCookie$1 } from "react-use-cookie";
 import match from "mime-match";
 import useClipboard from "react-use-clipboard";
 import getVideoId from "get-video-id";
-import { parseColor } from "@react-stately/color";
 let activeWorkspaceId = 0;
 function getActiveWorkspaceId() {
   return activeWorkspaceId;
@@ -11923,9 +11922,9 @@ function ContactSection() {
   ] });
 }
 const BillingPageRoutes = React.lazy(
-  () => import("./assets/billing-page-routes-a09af6d2.mjs")
+  () => import("./assets/billing-page-routes-6d50c0d1.mjs")
 );
-const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-88568c16.mjs"));
+const CheckoutRoutes = React.lazy(() => import("./assets/checkout-routes-3196134c.mjs"));
 const BillingRoutes = /* @__PURE__ */ jsxs(Fragment, { children: [
   /* @__PURE__ */ jsx(Route, { path: "/pricing", element: /* @__PURE__ */ jsx(PricingPage, {}) }),
   /* @__PURE__ */ jsx(
@@ -14402,13 +14401,6 @@ const WidgetRenderers = {
   [WidgetType.Twitch]: TwitchWidgetRenderer,
   [WidgetType.Tiktok]: TiktokWidgetRenderer
 };
-function getColorBrightness(value) {
-  const parsed = parseColor(value).toFormat("rgb");
-  const red = parsed.getChannelValue("red");
-  const green = parsed.getChannelValue("green");
-  const blue = parsed.getChannelValue("blue");
-  return (red * 299 + green * 587 + blue * 114) / 1e3;
-}
 function cssPropsFromBgConfig(bgConfig) {
   if (bgConfig) {
     return {
@@ -14530,30 +14522,7 @@ function LinkButton({ link: link2, appearance }) {
   );
 }
 function Branding({ appearance }) {
-  var _a, _b;
-  const { branding, biolink } = useSettings();
-  let src = biolink == null ? void 0 : biolink.branding_img;
-  const { trans } = useTrans();
-  let isDarkMode = useIsDarkMode();
-  if (appearance == null ? void 0 : appearance.hideBranding) {
-    return null;
-  }
-  if ((_a = appearance == null ? void 0 : appearance.bgConfig) == null ? void 0 : _a.color) {
-    isDarkMode = getColorBrightness((_b = appearance == null ? void 0 : appearance.bgConfig) == null ? void 0 : _b.color) > 100;
-  }
-  if (!src) {
-    src = isDarkMode ? branding.logo_light : branding.logo_dark;
-  }
-  return /* @__PURE__ */ jsx("div", { className: "flex-shrink-0", children: /* @__PURE__ */ jsx(Link, { to: "/", children: /* @__PURE__ */ jsx(
-    "img",
-    {
-      className: "mx-auto h-24 w-auto",
-      src,
-      alt: trans(
-        message(":site logo", { values: { site: branding.site_name } })
-      )
-    }
-  ) }) });
+  return null;
 }
 function BiolinkRenderer({ biolink }) {
   return /* @__PURE__ */ jsx(
@@ -14665,12 +14634,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-0714efd3.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-bfb005a1.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
-  () => import("./assets/swagger-api-docs-page-06507a85.mjs")
+  () => import("./assets/swagger-api-docs-page-7fc760ac.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-a3874f63.mjs").then((n) => n.aZ)
+  () => import("./assets/dashboard-routes-817bdad7.mjs").then((n) => n.aZ)
 );
 function AppRoutes() {
   var _a;

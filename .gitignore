@@ -35,7 +35,6 @@ install_files
 /storage/*.key
 Homestead.json
 Homestead.yaml
-.env
 data.ms
 /test-results/
 /playwright-report/
@@ -48,3 +47,4 @@ resources/lang/*.json
 supervisord.pid
 supervisord.sock
 *.pid
+config.bat
