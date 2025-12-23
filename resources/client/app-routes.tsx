@@ -16,8 +16,9 @@ import {AuthRoute} from '@common/auth/guards/auth-route';
 import {AuthRoutes} from '@common/auth/auth-routes';
 import {BillingRoutes} from '@common/billing/billing-routes';
 import {NotificationRoutes} from '@common/notifications/notification-routes';
-import {ContactUsPage} from '@common/contact/contact-us-page';
-import {CustomPageLayout} from '@common/custom-page/custom-page-layout';
+import {CustomContactPage} from '@app/landing/custom-contact-page';
+import {CustomPrivacyPolicyPage} from '@app/landing/custom-privacy-policy-page';
+import {CustomTermsOfServicePage} from '@app/landing/custom-terms-page';
 import {LinkeableRenderer} from '@app/short-links/linkeable-renderer';
 import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
@@ -113,8 +114,9 @@ export function AppRoutes() {
             }
           />
         )}
-        <Route path="contact" element={<ContactUsPage />} />
-        <Route path="pages/:pageSlug" element={<CustomPageLayout />} />
+        <Route path="contact" element={<CustomContactPage />} />
+        <Route path="privacy-policy" element={<CustomPrivacyPolicyPage />} />
+        <Route path="terms-of-service" element={<CustomTermsOfServicePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <DialogStoreOutlet />

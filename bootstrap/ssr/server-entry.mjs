@@ -6825,7 +6825,7 @@ function useLightThemeVariables() {
   const { data } = useBootstrapData();
   return (_a = data.themes.all.find((theme) => !theme.is_dark && theme.default_light)) == null ? void 0 : _a.values;
 }
-function Navbar$1(props) {
+function Navbar(props) {
   let {
     hideLogo,
     toggleButton,
@@ -7051,7 +7051,7 @@ const LightbulbIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" }),
   "LightbulbOutlined"
 );
-function Footer$1({ className, padding }) {
+function Footer({ className, padding }) {
   const year = (/* @__PURE__ */ new Date()).getFullYear();
   const { branding } = useSettings();
   return /* @__PURE__ */ jsxs(
@@ -7290,14 +7290,14 @@ function CustomPageLayout({ slug }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col min-h-screen bg", children: [
     /* @__PURE__ */ jsx(PageMetaTags, { query }),
     /* @__PURE__ */ jsx(
-      Navbar$1,
+      Navbar,
       {
         menuPosition: "custom-page-navbar",
         className: "flex-shrink-0 sticky top-0"
       }
     ),
     /* @__PURE__ */ jsx("div", { className: "flex-auto", children: query.data ? /* @__PURE__ */ jsx(CustomPageBody, { page: query.data.page }) : /* @__PURE__ */ jsx(PageStatus, { query, loaderClassName: "mt-80" }) }),
-    /* @__PURE__ */ jsx(Footer$1, { className: "mx-14 md:mx-40" })
+    /* @__PURE__ */ jsx(Footer, { className: "mx-14 md:mx-40" })
   ] });
 }
 function useLogin(form) {
@@ -7554,29 +7554,16 @@ const DashboardIcon = createSvgIcon(
   /* @__PURE__ */ jsx("path", { d: "M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z" }),
   "DashboardOutlined"
 );
-function CustomLandingPage() {
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(DefaultMetaTags, {}),
-    /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white", children: [
-      /* @__PURE__ */ jsx(Navbar, {}),
-      /* @__PURE__ */ jsx(HeroSection, {}),
-      /* @__PURE__ */ jsx(FeaturesSection, {}),
-      /* @__PURE__ */ jsx(SecondaryFeaturesSection, {}),
-      /* @__PURE__ */ jsx(BottomCtaSection, {}),
-      /* @__PURE__ */ jsx(Footer, {})
-    ] })
-  ] });
-}
-function Navbar() {
+function SharedNavbar() {
   return /* @__PURE__ */ jsx("nav", { className: "fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "flex h-64 items-center justify-between", children: [
-    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-12", children: /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-12", children: /* @__PURE__ */ jsx(Link, { to: "/", children: /* @__PURE__ */ jsx(
       "img",
       {
         src: "/images/logo.png",
         alt: "LinksForBio",
         className: "h-40 w-auto"
       }
-    ) }),
+    ) }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-12", children: [
       /* @__PURE__ */ jsx(
         Link,
@@ -7599,6 +7586,75 @@ function Navbar() {
       )
     ] })
   ] }) }) });
+}
+function SharedFooter() {
+  const year = (/* @__PURE__ */ new Date()).getFullYear();
+  return /* @__PURE__ */ jsx("footer", { className: "py-40 md:py-60", style: { backgroundColor: "#111827", color: "#ffffff" }, children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", style: { color: "#ffffff" }, children: [
+    /* @__PURE__ */ jsxs("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: [
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/privacy-policy",
+          className: "text-sm transition-colors hover:opacity-80",
+          style: { color: "#ffffff" },
+          children: "Privacy Policy"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/terms-of-service",
+          className: "text-sm transition-colors hover:opacity-80",
+          style: { color: "#ffffff" },
+          children: "Terms of Service"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/contact",
+          className: "text-sm transition-colors hover:opacity-80",
+          style: { color: "#ffffff" },
+          children: "Contact Us"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm md:flex-row md:justify-between", style: { color: "#ffffff" }, children: [
+      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
+        "Copyright © ",
+        year,
+        " LinksForBio"
+      ] }),
+      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
+        "Built By",
+        " ",
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: "https://jaylogan.com",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "hover:opacity-80 transition-opacity",
+            style: { color: "#ffffff", textDecoration: "none" },
+            children: "Jay Logan"
+          }
+        )
+      ] })
+    ] })
+  ] }) });
+}
+function CustomLandingPage() {
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(DefaultMetaTags, {}),
+    /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white", children: [
+      /* @__PURE__ */ jsx(SharedNavbar, {}),
+      /* @__PURE__ */ jsx(HeroSection, {}),
+      /* @__PURE__ */ jsx(FeaturesSection, {}),
+      /* @__PURE__ */ jsx(SecondaryFeaturesSection, {}),
+      /* @__PURE__ */ jsx(BottomCtaSection, {}),
+      /* @__PURE__ */ jsx(SharedFooter, {})
+    ] })
+  ] });
 }
 function HeroSection() {
   const [username, setUsername] = useState("");
@@ -7797,71 +7853,6 @@ function BottomCtaSection() {
       }
     )
   ] }) }) });
-}
-function Footer() {
-  const year = (/* @__PURE__ */ new Date()).getFullYear();
-  return /* @__PURE__ */ jsx("footer", { className: "py-40 md:py-60", style: { backgroundColor: "#111827", color: "#ffffff" }, children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", style: { color: "#ffffff" }, children: [
-    /* @__PURE__ */ jsxs("div", { className: "mb-32 flex flex-wrap justify-center gap-24 border-b border-white/10 pb-32", children: [
-      /* @__PURE__ */ jsx(
-        Link,
-        {
-          to: "/api-docs",
-          className: "text-sm transition-colors",
-          style: { color: "#ffffff" },
-          children: "Developers"
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        Link,
-        {
-          to: "/pages/privacy-policy",
-          className: "text-sm transition-colors",
-          style: { color: "#ffffff" },
-          children: "Privacy Policy"
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        Link,
-        {
-          to: "/pages/terms-of-service",
-          className: "text-sm transition-colors",
-          style: { color: "#ffffff" },
-          children: "Terms of Service"
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        Link,
-        {
-          to: "/contact",
-          className: "text-sm transition-colors",
-          style: { color: "#ffffff" },
-          children: "Contact Us"
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-16 text-center text-sm md:flex-row md:justify-between", style: { color: "#ffffff" }, children: [
-      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
-        "Copyright © ",
-        year,
-        " LinksForBio"
-      ] }),
-      /* @__PURE__ */ jsxs("div", { style: { color: "#ffffff" }, children: [
-        "Built By",
-        " ",
-        /* @__PURE__ */ jsx(
-          "a",
-          {
-            href: "https://jaylogan.com",
-            target: "_blank",
-            rel: "noopener noreferrer",
-            className: "hover:opacity-80 transition-opacity",
-            style: { color: "#ffffff", textDecoration: "none" },
-            children: "Jay Logan"
-          }
-        )
-      ] })
-    ] })
-  ] }) });
 }
 function AuthRoute({ children, permission, requireLogin = true }) {
   const { isLoggedIn, hasPermission, isSubscribed } = useAuth();
@@ -11206,7 +11197,7 @@ function AccountSettingsPage() {
   });
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-alt", children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Account Settings" }) }),
-    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "account-settings-page" }),
+    /* @__PURE__ */ jsx(Navbar, { menuPosition: "account-settings-page" }),
     /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-24 py-24", children: [
       /* @__PURE__ */ jsx("h1", { className: "text-3xl", children: /* @__PURE__ */ jsx(Trans, { message: "Account settings" }) }),
       /* @__PURE__ */ jsx("div", { className: "mb-40 text-base text-muted", children: /* @__PURE__ */ jsx(Trans, { message: "View and update your account details, profile and more." }) }),
@@ -11891,7 +11882,7 @@ function PricingPage() {
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Pricing" }) }),
     /* @__PURE__ */ jsx(
-      Navbar$1,
+      Navbar,
       {
         color: "bg",
         darkModeColor: "transparent",
@@ -11920,7 +11911,7 @@ function PricingPage() {
       ),
       /* @__PURE__ */ jsx(ContactSection, {})
     ] }),
-    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto flex-shrink-0 px-24" })
+    /* @__PURE__ */ jsx(Footer, { className: "container mx-auto flex-shrink-0 px-24" })
   ] });
 }
 function ContactSection() {
@@ -11980,7 +11971,7 @@ function NotificationsPage() {
   );
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Notifications" }) }),
-    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "notifications-page" }),
+    /* @__PURE__ */ jsx(Navbar, { menuPosition: "notifications-page" }),
     /* @__PURE__ */ jsxs("div", { className: "container mx-auto min-h-[1000px] p-16 md:p-24", children: [
       /* @__PURE__ */ jsxs("div", { className: "mb-30 flex items-center gap-24", children: [
         /* @__PURE__ */ jsx("h1", { className: "text-3xl", children: /* @__PURE__ */ jsx(Trans, { message: "Notifications" }) }),
@@ -11998,7 +11989,7 @@ function NotificationsPage() {
       ] }),
       /* @__PURE__ */ jsx(PageContent, {})
     ] }),
-    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto mt-48 p-16 md:p-24" })
+    /* @__PURE__ */ jsx(Footer, { className: "container mx-auto mt-48 p-16 md:p-24" })
   ] });
 }
 function PageContent() {
@@ -12069,7 +12060,7 @@ function NotificationSettingsPage() {
     return /* @__PURE__ */ jsx(Navigate, { to: "/", replace: true });
   }
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-alt", children: [
-    /* @__PURE__ */ jsx(Navbar$1, { menuPosition: "notifications-page" }),
+    /* @__PURE__ */ jsx(Navbar, { menuPosition: "notifications-page" }),
     !isFetched || !data || !selection ? /* @__PURE__ */ jsx("div", { className: "container mx-auto my-100 flex justify-center", children: /* @__PURE__ */ jsx(
       ProgressCircle,
       {
@@ -12244,23 +12235,22 @@ function useSubmitContactForm(form) {
 function submitContactForm(payload) {
   return apiClient.post("contact-page", payload).then((r2) => r2.data);
 }
-function ContactUsPage() {
+function CustomContactPage() {
   const form = useForm();
   const submitForm = useSubmitContactForm(form);
   const { verify, isVerifying } = useRecaptcha("contact");
-  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col bg-alt min-h-screen", children: [
-    /* @__PURE__ */ jsx(StaticPageTitle, { children: /* @__PURE__ */ jsx(Trans, { message: "Contact us" }) }),
-    /* @__PURE__ */ jsx(
-      Navbar$1,
-      {
-        className: "flex-shrink-0 sticky top-0",
-        menuPosition: "contact-us-page"
-      }
-    ),
-    /* @__PURE__ */ jsx("div", { className: "container p-24 md:p-40 mx-auto flex-auto flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "border rounded bg-paper p-24 max-w-620", children: [
-      /* @__PURE__ */ jsx("h1", { className: "text-2xl", children: /* @__PURE__ */ jsx(Trans, { message: "Contact us" }) }),
-      /* @__PURE__ */ jsx("p", { className: "text-sm mt-4 mb-30", children: /* @__PURE__ */ jsx(Trans, { message: "Please use the form below to send us a message and we'll get back to you as soon as possible." }) }),
-      /* @__PURE__ */ jsxs(
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Contact Us" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-800 mx-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-60", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-4xl md:text-5xl font-bold text-gray-900 mb-16", children: "Contact Us" }),
+        /* @__PURE__ */ jsx("p", { className: "text-lg text-gray-600", children: "Have a question or feedback? We'd love to hear from you." })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "bg-white rounded-2xl border-2 border-gray-100 p-32 md:p-48 shadow-lg", children: /* @__PURE__ */ jsxs(
         Form,
         {
           form,
@@ -12274,48 +12264,234 @@ function ContactUsPage() {
             /* @__PURE__ */ jsx(
               FormTextField,
               {
-                label: /* @__PURE__ */ jsx(Trans, { message: "Name" }),
+                label: "Name",
                 name: "name",
                 required: true,
-                className: "mb-20"
+                className: "mb-24",
+                background: "bg-white"
               }
             ),
             /* @__PURE__ */ jsx(
               FormTextField,
               {
-                label: /* @__PURE__ */ jsx(Trans, { message: "Email" }),
+                label: "Email",
                 name: "email",
                 required: true,
                 type: "email",
-                className: "mb-20"
+                className: "mb-24",
+                background: "bg-white"
               }
             ),
             /* @__PURE__ */ jsx(
               FormTextField,
               {
-                label: /* @__PURE__ */ jsx(Trans, { message: "Message" }),
+                label: "Message",
                 name: "message",
                 required: true,
                 inputElementType: "textarea",
-                className: "mb-20",
-                rows: 8
+                className: "mb-32",
+                rows: 8,
+                background: "bg-white"
               }
             ),
             /* @__PURE__ */ jsx(
               Button,
               {
                 type: "submit",
-                variant: "flat",
-                color: "primary",
+                variant: "raised",
+                size: "lg",
+                className: "w-full md:w-auto bg-[#FF6B35] hover:bg-[#FF8555] text-white font-semibold",
                 disabled: submitForm.isPending || isVerifying,
-                children: /* @__PURE__ */ jsx(Trans, { message: "Send" })
+                children: submitForm.isPending || isVerifying ? "Sending..." : "Send Message"
               }
             )
           ]
         }
-      )
-    ] }) }),
-    /* @__PURE__ */ jsx(Footer$1, { className: "container mx-auto px-24 flex-shrink-0" })
+      ) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
+  ] });
+}
+function CustomPrivacyPolicyPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Privacy Policy" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-900 mx-auto", children: [
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl md:text-5xl font-bold text-gray-900 mb-16", children: "Privacy Policy" }),
+      /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-500 mb-40", children: [
+        "Last updated: ",
+        (/* @__PURE__ */ new Date()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "prose prose-lg max-w-none", children: /* @__PURE__ */ jsxs("div", { className: "space-y-32 text-gray-700 leading-relaxed", children: [
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Introduction" }),
+          /* @__PURE__ */ jsx("p", { children: 'LinksForBio ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service.' })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Information We Collect" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "We collect information that you provide directly to us, including:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Account information (name, email address, password)" }),
+            /* @__PURE__ */ jsx("li", { children: "Content you create (links, link groups, customizations)" }),
+            /* @__PURE__ */ jsx("li", { children: "Communications with us (support requests, feedback)" })
+          ] }),
+          /* @__PURE__ */ jsx("p", { className: "mt-16", children: "We also automatically collect certain information when you use our service, such as IP address, browser type, device information, and usage data." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "How We Use Your Information" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "We use the information we collect to:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Provide, maintain, and improve our services" }),
+            /* @__PURE__ */ jsx("li", { children: "Process transactions and send related information" }),
+            /* @__PURE__ */ jsx("li", { children: "Send technical notices and support messages" }),
+            /* @__PURE__ */ jsx("li", { children: "Respond to your comments and questions" }),
+            /* @__PURE__ */ jsx("li", { children: "Monitor and analyze usage patterns" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Information Sharing" }),
+          /* @__PURE__ */ jsx("p", { children: "We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8 mt-12", children: [
+            /* @__PURE__ */ jsx("li", { children: "With your consent" }),
+            /* @__PURE__ */ jsx("li", { children: "To comply with legal obligations" }),
+            /* @__PURE__ */ jsx("li", { children: "To protect our rights and safety" }),
+            /* @__PURE__ */ jsx("li", { children: "With service providers who assist in operating our service" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Data Security" }),
+          /* @__PURE__ */ jsx("p", { children: "We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Your Rights" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "You have the right to:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Access and receive a copy of your personal data" }),
+            /* @__PURE__ */ jsx("li", { children: "Rectify inaccurate or incomplete data" }),
+            /* @__PURE__ */ jsx("li", { children: "Request deletion of your personal data" }),
+            /* @__PURE__ */ jsx("li", { children: "Object to processing of your personal data" }),
+            /* @__PURE__ */ jsx("li", { children: "Request restriction of processing" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Cookies" }),
+          /* @__PURE__ */ jsx("p", { children: "We use cookies and similar tracking technologies to track activity on our service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Changes to This Privacy Policy" }),
+          /* @__PURE__ */ jsx("p", { children: 'We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.' })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Contact Us" }),
+          /* @__PURE__ */ jsxs("p", { children: [
+            "If you have any questions about this Privacy Policy, please contact us through our ",
+            /* @__PURE__ */ jsx("a", { href: "/contact", className: "text-[#FF6B35] hover:underline", children: "contact page" }),
+            "."
+          ] })
+        ] })
+      ] }) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
+  ] });
+}
+function CustomTermsOfServicePage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-white flex flex-col", children: [
+    /* @__PURE__ */ jsx(StaticPageTitle, { children: "Terms of Service" }),
+    /* @__PURE__ */ jsx(SharedNavbar, {}),
+    /* @__PURE__ */ jsx("div", { className: "flex-1 pt-100 pb-60", children: /* @__PURE__ */ jsx("div", { className: "container mx-auto px-16 md:px-24 lg:px-32", children: /* @__PURE__ */ jsxs("div", { className: "max-w-900 mx-auto", children: [
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl md:text-5xl font-bold text-gray-900 mb-16", children: "Terms of Service" }),
+      /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-500 mb-40", children: [
+        "Last updated: ",
+        (/* @__PURE__ */ new Date()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "prose prose-lg max-w-none", children: /* @__PURE__ */ jsxs("div", { className: "space-y-32 text-gray-700 leading-relaxed", children: [
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Agreement to Terms" }),
+          /* @__PURE__ */ jsx("p", { children: 'By accessing or using LinksForBio ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.' })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Use License" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "Permission is granted to temporarily use LinksForBio for personal, non-commercial use. This is the grant of a license, not a transfer of title, and under this license you may not:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Modify or copy the materials" }),
+            /* @__PURE__ */ jsx("li", { children: "Use the materials for any commercial purpose or for any public display" }),
+            /* @__PURE__ */ jsx("li", { children: "Attempt to reverse engineer any software contained in the Service" }),
+            /* @__PURE__ */ jsx("li", { children: "Remove any copyright or other proprietary notations from the materials" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "User Accounts" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "When you create an account with us, you must provide information that is accurate, complete, and current at all times. You are responsible for:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Maintaining the security of your account and password" }),
+            /* @__PURE__ */ jsx("li", { children: "All activities that occur under your account" }),
+            /* @__PURE__ */ jsx("li", { children: "Notifying us immediately of any unauthorized use" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Acceptable Use" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "You agree not to use the Service to:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Violate any applicable laws or regulations" }),
+            /* @__PURE__ */ jsx("li", { children: "Infringe upon the rights of others" }),
+            /* @__PURE__ */ jsx("li", { children: "Transmit any malicious code or viruses" }),
+            /* @__PURE__ */ jsx("li", { children: "Spam, phish, or engage in any fraudulent activity" }),
+            /* @__PURE__ */ jsx("li", { children: "Interfere with or disrupt the Service" }),
+            /* @__PURE__ */ jsx("li", { children: "Impersonate any person or entity" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Content" }),
+          /* @__PURE__ */ jsx("p", { children: "You retain ownership of any content you submit, post, or display on or through the Service. By submitting content, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, and distribute your content solely for the purpose of providing the Service." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Prohibited Content" }),
+          /* @__PURE__ */ jsx("p", { className: "mb-12", children: "You may not use the Service to link to or promote:" }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc pl-24 space-y-8", children: [
+            /* @__PURE__ */ jsx("li", { children: "Illegal content or activities" }),
+            /* @__PURE__ */ jsx("li", { children: "Hate speech, harassment, or abusive content" }),
+            /* @__PURE__ */ jsx("li", { children: "Malware, viruses, or harmful software" }),
+            /* @__PURE__ */ jsx("li", { children: "Copyrighted material without permission" }),
+            /* @__PURE__ */ jsx("li", { children: "Adult content or explicit material" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Service Availability" }),
+          /* @__PURE__ */ jsx("p", { children: "We strive to provide reliable service but do not guarantee that the Service will be available at all times. We reserve the right to modify, suspend, or discontinue the Service at any time without notice." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Termination" }),
+          /* @__PURE__ */ jsx("p", { children: "We may terminate or suspend your account and access to the Service immediately, without prior notice, for any reason, including breach of these Terms. Upon termination, your right to use the Service will cease immediately." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Disclaimer" }),
+          /* @__PURE__ */ jsx("p", { children: 'The Service is provided "as is" and "as available" without any warranties of any kind, either express or implied. We do not warrant that the Service will be uninterrupted, secure, or error-free.' })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Limitation of Liability" }),
+          /* @__PURE__ */ jsx("p", { children: "In no event shall LinksForBio or its operators be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or use, arising out of or relating to your use of the Service." })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Changes to Terms" }),
+          /* @__PURE__ */ jsx("p", { children: 'We reserve the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on this page and updating the "Last updated" date. Your continued use of the Service after such changes constitutes acceptance of the new Terms.' })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { children: [
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-gray-900 mb-16", children: "Contact Information" }),
+          /* @__PURE__ */ jsxs("p", { children: [
+            "If you have any questions about these Terms of Service, please contact us through our ",
+            /* @__PURE__ */ jsx("a", { href: "/contact", className: "text-[#FF6B35] hover:underline", children: "contact page" }),
+            "."
+          ] })
+        ] })
+      ] }) })
+    ] }) }) }),
+    /* @__PURE__ */ jsx(SharedFooter, {})
   ] });
 }
 const ShareIcon = createSvgIcon(
@@ -12581,12 +12757,12 @@ function LinkPageRenderer({ link: link2 }) {
     !hideNavbar && /* @__PURE__ */ jsx(LinkPageNavbar, { link: link2 }),
     /* @__PURE__ */ jsx(AdHost, { slot: "link_page", className: "mt-70 mb-20pa" }),
     /* @__PURE__ */ jsx("div", { className: "flex-auto", children: /* @__PURE__ */ jsx(CustomPageBody, { page }) }),
-    !hideFooter && /* @__PURE__ */ jsx(Footer$1, { className: "mx-14 md:mx-40" })
+    !hideFooter && /* @__PURE__ */ jsx(Footer, { className: "mx-14 md:mx-40" })
   ] });
 }
 function LinkPageNavbar({ link: link2 }) {
   return /* @__PURE__ */ jsx(
-    Navbar$1,
+    Navbar,
     {
       menuPosition: "link-page-navbar",
       className: "flex-shrink-0 sticky top-0",
@@ -12700,7 +12876,7 @@ function LinkOverlayRenderer({ link: link2 }) {
 function LinkIframeRenderer({ link: link2 }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col h-screen relative", children: [
     /* @__PURE__ */ jsx(
-      Navbar$1,
+      Navbar,
       {
         menuPosition: "link-page-navbar",
         className: "flex-shrink-0 sticky top-0",
@@ -12715,7 +12891,7 @@ function LinkSplashRenderer({ link: link2 }) {
   const { base_url } = useSettings();
   return /* @__PURE__ */ jsxs("div", { className: "flex flex-col w-full h-screen bg-alt", children: [
     /* @__PURE__ */ jsx(
-      Navbar$1,
+      Navbar,
       {
         menuPosition: "link-page-navbar",
         rightChildren: /* @__PURE__ */ jsx(ShareLinkButton, { link: link2 })
@@ -12750,7 +12926,7 @@ function LinkSplashRenderer({ link: link2 }) {
       ] }),
       /* @__PURE__ */ jsx(AdHost, { slot: "splash_bottom", className: "mt-60 mb-20 flex-shrink-0" })
     ] }),
-    /* @__PURE__ */ jsx(Footer$1, { className: "px-24" })
+    /* @__PURE__ */ jsx(Footer, { className: "px-24" })
   ] });
 }
 function removeProtocol(url) {
@@ -13040,7 +13216,7 @@ function LinkGroupRenderer({ linkGroup }) {
   }
   return /* @__PURE__ */ jsxs("div", { className: "bg-alt flex flex-col min-h-screen", children: [
     /* @__PURE__ */ jsx(
-      Navbar$1,
+      Navbar,
       {
         menuPosition: "link-page-navbar",
         className: "sticky top-0 flex-shrink-0"
@@ -14245,8 +14421,9 @@ function AppRoutes() {
           element: /* @__PURE__ */ jsx(React.Suspense, { fallback: /* @__PURE__ */ jsx(FullPageLoader, { screen: true }), children: /* @__PURE__ */ jsx(SwaggerApiDocs, {}) })
         }
       ),
-      /* @__PURE__ */ jsx(Route, { path: "contact", element: /* @__PURE__ */ jsx(ContactUsPage, {}) }),
-      /* @__PURE__ */ jsx(Route, { path: "pages/:pageSlug", element: /* @__PURE__ */ jsx(CustomPageLayout, {}) }),
+      /* @__PURE__ */ jsx(Route, { path: "contact", element: /* @__PURE__ */ jsx(CustomContactPage, {}) }),
+      /* @__PURE__ */ jsx(Route, { path: "privacy-policy", element: /* @__PURE__ */ jsx(CustomPrivacyPolicyPage, {}) }),
+      /* @__PURE__ */ jsx(Route, { path: "terms-of-service", element: /* @__PURE__ */ jsx(CustomTermsOfServicePage, {}) }),
       /* @__PURE__ */ jsx(Route, { path: "*", element: /* @__PURE__ */ jsx(NotFoundPage, {}) })
     ] }),
     /* @__PURE__ */ jsx(DialogStoreOutlet, {})
@@ -14400,8 +14577,8 @@ export {
   closeDialog as aE,
   AuthRoute as aF,
   NotFoundPage as aG,
-  Navbar$1 as aH,
-  Footer$1 as aI,
+  Navbar as aH,
+  Footer as aI,
   getFromLocalStorage as aJ,
   Underlay as aK,
   useUserTimezone as aL,

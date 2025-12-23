@@ -55,3 +55,4 @@ mkdir -p public/favicon
 
 Then copy your favicon files there.
 
+
