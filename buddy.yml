@@ -1,0 +1,149 @@
+# Buddy.works pipeline-as-code — https://buddy.works/docs/yaml
+#
+# Links For Bio production deploy (Laravel + Vite)
+# - pushes to `main` build frontend assets and Composer dependencies in CI, transfer
+#   the application payload to Dozer CloudPanel over SFTP/SSH, then optimize Laravel
+#   on the server under the CloudPanel site user.
+#
+# Runtime model:
+#   CloudPanel/nginx + PHP-FPM serves the Laravel `public/` docroot. Server-side
+#   `.env`, `storage/`, and `bootstrap/cache/` are preserved across deploys.
+#
+# One-time Buddy project setup:
+#   1. Switch the Buddy project to YAML configuration so it reads this root file.
+#   2. Ensure BA Buddy workspace-global variables are set:
+#        DOZER_HOST       CloudPanel production server host/IP
+#        BROBOT_BA        shared BA deploy SSH key asset in Variables, Keys & Assets
+#   3. Add these encrypted project variables:
+#        PROD_SSH_USER    CloudPanel site user
+#        PROD_DEPLOY_PATH site docroot, e.g. /home/linksforbio/htdocs/linksforb.io
+#        PROD_SITE_URL    public production URL to health-check (e.g. https://linksforb.io)
+
+- pipeline: "Deploy To Production"
+  name: "Deploy To Production"
+  events:
+    - type: PUSH
+      refs:
+        - refs/heads/main
+  terminate_stale_runs: true
+  actions:
+    - action: "Build app"
+      type: "BUILD"
+      docker_image_name: "node"
+      docker_image_tag: "22"
+      shell: "BASH"
+      execute_commands:
+        - |
+          set -euo pipefail
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            php-cli php-mbstring php-xml php-curl php-zip php-bcmath php-intl unzip git ca-certificates
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          php -v
+          composer --version
+          node -v
+          npm -v
+        - "npm ci"
+        - "npm run build"
+        - "composer install --no-dev --optimize-autoloader --no-interaction"
+        - 'test -d public/build && test -f bootstrap/app.php && test -f public/index.php || { echo "ERROR: expected public/build, bootstrap/app.php, and public/index.php after build"; exit 1; }'
+
+    - action: "Transfer to production (SFTP)"
+      type: "TRANSFER"
+      input_type: "BUILD_ARTIFACTS"
+      local_path: "/"
+      remote_path: "$PROD_DEPLOY_PATH"
+      use_temporary_files: true
+      deletion_disabled: true
+      deployment_excludes:
+        - ".git/**"
+        - "node_modules/**"
+        - ".env"
+        - ".env.*"
+        - "storage/**"
+        - "logs/**"
+        - "**/logs/**"
+        - "bootstrap/cache/**"
+      targets:
+        - target: "production-cloudpanel"
+          type: "SSH"
+          name: "CloudPanel Production"
+          host: "$DOZER_HOST"
+          port: "22"
+          path: "$PROD_DEPLOY_PATH"
+          auth:
+            method: "ASSETS_KEY"
+            username: "$PROD_SSH_USER"
+            asset: "BROBOT_BA"
+
+    - action: "Optimize production app"
+      type: "SSH_COMMAND"
+      shell: "BASH"
+      run_as_script: true
+      working_directory: "$PROD_DEPLOY_PATH"
+      commands: |-
+        set -euo pipefail
+        cd "$PROD_DEPLOY_PATH"
+
+        test -f public/index.php || { echo "ERROR: public/index.php missing"; exit 1; }
+        test -f bootstrap/app.php || { echo "ERROR: bootstrap/app.php missing"; exit 1; }
+        test -d public/build || { echo "ERROR: public/build missing"; exit 1; }
+
+        if ! command -v composer >/dev/null 2>&1; then
+          echo "ERROR: composer not found on server"
+          exit 1
+        fi
+
+        if [ ! -d vendor ] || [ ! -f vendor/autoload.php ] || [ composer.lock -nt vendor/composer/installed.json ] 2>/dev/null; then
+          composer install --no-dev --optimize-autoloader --no-interaction
+        fi
+
+        # Remove known injected PHP/WordPress malware artifacts left behind by older manual deploys.
+        QUARANTINE_DIR="$HOME/malware-quarantine-buddy-$(date +%Y%m%d%H%M%S)"
+        mkdir -p "$QUARANTINE_DIR"
+        for bad in \
+          public/wp-admin public/wp-content public/wp-includes \
+          public/wp-conffg.php public/wper.php public/wp-loiin.php public/wp-crrm.php public/wp-haader.php \
+          public/lock.php public/temp.php public/about.php public/radio.php public/content.php; do
+          if [ -e "$bad" ]; then
+            mkdir -p "$QUARANTINE_DIR/$(dirname "$bad")"
+            mv "$bad" "$QUARANTINE_DIR/$bad"
+            echo "Quarantined malware artifact: $bad"
+          fi
+        done
+        if [ -f public/htaccess.example ]; then
+          cp public/htaccess.example public/.htaccess
+        fi
+        if grep -RInE 'wp-conffg|wper\.php|wp-loiin|wp-crrm|wp-haader|FilesMan|c99shell|r57shell' public/.htaccess public/index.php 2>/dev/null; then
+          echo "ERROR: malware marker remains in public entry files"
+          exit 1
+        fi
+
+        php artisan optimize:clear
+        php artisan optimize
+
+        mkdir -p storage bootstrap/cache
+        chmod -R u+rwX,go+rX storage bootstrap/cache
+        find storage bootstrap/cache -type d -exec chmod 775 {} \;
+
+        test -d vendor
+        test -f vendor/autoload.php
+
+        SITE_URL="${PROD_SITE_URL:-}"
+        if [ -n "${SITE_URL:-}" ]; then
+          curl -fsS -I --connect-timeout 3 --max-time 10 "$SITE_URL/" >/dev/null
+          echo "Public health check passed: $SITE_URL/"
+        else
+          echo "PROD_SITE_URL not set; skipped public health check"
+        fi
+      targets:
+        - target: "production-cloudpanel"
+          type: "SSH"
+          name: "CloudPanel Production"
+          host: "$DOZER_HOST"
+          port: "22"
+          path: "$PROD_DEPLOY_PATH"
+          auth:
+            method: "ASSETS_KEY"
+            username: "$PROD_SSH_USER"
+            asset: "BROBOT_BA"
