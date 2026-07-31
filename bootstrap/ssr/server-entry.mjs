@@ -13592,20 +13592,16 @@ function ImageWidgetRenderer({
   widget,
   variant
 }) {
-  const image = widget.config.url ? /* @__PURE__ */ jsx(
-    "img",
-    {
-      className: clsx("object-cover", getImageClassName({ widget, variant })),
-      src: widget.config.url,
-      alt: ""
-    }
-  ) : /* @__PURE__ */ jsx(
+  const className = clsx(
+    getObjectFitClass(widget),
+    getImageClassName({ widget, variant })
+  );
+  const style = getImageStyle({ widget, variant });
+  const image = widget.config.url ? /* @__PURE__ */ jsx("img", { className, style, src: widget.config.url, alt: "" }) : /* @__PURE__ */ jsx(
     "div",
     {
-      className: clsx(
-        getImageClassName({ widget, variant }),
-        "flex items-center justify-center"
-      ),
+      className: clsx(className, "flex items-center justify-center"),
+      style,
       children: /* @__PURE__ */ jsx(
         ImageIcon,
         {
@@ -13620,17 +13616,47 @@ function ImageWidgetRenderer({
   }
   return image;
 }
+function getObjectFitClass(widget) {
+  const type = widget.config.type ?? "default";
+  const avatarShape = widget.config.avatarShape ?? "circle";
+  if (type === "avatar" && avatarShape === "square") {
+    return "object-contain";
+  }
+  return "object-cover";
+}
 function getImageClassName({
   widget,
   variant
 }) {
-  const type = widget.config.type;
+  const type = widget.config.type ?? "default";
+  const avatarShape = widget.config.avatarShape ?? "circle";
+  const isAvatar = type === "avatar";
+  const isCircle = isAvatar && avatarShape === "circle";
+  const hasCustomWidth = type === "default" && !!widget.config.widthPercent;
   if (variant === "editor") {
-    return `w-20 h-20 ${type === "avatar" ? "rounded-full" : "rounded"}`;
-  } else if (type === "avatar") {
-    return "w-96 h-96 rounded-full mx-auto";
+    return clsx("w-20 h-20", isCircle ? "rounded-full" : "rounded");
+  }
+  if (isAvatar) {
+    return clsx("w-96 h-96 mx-auto", isCircle ? "rounded-full" : "rounded");
+  }
+  if (hasCustomWidth) {
+    return "rounded block mx-auto max-w-full h-auto";
   }
   return "w-full h-full rounded block";
+}
+function getImageStyle({
+  widget,
+  variant
+}) {
+  const type = widget.config.type ?? "default";
+  if (type !== "default" || variant === "editor" || widget.config.widthPercent == null) {
+    return void 0;
+  }
+  const widthPercent = Math.min(
+    100,
+    Math.max(1, Number(widget.config.widthPercent) || 100)
+  );
+  return { width: `${widthPercent}%` };
 }
 function VideoEmbedWidgetRenderer({
   variant,
@@ -14634,12 +14660,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-bfb005a1.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-2e921a94.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
   () => import("./assets/swagger-api-docs-page-7fc760ac.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-817bdad7.mjs").then((n) => n.aZ)
+  () => import("./assets/dashboard-routes-1f89217c.mjs").then((n) => n.aZ)
 );
 function AppRoutes() {
   var _a;

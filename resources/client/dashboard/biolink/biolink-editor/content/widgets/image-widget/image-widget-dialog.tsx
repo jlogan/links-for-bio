@@ -10,6 +10,7 @@ import {Item} from '@common/ui/forms/listbox/item';
 import {CrupdateWidgetDialog} from '@app/dashboard/biolink/biolink-editor/content/widgets/crupdate-widget-dialog';
 import {WidgetType} from '@app/dashboard/biolink/biolink-editor/content/widgets/widget-list';
 import {WidgetDialogProps} from '@app/dashboard/biolink/biolink-editor/content/widgets/types/widget-dialog-props';
+import {useFormContext} from 'react-hook-form';
 
 export interface ImageWidget extends BiolinkWidget {
   type: WidgetType.Image;
@@ -17,6 +18,8 @@ export interface ImageWidget extends BiolinkWidget {
     url: string;
     destinationUrl?: string;
     type: 'default' | 'avatar';
+    avatarShape?: 'circle' | 'square';
+    widthPercent?: string;
   };
 }
 
@@ -47,6 +50,7 @@ export function ImageWidgetDialog({
           <Trans message="Avatar" />
         </Item>
       </FormSelect>
+      <ImageWidgetStyleFields />
       <FormTextField
         placeholder={trans(message('Optional'))}
         name="destinationUrl"
@@ -58,4 +62,44 @@ export function ImageWidgetDialog({
       />
     </CrupdateWidgetDialog>
   );
+}
+
+function ImageWidgetStyleFields() {
+  const styleType = useFormContext<ImageWidget['config']>().watch('type');
+
+  if (styleType === 'avatar') {
+    return (
+      <FormSelect
+        className="mb-24"
+        name="avatarShape"
+        label={<Trans message="Shape" />}
+        selectionMode="single"
+      >
+        <Item value="circle">
+          <Trans message="Circle" />
+        </Item>
+        <Item value="square">
+          <Trans message="Square" />
+        </Item>
+      </FormSelect>
+    );
+  }
+
+  if (styleType === 'default') {
+    return (
+      <FormTextField
+        className="mb-24"
+        type="number"
+        name="widthPercent"
+        min={1}
+        max={100}
+        label={<Trans message="Width (%)" />}
+        description={
+          <Trans message="Image width as a percentage of the page width." />
+        }
+      />
+    );
+  }
+
+  return null;
 }
