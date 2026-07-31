@@ -14660,12 +14660,12 @@ function getLinkRenderer(link2) {
       return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
 }
-const AdminRoutes = React.lazy(() => import("./assets/admin-routes-2e921a94.mjs").then((n) => n.h));
+const AdminRoutes = React.lazy(() => import("./assets/admin-routes-7118acd7.mjs").then((n) => n.h));
 const SwaggerApiDocs = React.lazy(
   () => import("./assets/swagger-api-docs-page-7fc760ac.mjs")
 );
 const DashboardRoutes = React.lazy(
-  () => import("./assets/dashboard-routes-1f89217c.mjs").then((n) => n.aZ)
+  () => import("./assets/dashboard-routes-cc5d86db.mjs").then((n) => n.aZ)
 );
 function AppRoutes() {
   var _a;
